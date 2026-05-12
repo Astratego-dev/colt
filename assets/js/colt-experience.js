@@ -78,7 +78,98 @@
         if (canvas && !prefersReduced) {
             runCanvas(canvas, root);
         }
+
+        if (!prefersReduced) {
+            setupCinematic(root);
+        }
     });
+
+    function setupCinematic(root) {
+        const gsap = window.gsap;
+        const ScrollTrigger = window.ScrollTrigger;
+        const cinema = root.querySelector('[data-colt-cinema]');
+
+        if (!cinema || !gsap || !ScrollTrigger || window.innerWidth < 981) {
+            return;
+        }
+
+        gsap.registerPlugin(ScrollTrigger);
+
+        if (window.Lenis) {
+            const lenis = new window.Lenis({
+                duration: 1.18,
+                smoothWheel: true,
+                wheelMultiplier: 0.82,
+            });
+
+            lenis.on('scroll', ScrollTrigger.update);
+            gsap.ticker.add((time) => lenis.raf(time * 1000));
+            gsap.ticker.lagSmoothing(0);
+        }
+
+        const sticky = cinema.querySelector('.colt-xp__cinema-sticky');
+        const panels = Array.from(cinema.querySelectorAll('[data-cinema-panel]'));
+        const card = cinema.querySelector('.colt-xp__cinema-card');
+        const vault = cinema.querySelector('.colt-xp__cinema-vault');
+        const paths = Array.from(cinema.querySelectorAll('.colt-xp__cinema-paths a'));
+        const guardian = cinema.querySelector('.colt-xp__cinema-guardian');
+        const wordmark = cinema.querySelector('.colt-xp__cinema-wordmark');
+        const rings = cinema.querySelectorAll('.colt-xp__tunnel-ring');
+        const glow = cinema.querySelector('.colt-xp__tunnel-glow');
+
+        gsap.set(panels.slice(1), { autoAlpha: 0, y: 28 });
+        gsap.set(paths, { autoAlpha: 0, y: 26, scale: 0.94 });
+        gsap.set(vault, { autoAlpha: 0, scale: 0.58, rotate: -20 });
+
+        const activatePanel = (index) => {
+            panels.forEach((panel, panelIndex) => {
+                panel.classList.toggle('is-active', panelIndex === index);
+            });
+        };
+
+        const timeline = gsap.timeline({
+            defaults: { ease: 'power2.inOut' },
+            scrollTrigger: {
+                trigger: cinema,
+                start: 'top top',
+                end: 'bottom bottom',
+                scrub: 1.1,
+                pin: sticky,
+                anticipatePin: 1,
+                onUpdate: (self) => {
+                    root.style.setProperty('--cinema-progress', self.progress.toFixed(4));
+                    const panelIndex = Math.min(3, Math.floor(self.progress * 4.05));
+                    activatePanel(panelIndex);
+                },
+            },
+        });
+
+        timeline
+            .to(wordmark, { autoAlpha: 0.16, y: -70, scale: 1.08, duration: 0.9 }, 0)
+            .to(guardian, { xPercent: 64, y: 34, scale: 0.72, autoAlpha: 0.46, duration: 1 }, 0)
+            .to(card, { x: '24vw', y: '-2vh', rotation: 5, scale: 1.08, duration: 1 }, 0)
+            .to(rings, { rotate: 180, scale: 1.16, stagger: 0.05, duration: 1 }, 0)
+            .to(panels[0], { autoAlpha: 0, y: -24, duration: 0.35 }, 0.55)
+            .to(panels[1], { autoAlpha: 1, y: 0, duration: 0.45 }, 0.62)
+
+            .to(vault, { autoAlpha: 1, scale: 1, rotate: 0, duration: 0.9 }, 0.92)
+            .to(card, { x: '42vw', y: '-3vh', rotation: 0, scale: 0.58, autoAlpha: 0.34, duration: 0.95 }, 0.98)
+            .to(glow, { scale: 1.85, autoAlpha: 0.55, duration: 0.9 }, 1)
+            .to(rings, { scale: 0.72, rotate: 420, duration: 1 }, 1.05)
+            .to(panels[1], { autoAlpha: 0, y: -24, duration: 0.35 }, 1.45)
+            .to(panels[2], { autoAlpha: 1, y: 0, duration: 0.45 }, 1.52)
+
+            .to(vault, { x: '18vw', scale: 0.76, autoAlpha: 0.58, duration: 0.9 }, 1.72)
+            .to(card, { x: '12vw', y: '19vh', scale: 0.44, autoAlpha: 0.22, duration: 0.8 }, 1.72)
+            .to(paths, { autoAlpha: 1, y: 0, scale: 1, stagger: 0.08, duration: 0.7 }, 1.86)
+            .to(guardian, { xPercent: 52, y: 54, scale: 0.58, autoAlpha: 0.28, duration: 0.9 }, 1.82)
+            .to(panels[2], { autoAlpha: 0, y: -24, duration: 0.35 }, 2.42)
+            .to(panels[3], { autoAlpha: 1, y: 0, duration: 0.45 }, 2.5)
+
+            .to(paths, { x: 0, y: -8, scale: 1.03, stagger: 0.04, duration: 0.55 }, 2.62)
+            .to(vault, { scale: 0.54, autoAlpha: 0.32, duration: 0.5 }, 2.7)
+            .to(rings, { scale: 1.28, rotate: 620, duration: 0.7 }, 2.72);
+    }
 
     function runCanvas(canvas, root) {
         const ctx = canvas.getContext('2d');

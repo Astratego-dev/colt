@@ -50,9 +50,33 @@ final class Colt_Experience
         );
 
         wp_enqueue_script(
+            'colt-lenis',
+            'https://cdn.jsdelivr.net/npm/lenis@1.3.13/dist/lenis.min.js',
+            [],
+            '1.3.13',
+            true
+        );
+
+        wp_enqueue_script(
+            'colt-gsap',
+            'https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js',
+            [],
+            '3.13.0',
+            true
+        );
+
+        wp_enqueue_script(
+            'colt-scrolltrigger',
+            'https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js',
+            ['colt-gsap'],
+            '3.13.0',
+            true
+        );
+
+        wp_enqueue_script(
             'colt-experience',
             COLT_EXPERIENCE_URL . 'assets/js/colt-experience.js',
-            [],
+            ['colt-lenis', 'colt-gsap', 'colt-scrolltrigger'],
             COLT_EXPERIENCE_VERSION,
             true
         );

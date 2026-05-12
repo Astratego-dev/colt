@@ -323,6 +323,258 @@
     animation: colt-pulse-line 1.6s ease-in-out infinite;
 }
 
+.colt-xp__cinema {
+    position: relative;
+    height: 430vh;
+    margin-top: -1px;
+}
+
+.colt-xp__cinema-sticky {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    border-block: 1px solid rgba(247, 240, 223, 0.08);
+    background:
+        radial-gradient(circle at 50% 50%, rgba(217, 183, 111, 0.10), transparent 28rem),
+        linear-gradient(180deg, rgba(5, 6, 10, 0.42), rgba(5, 6, 10, 0.92));
+}
+
+.colt-xp__cinema-bg,
+.colt-xp__cinema-stage {
+    position: absolute;
+    inset: 0;
+}
+
+.colt-xp__tunnel-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: min(74vw, 780px);
+    aspect-ratio: 1;
+    border: 1px solid rgba(217, 183, 111, 0.22);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.colt-xp__tunnel-ring--one {
+    background: conic-gradient(from 0deg, transparent, rgba(217, 183, 111, 0.24), transparent 34%, rgba(197, 54, 67, 0.2), transparent 66%);
+    filter: blur(0.2px);
+}
+
+.colt-xp__tunnel-ring--two {
+    width: min(54vw, 560px);
+    border-color: rgba(247, 240, 223, 0.14);
+}
+
+.colt-xp__tunnel-ring--three {
+    width: min(34vw, 360px);
+    border-color: rgba(71, 109, 255, 0.22);
+}
+
+.colt-xp__tunnel-glow {
+    position: absolute;
+    inset: 50% auto auto 50%;
+    width: min(28vw, 320px);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(217, 183, 111, 0.26), transparent 68%);
+    transform: translate(-50%, -50%);
+    filter: blur(12px);
+}
+
+.colt-xp__cinema-copy {
+    position: absolute;
+    z-index: 5;
+    top: 50%;
+    right: max(24px, calc((100vw - 1180px) / 2));
+    width: min(470px, calc(100vw - 48px));
+    transform: translateY(-50%);
+}
+
+.colt-xp__cinema-panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100%;
+    opacity: 0;
+    transform: translateY(24px);
+}
+
+.colt-xp__cinema-panel.is-active {
+    position: relative;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.colt-xp__cinema-panel h2 {
+    font-size: clamp(38px, 5.4vw, 74px);
+}
+
+.colt-xp__cinema-panel p:not(.colt-xp__kicker) {
+    color: var(--colt-muted);
+    font-size: clamp(17px, 1.5vw, 21px);
+    line-height: 1.72;
+}
+
+.colt-xp__cinema-guardian,
+.colt-xp__cinema-wordmark,
+.colt-xp__cinema-card,
+.colt-xp__cinema-vault,
+.colt-xp__cinema-paths {
+    position: absolute;
+    z-index: 3;
+}
+
+.colt-xp__cinema-guardian {
+    right: 50%;
+    bottom: 5vh;
+    width: min(440px, 40vw);
+    transform: translateX(50%);
+    filter: drop-shadow(0 36px 90px rgba(0, 0, 0, 0.76));
+}
+
+.colt-xp__cinema-wordmark {
+    top: 10vh;
+    left: 50%;
+    width: min(600px, 54vw);
+    opacity: 0.58;
+    mix-blend-mode: screen;
+    transform: translateX(-50%);
+}
+
+.colt-xp__cinema-card {
+    top: 50%;
+    left: max(40px, calc((100vw - 1180px) / 2 + 120px));
+    width: 210px;
+    height: 306px;
+    padding: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.26);
+    background: linear-gradient(145deg, rgba(255,255,255,0.24), rgba(255,255,255,0.055));
+    box-shadow: 0 40px 90px rgba(0, 0, 0, 0.55);
+    transform: translateY(-50%) rotate(-8deg);
+    transform-style: preserve-3d;
+}
+
+.colt-xp__cinema-card-label {
+    display: block;
+    padding: 9px;
+    background: rgba(5, 6, 10, 0.82);
+    color: var(--colt-gold);
+    font-size: 11px;
+    font-weight: 950;
+    text-align: center;
+}
+
+.colt-xp__cinema-card b {
+    position: relative;
+    display: grid;
+    place-items: center;
+    height: 232px;
+    margin-top: 12px;
+    overflow: hidden;
+    background:
+        radial-gradient(circle at 25% 18%, rgba(217, 183, 111, 0.75), transparent 28%),
+        radial-gradient(circle at 70% 74%, rgba(71, 109, 255, 0.46), transparent 32%),
+        linear-gradient(145deg, #111827, #421820 50%, #090b10);
+    font-size: 44px;
+    line-height: 1;
+}
+
+.colt-xp__cinema-card i {
+    position: absolute;
+    inset: 25% 12px 12px;
+    background: linear-gradient(115deg, transparent 35%, rgba(255,255,255,0.45), transparent 58%);
+    opacity: 0.66;
+}
+
+.colt-xp__cinema-vault {
+    top: 50%;
+    left: 50%;
+    display: grid;
+    place-items: center;
+    width: min(420px, 44vw);
+    aspect-ratio: 1;
+    transform: translate(-50%, -50%) scale(0.6);
+    opacity: 0;
+}
+
+.colt-xp__cinema-vault span {
+    position: absolute;
+    inset: 0;
+    border: 1px solid rgba(217, 183, 111, 0.28);
+    border-radius: 50%;
+}
+
+.colt-xp__cinema-vault span:nth-child(2) {
+    inset: 16%;
+    border-color: rgba(247, 240, 223, 0.18);
+}
+
+.colt-xp__cinema-vault span:nth-child(3) {
+    inset: 34%;
+    background: rgba(5, 6, 10, 0.84);
+    border-color: rgba(71, 109, 255, 0.20);
+}
+
+.colt-xp__cinema-vault strong {
+    z-index: 1;
+    color: var(--colt-gold);
+    font-size: clamp(40px, 6vw, 78px);
+    font-weight: 950;
+}
+
+.colt-xp__cinema-paths {
+    top: 50%;
+    left: max(28px, calc((100vw - 1180px) / 2));
+    display: grid;
+    grid-template-columns: repeat(2, minmax(150px, 1fr));
+    gap: 12px;
+    width: min(480px, 42vw);
+    transform: translateY(-50%);
+    pointer-events: auto;
+}
+
+.colt-xp__cinema-paths a {
+    display: grid;
+    gap: 8px;
+    min-height: 96px;
+    padding: 16px;
+    border: 1px solid rgba(247, 240, 223, 0.16);
+    background: rgba(247, 240, 223, 0.06);
+    backdrop-filter: blur(12px);
+    opacity: 0;
+    transform: translateY(22px) scale(0.96);
+}
+
+.colt-xp__cinema-paths small {
+    color: var(--colt-gold);
+    font-weight: 950;
+}
+
+.colt-xp__cinema-paths b {
+    font-size: 20px;
+    line-height: 1.05;
+}
+
+.colt-xp__cinema-progress {
+    position: absolute;
+    right: max(24px, calc((100vw - 1180px) / 2));
+    bottom: 36px;
+    z-index: 8;
+    width: min(420px, calc(100vw - 48px));
+    height: 2px;
+    background: rgba(247, 240, 223, 0.12);
+}
+
+.colt-xp__cinema-progress span {
+    display: block;
+    width: calc(var(--cinema-progress, 0) * 100%);
+    height: 100%;
+    background: linear-gradient(90deg, var(--colt-gold), var(--colt-hot));
+}
+
 .colt-xp__story-rail {
     position: fixed;
     top: 24vh;
@@ -676,6 +928,62 @@
 
     .colt-xp__story-rail {
         display: none;
+    }
+
+    .colt-xp__cinema {
+        height: auto;
+    }
+
+    .colt-xp__cinema-sticky {
+        position: relative;
+        height: auto;
+        min-height: 100vh;
+        padding: 84px 20px;
+    }
+
+    .colt-xp__cinema-copy,
+    .colt-xp__cinema-stage,
+    .colt-xp__cinema-guardian,
+    .colt-xp__cinema-wordmark,
+    .colt-xp__cinema-card,
+    .colt-xp__cinema-vault,
+    .colt-xp__cinema-paths {
+        position: relative;
+        top: auto;
+        right: auto;
+        bottom: auto;
+        left: auto;
+        transform: none;
+    }
+
+    .colt-xp__cinema-copy {
+        width: min(100%, 640px);
+        margin: 0 auto 32px;
+    }
+
+    .colt-xp__cinema-panel {
+        position: relative;
+        display: none;
+    }
+
+    .colt-xp__cinema-panel:first-child {
+        display: block;
+        opacity: 1;
+        transform: none;
+    }
+
+    .colt-xp__cinema-stage {
+        min-height: 680px;
+    }
+
+    .colt-xp__cinema-paths {
+        width: 100%;
+        margin-top: 24px;
+    }
+
+    .colt-xp__cinema-paths a {
+        opacity: 1;
+        transform: none;
     }
 }
 

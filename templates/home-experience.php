@@ -57,6 +57,66 @@ $guardian_url = Colt_Experience::asset_url('assets/img/colt-logo.png');
         </div>
     </header>
 
+    <section class="colt-xp__cinema" data-colt-cinema data-colt-scene="cinema" aria-label="COLT cinematic collector journey">
+        <div class="colt-xp__cinema-sticky">
+            <div class="colt-xp__cinema-bg" aria-hidden="true">
+                <span class="colt-xp__tunnel-ring colt-xp__tunnel-ring--one"></span>
+                <span class="colt-xp__tunnel-ring colt-xp__tunnel-ring--two"></span>
+                <span class="colt-xp__tunnel-ring colt-xp__tunnel-ring--three"></span>
+                <span class="colt-xp__tunnel-glow"></span>
+            </div>
+
+            <div class="colt-xp__cinema-copy">
+                <article class="colt-xp__cinema-panel is-active" data-cinema-panel="0">
+                    <p class="colt-xp__kicker">THE ENTRY</p>
+                    <h2>האספן נכנס דרך הקלף.</h2>
+                    <p>החוויה מתחילה מפריט אחד שמקבל במה, אור, עומק ומשמעות.</p>
+                </article>
+                <article class="colt-xp__cinema-panel" data-cinema-panel="1">
+                    <p class="colt-xp__kicker">THE VAULT</p>
+                    <h2>הקלף עובר לתוך הכספת.</h2>
+                    <p>שמירה, ביטוח, קטלוג וגישה הופכים מחלק טכני לרגע מותגי.</p>
+                </article>
+                <article class="colt-xp__cinema-panel" data-cinema-panel="2">
+                    <p class="colt-xp__kicker">THE SYSTEM</p>
+                    <h2>מתוך הכספת נפתחים המסלולים.</h2>
+                    <p>חנות, חיפוש, דירוג, מכירה, השקעות ואירועים מחוברים למסע אחד.</p>
+                </article>
+                <article class="colt-xp__cinema-panel" data-cinema-panel="3">
+                    <p class="colt-xp__kicker">CHOOSE A PATH</p>
+                    <h2>מפה ממשיכים לשירות או מוצר.</h2>
+                    <p>הסיפור מסתיים בהחלטה ברורה: לקנות, למכור, לשמור או לבנות אוסף.</p>
+                </article>
+            </div>
+
+            <div class="colt-xp__cinema-stage" aria-hidden="true">
+                <img class="colt-xp__cinema-guardian" src="<?php echo esc_url($guardian_url); ?>" alt="">
+                <img class="colt-xp__cinema-wordmark" src="<?php echo esc_url($mark_url); ?>" alt="">
+                <div class="colt-xp__cinema-card">
+                    <span class="colt-xp__cinema-card-label">COLT / 10</span>
+                    <b>RARE</b>
+                    <i></i>
+                </div>
+                <div class="colt-xp__cinema-vault">
+                    <span></span><span></span><span></span>
+                    <strong>VAULT</strong>
+                </div>
+                <div class="colt-xp__cinema-paths">
+                    <?php foreach (array_slice($services, 0, 6) as $index => $service) : ?>
+                        <a href="<?php echo esc_url($service['url']); ?>" style="--i: <?php echo esc_attr((string) $index); ?>">
+                            <small>0<?php echo esc_html((string) ($index + 1)); ?></small>
+                            <b><?php echo esc_html($service['title']); ?></b>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+
+            <div class="colt-xp__cinema-progress" aria-hidden="true">
+                <span></span>
+            </div>
+        </div>
+    </section>
+
     <div class="colt-xp__story-rail" aria-hidden="true">
         <span data-colt-rail></span>
     </div>
