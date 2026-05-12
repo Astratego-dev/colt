@@ -74,6 +74,11 @@ final class Colt_Experience
         return COLT_EXPERIENCE_URL . 'assets/img/colt-mark.svg';
     }
 
+    public static function asset_url($path)
+    {
+        return COLT_EXPERIENCE_URL . ltrim((string) $path, '/');
+    }
+
     public static function services()
     {
         $defaults = [
@@ -83,6 +88,7 @@ final class Colt_Experience
                 'text' => 'אחסון מבוטח, הרמטי ומותאם לפריטי אספנות יקרי ערך.',
                 'slug' => 'the-vault',
                 'tone' => 'vault',
+                'image' => self::asset_url('assets/img/vault-service.jpg'),
             ],
             [
                 'title' => 'MOST WANTED',
@@ -90,6 +96,7 @@ final class Colt_Experience
                 'text' => 'רשימת פריטים מבוקשים שאפשר למכור לנו ישירות.',
                 'slug' => 'most-wanted',
                 'tone' => 'wanted',
+                'image' => self::asset_url('assets/img/hunter-service.jpg'),
             ],
             [
                 'title' => 'חיפוש אישי',
@@ -97,6 +104,7 @@ final class Colt_Experience
                 'text' => 'מפעילים קשרים, ערוצים וקהילה כדי למצוא את הפריט הנכון.',
                 'slug' => '%d7%97%d7%99%d7%a4%d7%95%d7%a9-%d7%90%d7%99%d7%a9%d7%99',
                 'tone' => 'search',
+                'image' => self::asset_url('assets/img/hunter-service.jpg'),
             ],
             [
                 'title' => 'דירוג',
@@ -104,6 +112,7 @@ final class Colt_Experience
                 'text' => 'תהליך מסודר לקלפים שצריכים להגיע לדירוג נכון.',
                 'slug' => 'cshev',
                 'tone' => 'grading',
+                'image' => self::asset_url('assets/img/vault-service.jpg'),
             ],
             [
                 'title' => 'Whatnot',
@@ -111,6 +120,7 @@ final class Colt_Experience
                 'text' => 'ניהול מלאי, חשיפה ולייבים לקהל אספנים מתאים.',
                 'slug' => '%d7%9e%d7%9b%d7%99%d7%a8%d7%94-%d7%91whatnot',
                 'tone' => 'whatnot',
+                'image' => self::asset_url('assets/img/hunter-service.jpg'),
             ],
             [
                 'title' => 'תיק השקעות',
@@ -118,6 +128,7 @@ final class Colt_Experience
                 'text' => 'בניית תיק אספנות לפי תקציב, פוטנציאל וביקוש.',
                 'slug' => '%d7%91%d7%a0%d7%99%d7%99%d7%aa-%d7%aa%d7%99%d7%a7-%d7%94%d7%a9%d7%a7%d7%a2%d7%95%d7%aa',
                 'tone' => 'portfolio',
+                'image' => self::asset_url('assets/img/vault-service.jpg'),
             ],
         ];
 
