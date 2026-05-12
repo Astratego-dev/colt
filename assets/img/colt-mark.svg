@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 220" role="img" aria-label="COLT">
+  <rect width="220" height="220" rx="42" fill="#0d1117"/>
+  <path d="M54 66h112v88H54z" fill="none" stroke="#d9b76f" stroke-width="10"/>
+  <path d="M82 92h56v36H82z" fill="#d9b76f"/>
+  <text x="110" y="184" text-anchor="middle" font-family="Arial, sans-serif" font-size="36" font-weight="800" fill="#f7f0df">COLT</text>
+</svg>
