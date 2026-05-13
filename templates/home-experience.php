@@ -15,13 +15,10 @@ $products = Colt_Experience::featured_products($product_limit);
 $logo_url = Colt_Experience::logo_url();
 $mark_url = Colt_Experience::asset_url('assets/img/colt-character.png');
 $origin_world_url = Colt_Experience::asset_url('assets/scene-01-origin/colt-origin-world-clean.png');
-$guardian_frames = [];
-for ($frame_index = 1; $frame_index <= 6; $frame_index++) {
-    $guardian_frames[] = Colt_Experience::asset_url(sprintf('assets/scene-01-origin/guardian-frame-%02d.png', $frame_index));
-}
+$origin_video_url = Colt_Experience::asset_url('assets/scene-01-origin/colt-origin-scroll.mp4');
 ?>
 
-<section class="colt-xp" dir="rtl" data-colt-xp data-version="0.7.0">
+<section class="colt-xp" dir="rtl" data-colt-xp data-version="0.8.0">
     <canvas class="colt-xp__canvas" data-colt-canvas aria-hidden="true"></canvas>
     <div class="colt-xp__noise" aria-hidden="true"></div>
 
@@ -43,6 +40,19 @@ for ($frame_index = 1; $frame_index <= 6; $frame_index++) {
         style="<?php echo esc_attr("--colt-origin-world: url(" . esc_url($origin_world_url) . ");"); ?>"
     >
         <div class="colt-origin__pin">
+            <video
+                class="colt-origin__video"
+                data-origin-video
+                data-video-duration="10"
+                poster="<?php echo esc_url($origin_world_url); ?>"
+                preload="auto"
+                muted
+                playsinline
+                webkit-playsinline
+                aria-hidden="true"
+            >
+                <source src="<?php echo esc_url($origin_video_url); ?>" type="video/mp4">
+            </video>
             <div class="colt-origin__world" aria-hidden="true"></div>
             <div class="colt-origin__atmosphere" aria-hidden="true">
                 <span></span>
@@ -89,22 +99,6 @@ for ($frame_index = 1; $frame_index <= 6; $frame_index++) {
                         <a href="<?php echo esc_url(home_url('/shop/')); ?>">כניסה לחנות</a>
                     </div>
                 </div>
-            </div>
-
-            <div
-                class="colt-origin__guardian"
-                aria-hidden="true"
-            >
-                <?php foreach ($guardian_frames as $index => $frame_url) : ?>
-                    <img src="<?php echo esc_url($frame_url); ?>" alt="" data-guardian-frame="<?php echo esc_attr((string) $index); ?>" loading="<?php echo $index === 0 ? 'eager' : 'lazy'; ?>">
-                <?php endforeach; ?>
-                <span class="colt-origin__guardian-glow"></span>
-                <span class="colt-origin__guardian-shadow"></span>
-            </div>
-
-            <div class="colt-origin__void" aria-hidden="true"></div>
-            <div class="colt-origin__portal" aria-hidden="true">
-                <span></span><span></span><span></span>
             </div>
 
             <div class="colt-origin__label" aria-hidden="true">

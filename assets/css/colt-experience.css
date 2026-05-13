@@ -135,7 +135,6 @@
         radial-gradient(circle at 82% 14%, rgba(197,54,67,.22), transparent 32rem),
         linear-gradient(90deg, rgba(5,4,9,.62), transparent 27%, transparent 68%, rgba(5,4,9,.64)),
         linear-gradient(0deg, rgba(5,4,9,.92), transparent 26%, transparent 76%, rgba(5,4,9,.42));
-    mix-blend-mode: screen;
 }
 
 .colt-origin__pin::after {
@@ -149,15 +148,23 @@
 }
 
 .colt-origin__world,
+.colt-origin__video,
 .colt-origin__atmosphere,
 .colt-origin__sky,
 .colt-origin__rail,
 .colt-origin__service-tab,
-.colt-origin__portal,
-.colt-origin__guardian,
-.colt-origin__copy,
-.colt-origin__void {
+.colt-origin__copy {
     position: absolute;
+}
+
+.colt-origin__video {
+    z-index: 1;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background: #050409;
+    filter: saturate(1.08) contrast(1.04) brightness(.92);
 }
 
 .colt-origin__world {
@@ -172,7 +179,7 @@
 }
 
 .colt-origin__atmosphere {
-    z-index: 1;
+    z-index: 2;
     inset: 0;
     overflow: hidden;
     pointer-events: none;
@@ -211,7 +218,7 @@
 }
 
 .colt-origin__sky {
-    z-index: 3;
+    z-index: 4;
     inset: 0;
     overflow: hidden;
     opacity: .86;
@@ -420,103 +427,6 @@
     color: var(--gold);
     font-size: 12px;
 }
-
-.colt-origin__guardian {
-    z-index: 6;
-    right: 50%;
-    bottom: 5vh;
-    width: min(520px, 36vw);
-    aspect-ratio: 2 / 3;
-    transform: translateX(50%) translateY(0) scale(.18);
-    transform-origin: 50% 74%;
-    filter:
-        drop-shadow(0 34px 42px rgba(0,0,0,.78))
-        drop-shadow(0 0 30px rgba(217,183,111,.1));
-    pointer-events: none;
-}
-
-.colt-origin__guardian img {
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    opacity: 0;
-}
-
-.colt-origin__guardian img:first-child {
-    opacity: 1;
-}
-
-.colt-origin__guardian-glow,
-.colt-origin__guardian-shadow {
-    position: absolute;
-    pointer-events: none;
-}
-
-.colt-origin__guardian-glow {
-    z-index: -1;
-    inset: 11% 24% 31%;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(217,183,111,.2), rgba(206,54,154,.1) 42%, transparent 70%);
-    filter: blur(24px);
-    opacity: .7;
-}
-
-.colt-origin__guardian-shadow {
-    z-index: -2;
-    right: 20%;
-    left: 20%;
-    bottom: 0;
-    height: 12%;
-    border-radius: 50%;
-    background: rgba(0,0,0,.72);
-    filter: blur(20px);
-    transform: scaleX(1.4);
-}
-
-.colt-origin__void {
-    z-index: 8;
-    top: 43%;
-    left: 50%;
-    width: min(150px, 13vw);
-    aspect-ratio: 1;
-    border-radius: 50%;
-    background:
-        radial-gradient(circle at 50% 50%, #000 0 54%, rgba(0,0,0,.98) 62%, rgba(217,183,111,.12) 69%, transparent 72%);
-    box-shadow:
-        0 0 44px rgba(0,0,0,.96),
-        0 0 100px rgba(217,183,111,.18),
-        inset 0 0 42px rgba(0,0,0,1);
-    transform: translate(-50%, -50%) scale(.16);
-    opacity: 0;
-    pointer-events: none;
-}
-
-.colt-origin__portal {
-    z-index: 5;
-    inset: 43% auto auto 50%;
-    width: min(680px, 64vw);
-    aspect-ratio: 1;
-    transform: translate(-50%, -50%) scale(.18);
-    opacity: 0;
-    pointer-events: none;
-}
-
-.colt-origin__portal span {
-    position: absolute;
-    inset: 0;
-    border: 1px solid rgba(217,183,111,.24);
-    border-radius: 50%;
-    background:
-        radial-gradient(circle, transparent 0 48%, rgba(0,0,0,.38) 57%, transparent 68%),
-        conic-gradient(transparent, rgba(217,183,111,.24), transparent 26%, rgba(207,57,156,.22), transparent 58%, rgba(110,232,212,.15), transparent 78%);
-    box-shadow: inset 0 0 70px rgba(0,0,0,.54), 0 0 80px rgba(217,183,111,.1);
-}
-
-.colt-origin__portal span:nth-child(2) { inset: 15%; border-color: rgba(248,241,223,.16); }
-.colt-origin__portal span:nth-child(3) { inset: 30%; border-color: rgba(110,232,212,.2); }
 
 .colt-origin__label {
     position: absolute;
@@ -734,11 +644,10 @@
 @media (max-width: 980px) {
     .colt-origin { height: auto; }
     .colt-origin__pin { position: relative; min-height: 100vh; height: auto; padding: 132px 20px 80px; }
+    .colt-origin__video { opacity: .82; }
     .colt-origin__world { inset: 0; opacity: .78; }
     .colt-origin__rail, .colt-origin__service-tab { display: none; }
-    .colt-origin__copy,
-    .colt-origin__guardian,
-    .colt-origin__portal {
+    .colt-origin__copy {
         position: relative;
         inset: auto;
         transform: none;
@@ -750,19 +659,6 @@
         text-align: center;
     }
     .colt-origin__chapter { position: absolute; }
-    .colt-origin__guardian {
-        width: min(420px, 82vw);
-        margin: -24px auto 0;
-        transform: none;
-    }
-    .colt-origin__guardian img { opacity: 0; }
-    .colt-origin__guardian img:nth-of-type(5) { opacity: 1; }
-    .colt-origin__void {
-        display: none;
-    }
-    .colt-origin__portal {
-        display: none;
-    }
     .colt-origin__metrics { grid-template-columns: 1fr; }
     .colt-section-head, .colt-deep { grid-template-columns: 1fr; }
     .colt-core__grid, .colt-products__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
