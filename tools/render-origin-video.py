@@ -34,8 +34,29 @@ def cover(image: Image.Image, width: int, height: int, scale: float, pan_x: floa
     return resized.crop((left, top, left + width, top + height))
 
 
+def alpha_crop(image: Image.Image, padding: int = 16) -> Image.Image:
+    bbox = image.getchannel("A").getbbox()
+    if not bbox:
+        return image
+    left = max(0, bbox[0] - padding)
+    top = max(0, bbox[1] - padding)
+    right = min(image.width, bbox[2] + padding)
+    bottom = min(image.height, bbox[3] + padding)
+    return image.crop((left, top, right, bottom))
+
+
+def camera_crop(world: Image.Image, center_x: float, center_y: float, view_width: float, out_w: int, out_h: int) -> Image.Image:
+    view_height = view_width * out_h / out_w
+    left = int(center_x - view_width / 2)
+    top = int(center_y - view_height / 2)
+    left = max(0, min(world.width - int(view_width), left))
+    top = max(0, min(world.height - int(view_height), top))
+    crop = world.crop((left, top, left + int(view_width), top + int(view_height)))
+    return crop.resize((out_w, out_h), Image.Resampling.LANCZOS)
+
+
 def character_pair(frames: list[Image.Image], progress: float) -> tuple[Image.Image, Image.Image, float]:
-    stops = [0.0, 0.24, 0.43, 0.63, 0.79, 1.0]
+    stops = [0.0, 0.28, 0.48, 0.67, 0.84, 1.0]
     for index in range(len(stops) - 1):
         if stops[index] <= progress <= stops[index + 1]:
             local = (progress - stops[index]) / (stops[index + 1] - stops[index])
@@ -43,38 +64,46 @@ def character_pair(frames: list[Image.Image], progress: float) -> tuple[Image.Im
     return frames[-2], frames[-1], 1.0
 
 
-def paste_character(base: Image.Image, first: Image.Image, second: Image.Image, mix: float, progress: float) -> None:
-    zoom = ease_in_out(progress)
-    scale = lerp(0.105, 1.42, zoom)
-    if progress > 0.82:
-        scale = lerp(scale, 2.22, ease_in_out((progress - 0.82) / 0.18))
+def paste_character(world: Image.Image, first: Image.Image, second: Image.Image, mix: float, progress: float) -> tuple[float, float]:
+    first = alpha_crop(first)
+    second = alpha_crop(second)
+    character_height = int(lerp(355, 430, ease_in_out(progress)))
+    first_ratio = first.width / first.height
+    second_ratio = second.width / second.height
+    first_scaled = first.resize((int(character_height * first_ratio), character_height), Image.Resampling.LANCZOS)
+    second_scaled = second.resize((int(character_height * second_ratio), character_height), Image.Resampling.LANCZOS)
 
-    width = int(first.width * scale)
-    height = int(first.height * scale)
-    first_scaled = first.resize((width, height), Image.Resampling.LANCZOS)
-    second_scaled = second.resize((width, height), Image.Resampling.LANCZOS)
+    width = max(first_scaled.width, second_scaled.width)
+    height = max(first_scaled.height, second_scaled.height)
+    first_plate = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+    second_plate = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+    first_plate.alpha_composite(first_scaled, ((width - first_scaled.width) // 2, height - first_scaled.height))
+    second_plate.alpha_composite(second_scaled, ((width - second_scaled.width) // 2, height - second_scaled.height))
+    blended = Image.blend(first_plate, second_plate, mix)
 
-    blended = Image.blend(first_scaled, second_scaled, mix)
     alpha = blended.getchannel("A")
 
-    bottom = int(786 + 108 * ease_in_out(max(0.0, progress - 0.48) / 0.52))
-    x = int(base.width * 0.5 - width * 0.5)
+    world_x = int(world.width * 0.5)
+    bottom = int(world.height * 0.724)
+    x = int(world_x - width * 0.5)
     y = bottom - height
+    face_center_y = y + int(height * 0.19)
 
     shadow_w = max(40, int(width * 0.62))
-    shadow_h = max(8, int(26 * scale))
+    shadow_h = 20
     shadow = Image.new("RGBA", (shadow_w, shadow_h), (0, 0, 0, 0))
     shadow_alpha = Image.new("L", (shadow_w, shadow_h), 0)
-    ImageDraw.Draw(shadow_alpha).ellipse((0, 0, shadow_w, shadow_h), fill=170)
-    shadow_alpha = shadow_alpha.filter(ImageFilter.GaussianBlur(max(6, int(18 * scale))))
+    ImageDraw.Draw(shadow_alpha).ellipse((0, 0, shadow_w, shadow_h), fill=130)
+    shadow_alpha = shadow_alpha.filter(ImageFilter.GaussianBlur(18))
     shadow.putalpha(shadow_alpha)
-    base.alpha_composite(shadow, (int(base.width * 0.5 - shadow_w * 0.5), bottom - int(18 * scale)))
+    world.alpha_composite(shadow, (int(world_x - shadow_w * 0.5), bottom - 9))
 
     glow = Image.new("RGBA", blended.size, (217, 183, 111, 0))
-    glow_alpha = alpha.filter(ImageFilter.GaussianBlur(max(4, int(12 * scale))))
-    glow.putalpha(ImageEnhance.Brightness(glow_alpha).enhance(0.28))
-    base.alpha_composite(glow, (x, y))
-    base.alpha_composite(blended, (x, y))
+    glow_alpha = alpha.filter(ImageFilter.GaussianBlur(8))
+    glow.putalpha(ImageEnhance.Brightness(glow_alpha).enhance(0.2))
+    world.alpha_composite(glow, (x, y))
+    world.alpha_composite(blended, (x, y))
+    return float(world_x), float(face_center_y)
 
 
 def add_void(base: Image.Image, progress: float) -> None:
@@ -132,6 +161,7 @@ def main() -> int:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     width, height = 1920, 1080
+    world_width, world_height = 3840, 2160
     background = Image.open(repo / "assets/scene-01-origin/colt-origin-world-clean.png").convert("RGB")
     frames = [
         Image.open(repo / f"assets/scene-01-origin/guardian-frame-{index:02d}.png").convert("RGBA")
@@ -140,15 +170,23 @@ def main() -> int:
 
     for frame in range(frame_count):
         progress = frame / max(1, frame_count - 1)
-        zoom = 1.0 + 0.78 * ease_in_out(progress)
-        pan_x = lerp(0.0, -0.07, ease_in_out(progress))
-        pan_y = lerp(0.0, 0.08, ease_in_out(progress))
-        plate = cover(background, width, height, zoom, pan_x, pan_y).convert("RGBA")
-        plate = ImageEnhance.Color(plate).enhance(1.08 + progress * 0.16)
-        plate = ImageEnhance.Contrast(plate).enhance(1.05 + progress * 0.08)
+        camera = ease_in_out(progress)
+        world = cover(background, world_width, world_height, 1.08, 0.0, 0.0).convert("RGBA")
+        world = ImageEnhance.Color(world).enhance(1.08 + progress * 0.13)
+        world = ImageEnhance.Contrast(world).enhance(1.04 + progress * 0.06)
 
         first, second, mix = character_pair(frames, progress)
-        paste_character(plate, first, second, mix, progress)
+        face_x, face_y = paste_character(world, first, second, mix, progress)
+
+        view_width = lerp(world_width, 720, camera)
+        center_x = lerp(world_width * 0.5, face_x, ease_in_out(max(0.0, progress - 0.12) / 0.88))
+        center_y = lerp(world_height * 0.53, face_y + 64, ease_in_out(max(0.0, progress - 0.18) / 0.82))
+        if progress > 0.76:
+            head_t = ease_in_out((progress - 0.76) / 0.24)
+            view_width = lerp(view_width, 470, head_t)
+            center_y = lerp(center_y, face_y, head_t)
+
+        plate = camera_crop(world, center_x, center_y, view_width, width, height)
         add_light_sweep(plate, progress)
         add_void(plate, progress)
 

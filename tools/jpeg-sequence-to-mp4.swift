@@ -31,7 +31,10 @@ let settings: [String: Any] = [
     AVVideoWidthKey: width,
     AVVideoHeightKey: height,
     AVVideoCompressionPropertiesKey: [
-        AVVideoAverageBitRateKey: 12_000_000,
+        AVVideoAverageBitRateKey: 18_000_000,
+        AVVideoExpectedSourceFrameRateKey: fps,
+        AVVideoMaxKeyFrameIntervalKey: 1,
+        AVVideoAllowFrameReorderingKey: false,
         AVVideoProfileLevelKey: AVVideoProfileLevelH264HighAutoLevel
     ]
 ]
@@ -58,8 +61,8 @@ let queue = DispatchQueue(label: "colt.origin.video.writer")
 let group = DispatchGroup()
 group.enter()
 
+var frame = 0
 input.requestMediaDataWhenReady(on: queue) {
-    var frame = 0
     while input.isReadyForMoreMediaData && frame < frameCount {
         autoreleasepool {
             let name = String(format: "frame_%04d.jpg", frame)
