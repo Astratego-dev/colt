@@ -14,16 +14,14 @@ $support_services = array_values(array_filter($services, static function ($servi
 $products = Colt_Experience::featured_products($product_limit);
 $logo_url = Colt_Experience::logo_url();
 $mark_url = Colt_Experience::asset_url('assets/img/colt-character.png');
-$guardian_frames = [
-    Colt_Experience::asset_url('assets/img/guardian-frame-01.svg'),
-    Colt_Experience::asset_url('assets/img/guardian-frame-02.svg'),
-    Colt_Experience::asset_url('assets/img/guardian-frame-03.svg'),
-    Colt_Experience::asset_url('assets/img/guardian-frame-04.svg'),
-    Colt_Experience::asset_url('assets/img/guardian-frame-05.svg'),
-];
+$origin_world_url = Colt_Experience::asset_url('assets/scene-01-origin/colt-origin-world.png');
+$guardian_frames = [];
+for ($frame_index = 1; $frame_index <= 6; $frame_index++) {
+    $guardian_frames[] = Colt_Experience::asset_url(sprintf('assets/scene-01-origin/guardian-frame-%02d.png', $frame_index));
+}
 ?>
 
-<section class="colt-xp" dir="rtl" data-colt-xp data-version="0.5.0">
+<section class="colt-xp" dir="rtl" data-colt-xp data-version="0.6.0">
     <canvas class="colt-xp__canvas" data-colt-canvas aria-hidden="true"></canvas>
     <div class="colt-xp__noise" aria-hidden="true"></div>
 
@@ -38,35 +36,69 @@ $guardian_frames = [
         </div>
     </nav>
 
-    <section class="colt-origin" data-origin-sequence data-colt-scene="origin">
+    <section
+        class="colt-origin"
+        data-origin-sequence
+        data-colt-scene="origin"
+        style="<?php echo esc_attr("--colt-origin-world: url(" . esc_url($origin_world_url) . ");"); ?>"
+    >
         <div class="colt-origin__pin">
+            <div class="colt-origin__world" aria-hidden="true"></div>
+            <div class="colt-origin__atmosphere" aria-hidden="true">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
             <div class="colt-origin__sky" aria-hidden="true">
-                <span></span><span></span><span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
             </div>
 
+            <div class="colt-origin__rail" aria-label="ניווט פתיחת COLT">
+                <p>[ COLT ORIGIN ]</p>
+                <a href="#colt-core">חוויות מרכזיות</a>
+                <a href="#colt-services">שירותי אספנים</a>
+                <a href="<?php echo esc_url(home_url('/shop/')); ?>">חנות</a>
+            </div>
+
+            <a class="colt-origin__service-tab" href="#colt-core">לגלות</a>
+
             <div class="colt-origin__copy">
-                <p class="colt-kicker">COLT EXPERIENCE</p>
-                <h1>קלפים, שירותים ואספנות יוקרתית במקום אחד.</h1>
-                <p>חנות ושירותי אספנים לקנייה, שמירה, דירוג, איתור ומכירה של פריטים עם ערך.</p>
+                <p class="colt-kicker">COLT COLLECTORS CLUB</p>
+                <h1>האוסף שלך מקבל במה של נכס.</h1>
+                <p>קלפים נדירים, סלאבים, כספת, תכשיטי אספנים ומסלולי חיפוש שמחברים בין תשוקה, ערך וסיפור אישי.</p>
                 <div class="colt-origin__actions">
-                    <a href="#colt-core">לגלות את COLT</a>
+                    <a href="#colt-core">להתחיל את המסע</a>
                     <a href="<?php echo esc_url(home_url('/shop/')); ?>">כניסה לחנות</a>
+                </div>
+                <div class="colt-origin__metrics" aria-label="שירותי COLT מרכזיים">
+                    <span><b>01</b>סינגלים וסלאבים</span>
+                    <span><b>02</b>THE VAULT</span>
+                    <span><b>03</b>תכשיטי אספנים</span>
+                    <span><b>04</b>Mystery Box</span>
                 </div>
             </div>
 
-            <div class="colt-origin__guardian" aria-hidden="true">
+            <div
+                class="colt-origin__guardian"
+                aria-hidden="true"
+            >
                 <?php foreach ($guardian_frames as $index => $frame_url) : ?>
                     <img src="<?php echo esc_url($frame_url); ?>" alt="" data-guardian-frame="<?php echo esc_attr((string) $index); ?>" loading="<?php echo $index === 0 ? 'eager' : 'lazy'; ?>">
                 <?php endforeach; ?>
-                <span class="colt-origin__void"></span>
+                <span class="colt-origin__guardian-glow"></span>
+                <span class="colt-origin__guardian-shadow"></span>
             </div>
 
+            <div class="colt-origin__void" aria-hidden="true"></div>
             <div class="colt-origin__portal" aria-hidden="true">
                 <span></span><span></span><span></span>
             </div>
 
             <div class="colt-origin__label" aria-hidden="true">
-                <span>SCROLL</span>
+                <span>גלול כדי להתקרב</span>
                 <b></b>
             </div>
         </div>
