@@ -111,6 +111,7 @@
         const panels = Array.from(cinema.querySelectorAll('[data-cinema-panel]'));
         const card = cinema.querySelector('.colt-xp__cinema-card');
         const vault = cinema.querySelector('.colt-xp__cinema-vault');
+        const faceVoid = cinema.querySelector('.colt-xp__face-void');
         const paths = Array.from(cinema.querySelectorAll('.colt-xp__cinema-paths a'));
         const guardian = cinema.querySelector('.colt-xp__cinema-guardian');
         const wordmark = cinema.querySelector('.colt-xp__cinema-wordmark');
@@ -120,6 +121,8 @@
         gsap.set(panels.slice(1), { autoAlpha: 0, y: 28 });
         gsap.set(paths, { autoAlpha: 0, y: 26, scale: 0.94 });
         gsap.set(vault, { autoAlpha: 0, scale: 0.58, rotate: -20 });
+        gsap.set(card, { autoAlpha: 0, y: 40, scale: 0.7 });
+        gsap.set(faceVoid, { autoAlpha: 0, scale: 0.2 });
 
         const activatePanel = (index) => {
             panels.forEach((panel, panelIndex) => {
@@ -145,30 +148,35 @@
         });
 
         timeline
-            .to(wordmark, { autoAlpha: 0.16, y: -70, scale: 1.08, duration: 0.9 }, 0)
-            .to(guardian, { xPercent: 64, y: 34, scale: 0.72, autoAlpha: 0.46, duration: 1 }, 0)
-            .to(card, { x: '24vw', y: '-2vh', rotation: 5, scale: 1.08, duration: 1 }, 0)
-            .to(rings, { rotate: 180, scale: 1.16, stagger: 0.05, duration: 1 }, 0)
-            .to(panels[0], { autoAlpha: 0, y: -24, duration: 0.35 }, 0.55)
-            .to(panels[1], { autoAlpha: 1, y: 0, duration: 0.45 }, 0.62)
+            .to(wordmark, { autoAlpha: 0.18, y: -80, scale: 1.12, duration: 0.9 }, 0)
+            .to(guardian, { scale: 0.72, rotateY: 0, y: -12, autoAlpha: 0.92, duration: 0.85 }, 0)
+            .to(rings, { rotate: 160, scale: 1.22, stagger: 0.05, duration: 0.85 }, 0)
+            .to(faceVoid, { autoAlpha: 0.72, scale: 0.92, y: -16, duration: 0.55 }, 0.3)
+            .to(panels[0], { autoAlpha: 0, y: -24, duration: 0.35 }, 0.62)
+            .to(panels[1], { autoAlpha: 1, y: 0, duration: 0.45 }, 0.7)
 
-            .to(vault, { autoAlpha: 1, scale: 1, rotate: 0, duration: 0.9 }, 0.92)
-            .to(card, { x: '42vw', y: '-3vh', rotation: 0, scale: 0.58, autoAlpha: 0.34, duration: 0.95 }, 0.98)
-            .to(glow, { scale: 1.85, autoAlpha: 0.55, duration: 0.9 }, 1)
-            .to(rings, { scale: 0.72, rotate: 420, duration: 1 }, 1.05)
-            .to(panels[1], { autoAlpha: 0, y: -24, duration: 0.35 }, 1.45)
-            .to(panels[2], { autoAlpha: 1, y: 0, duration: 0.45 }, 1.52)
+            .to(guardian, { scale: 1.62, y: 70, autoAlpha: 0.62, duration: 0.95 }, 0.86)
+            .to(faceVoid, { scale: 9.8, y: 40, autoAlpha: 1, duration: 1.05 }, 0.9)
+            .to(wordmark, { autoAlpha: 0, scale: 1.36, duration: 0.75 }, 0.92)
+            .to(card, { autoAlpha: 1, y: 0, scale: 1, duration: 0.65 }, 1.42)
+            .to(vault, { autoAlpha: 1, scale: 0.82, rotate: 0, duration: 0.7 }, 1.44)
+            .to(rings, { scale: 0.56, rotate: 390, duration: 0.9 }, 1.35)
+            .to(glow, { scale: 2.2, autoAlpha: 0.66, duration: 0.8 }, 1.35)
+            .to(panels[1], { autoAlpha: 0, y: -24, duration: 0.35 }, 1.78)
+            .to(panels[2], { autoAlpha: 1, y: 0, duration: 0.45 }, 1.86)
 
-            .to(vault, { x: '18vw', scale: 0.76, autoAlpha: 0.58, duration: 0.9 }, 1.72)
-            .to(card, { x: '12vw', y: '19vh', scale: 0.44, autoAlpha: 0.22, duration: 0.8 }, 1.72)
-            .to(paths, { autoAlpha: 1, y: 0, scale: 1, stagger: 0.08, duration: 0.7 }, 1.86)
-            .to(guardian, { xPercent: 52, y: 54, scale: 0.58, autoAlpha: 0.28, duration: 0.9 }, 1.82)
-            .to(panels[2], { autoAlpha: 0, y: -24, duration: 0.35 }, 2.42)
-            .to(panels[3], { autoAlpha: 1, y: 0, duration: 0.45 }, 2.5)
+            .to(faceVoid, { autoAlpha: 0.28, scale: 14, duration: 0.6 }, 1.92)
+            .to(guardian, { autoAlpha: 0.14, scale: 1.95, y: 130, duration: 0.7 }, 1.92)
+            .to(card, { x: '31vw', y: '-2vh', rotation: 3, scale: 0.72, autoAlpha: 0.5, duration: 0.8 }, 2.02)
+            .to(vault, { x: '18vw', scale: 0.6, autoAlpha: 0.46, duration: 0.8 }, 2.02)
+            .to(paths, { autoAlpha: 1, y: 0, scale: 1, stagger: 0.09, duration: 0.76 }, 2.14)
+            .to(panels[2], { autoAlpha: 0, y: -24, duration: 0.35 }, 2.72)
+            .to(panels[3], { autoAlpha: 1, y: 0, duration: 0.45 }, 2.82)
 
-            .to(paths, { x: 0, y: -8, scale: 1.03, stagger: 0.04, duration: 0.55 }, 2.62)
-            .to(vault, { scale: 0.54, autoAlpha: 0.32, duration: 0.5 }, 2.7)
-            .to(rings, { scale: 1.28, rotate: 620, duration: 0.7 }, 2.72);
+            .to(paths, { y: -8, scale: 1.04, stagger: 0.04, duration: 0.55 }, 2.95)
+            .to(card, { x: '18vw', y: '16vh', scale: 0.46, autoAlpha: 0.18, duration: 0.55 }, 3.02)
+            .to(vault, { scale: 0.42, autoAlpha: 0.24, duration: 0.5 }, 3.04)
+            .to(rings, { scale: 1.34, rotate: 650, duration: 0.7 }, 3.04);
     }
 
     function runCanvas(canvas, root) {

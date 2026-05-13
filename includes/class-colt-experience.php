@@ -43,9 +43,16 @@ final class Colt_Experience
         }
 
         wp_enqueue_style(
+            'colt-rubik-font',
+            'https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800;900&display=swap',
+            [],
+            null
+        );
+
+        wp_enqueue_style(
             'colt-experience',
             COLT_EXPERIENCE_URL . 'assets/css/colt-experience.css',
-            [],
+            ['colt-rubik-font'],
             COLT_EXPERIENCE_VERSION
         );
 
@@ -107,12 +114,40 @@ final class Colt_Experience
     {
         $defaults = [
             [
+                'title' => 'סינגלים וסלאבים',
+                'eyebrow' => 'קלפים נבחרים',
+                'text' => 'קלפים בודדים, מדורגים ופריטי showcase לאספנים שמחפשים את הדבר המדויק.',
+                'slug' => '../shop',
+                'tone' => 'singles',
+                'image' => self::asset_url('assets/img/hunter-service.jpg'),
+                'group' => 'core',
+            ],
+            [
                 'title' => 'THE VAULT',
                 'eyebrow' => 'כספת אספנים',
                 'text' => 'אחסון מבוטח, הרמטי ומותאם לפריטי אספנות יקרי ערך.',
                 'slug' => 'the-vault',
                 'tone' => 'vault',
                 'image' => self::asset_url('assets/img/vault-service.jpg'),
+                'group' => 'core',
+            ],
+            [
+                'title' => 'תכשיטי אספנים',
+                'eyebrow' => 'פריט שהופך לאובייקט',
+                'text' => 'עיצוב אישי סביב קלף, מטבע או פריט אספנות עם נוכחות יוקרתית.',
+                'slug' => '%d7%a2%d7%99%d7%a6%d7%95%d7%91-%d7%aa%d7%9b%d7%a9%d7%99%d7%98-%d7%90%d7%99%d7%a9%d7%99',
+                'tone' => 'jewelry',
+                'image' => self::asset_url('assets/img/vault-service.jpg'),
+                'group' => 'core',
+            ],
+            [
+                'title' => 'Mystery Box',
+                'eyebrow' => 'פתיחה עם ערך',
+                'text' => 'מארז אספנים עם קלף מדורג, סינגל וחבילת קלפים לחוויית פתיחה פרימיום.',
+                'slug' => '../shop',
+                'tone' => 'mystery',
+                'image' => self::asset_url('assets/img/hunter-service.jpg'),
+                'group' => 'core',
             ],
             [
                 'title' => 'MOST WANTED',
@@ -121,6 +156,7 @@ final class Colt_Experience
                 'slug' => 'most-wanted',
                 'tone' => 'wanted',
                 'image' => self::asset_url('assets/img/hunter-service.jpg'),
+                'group' => 'support',
             ],
             [
                 'title' => 'חיפוש אישי',
@@ -129,6 +165,7 @@ final class Colt_Experience
                 'slug' => '%d7%97%d7%99%d7%a4%d7%95%d7%a9-%d7%90%d7%99%d7%a9%d7%99',
                 'tone' => 'search',
                 'image' => self::asset_url('assets/img/hunter-service.jpg'),
+                'group' => 'support',
             ],
             [
                 'title' => 'דירוג',
@@ -137,6 +174,7 @@ final class Colt_Experience
                 'slug' => 'cshev',
                 'tone' => 'grading',
                 'image' => self::asset_url('assets/img/vault-service.jpg'),
+                'group' => 'support',
             ],
             [
                 'title' => 'Whatnot',
@@ -145,6 +183,7 @@ final class Colt_Experience
                 'slug' => '%d7%9e%d7%9b%d7%99%d7%a8%d7%94-%d7%91whatnot',
                 'tone' => 'whatnot',
                 'image' => self::asset_url('assets/img/hunter-service.jpg'),
+                'group' => 'support',
             ],
             [
                 'title' => 'תיק השקעות',
@@ -153,10 +192,16 @@ final class Colt_Experience
                 'slug' => '%d7%91%d7%a0%d7%99%d7%99%d7%aa-%d7%aa%d7%99%d7%a7-%d7%94%d7%a9%d7%a7%d7%a2%d7%95%d7%aa',
                 'tone' => 'portfolio',
                 'image' => self::asset_url('assets/img/vault-service.jpg'),
+                'group' => 'support',
             ],
         ];
 
         return array_map(static function (array $service): array {
+            if (strpos($service['slug'], '../') === 0) {
+                $service['url'] = home_url('/' . ltrim(substr($service['slug'], 3), '/') . '/');
+                return $service;
+            }
+
             $path = '/services/' . $service['slug'] . '/';
             $service['url'] = home_url($path);
             return $service;

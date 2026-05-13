@@ -5,6 +5,12 @@ if (!defined('ABSPATH')) {
 
 $product_limit = isset($atts['products']) ? (int) $atts['products'] : 8;
 $services = Colt_Experience::services();
+$core_services = array_values(array_filter($services, static function ($service) {
+    return isset($service['group']) && $service['group'] === 'core';
+}));
+$support_services = array_values(array_filter($services, static function ($service) {
+    return !isset($service['group']) || $service['group'] !== 'core';
+}));
 $products = Colt_Experience::featured_products($product_limit);
 $logo_url = Colt_Experience::logo_url();
 $mark_url = Colt_Experience::asset_url('assets/img/colt-character.png');
@@ -68,29 +74,30 @@ $guardian_url = Colt_Experience::asset_url('assets/img/colt-logo.png');
 
             <div class="colt-xp__cinema-copy">
                 <article class="colt-xp__cinema-panel is-active" data-cinema-panel="0">
-                    <p class="colt-xp__kicker">THE ENTRY</p>
-                    <h2>האספן נכנס דרך הקלף.</h2>
-                    <p>החוויה מתחילה מפריט אחד שמקבל במה, אור, עומק ומשמעות.</p>
+                    <p class="colt-xp__kicker">COLT</p>
+                    <h2>קלפים נדירים. שירותים לאספנים. עולם אחד.</h2>
+                    <p>הבית לאספנים שמחפשים לקנות, לשמור, לדרג, למכור ולבנות אוסף עם מחשבה קדימה.</p>
                 </article>
                 <article class="colt-xp__cinema-panel" data-cinema-panel="1">
-                    <p class="colt-xp__kicker">THE VAULT</p>
-                    <h2>הקלף עובר לתוך הכספת.</h2>
-                    <p>שמירה, ביטוח, קטלוג וגישה הופכים מחלק טכני לרגע מותגי.</p>
+                    <p class="colt-xp__kicker">PREMIUM COLLECTING</p>
+                    <h2>מהמדף הפרטי שלך לשירות שמתאים לערך של האוסף.</h2>
+                    <p>סינגלים, סלאבים, כספת, תכשיטי אספנים ומארזי Mystery Box שנבנים סביב חוויית אספנות אמיתית.</p>
                 </article>
                 <article class="colt-xp__cinema-panel" data-cinema-panel="2">
-                    <p class="colt-xp__kicker">THE SYSTEM</p>
-                    <h2>מתוך הכספת נפתחים המסלולים.</h2>
-                    <p>חנות, חיפוש, דירוג, מכירה, השקעות ואירועים מחוברים למסע אחד.</p>
+                    <p class="colt-xp__kicker">COLLECTOR SERVICES</p>
+                    <h2>ליווי לאספן שמחפש יותר מעוד מוצר.</h2>
+                    <p>איתור אישי, שליחה לדירוג, מכירה ב-Whatnot, Most Wanted ובניית תיק אספנות.</p>
                 </article>
                 <article class="colt-xp__cinema-panel" data-cinema-panel="3">
-                    <p class="colt-xp__kicker">CHOOSE A PATH</p>
-                    <h2>מפה ממשיכים לשירות או מוצר.</h2>
-                    <p>הסיפור מסתיים בהחלטה ברורה: לקנות, למכור, לשמור או לבנות אוסף.</p>
+                    <p class="colt-xp__kicker">START HERE</p>
+                    <h2>בחר את הדרך הנכונה לאוסף שלך.</h2>
+                    <p>המשך לחנות, לכספת, לחיפוש פריט נדיר או לשירות שמתאים למה שאתה רוצה לעשות עכשיו.</p>
                 </article>
             </div>
 
             <div class="colt-xp__cinema-stage" aria-hidden="true">
                 <img class="colt-xp__cinema-guardian" src="<?php echo esc_url($guardian_url); ?>" alt="">
+                <span class="colt-xp__face-void"></span>
                 <img class="colt-xp__cinema-wordmark" src="<?php echo esc_url($mark_url); ?>" alt="">
                 <div class="colt-xp__cinema-card">
                     <span class="colt-xp__cinema-card-label">COLT / 10</span>
@@ -102,7 +109,7 @@ $guardian_url = Colt_Experience::asset_url('assets/img/colt-logo.png');
                     <strong>VAULT</strong>
                 </div>
                 <div class="colt-xp__cinema-paths">
-                    <?php foreach (array_slice($services, 0, 6) as $index => $service) : ?>
+                    <?php foreach ($core_services as $index => $service) : ?>
                         <a href="<?php echo esc_url($service['url']); ?>" style="--i: <?php echo esc_attr((string) $index); ?>">
                             <small>0<?php echo esc_html((string) ($index + 1)); ?></small>
                             <b><?php echo esc_html($service['title']); ?></b>
@@ -123,20 +130,20 @@ $guardian_url = Colt_Experience::asset_url('assets/img/colt-logo.png');
 
     <section class="colt-xp__chapter" data-colt-scene="commerce">
         <div class="colt-xp__chapter-copy colt-reveal">
-            <p class="colt-xp__kicker">01 / STORE</p>
-            <h2>החנות היא השער, לא כל הסיפור.</h2>
-            <p>קלפים, בוקסים, אביזרים, סלאבים ומוצרים נדירים מוצגים כמו נכסי אספנות, לא כמו עוד קטלוג רגיל.</p>
+            <p class="colt-xp__kicker">SINGLES & SLABS</p>
+            <h2>קלפים שבוחרים לפי ערך, מצב וסיפור.</h2>
+            <p>סינגלים, סלאבים ופריטים נבחרים מקבלים במה שמאפשרת להבין מהר מה מיוחד, למי זה מתאים ולאן להמשיך.</p>
         </div>
         <div class="colt-xp__floating-board colt-reveal">
-            <span>SEALED</span><span>GRADED</span><span>SINGLES</span><span>ACCESSORIES</span>
+            <span>SINGLES</span><span>SLABS</span><span>SEALED</span><span>RARE DROPS</span>
         </div>
     </section>
 
     <section class="colt-xp__chapter colt-xp__chapter--reverse" data-colt-scene="vault">
         <div class="colt-xp__chapter-copy colt-reveal">
-            <p class="colt-xp__kicker">02 / THE VAULT</p>
-            <h2>פריטים יקרים צריכים להרגיש מוגנים עוד לפני שלוחצים.</h2>
-            <p>הכספת מקבלת סצנה משלה: אבטחה, שמירה, ביטוח, קטלוג וגישה. תחושה של חדר פרטי לאספנים רציניים.</p>
+            <p class="colt-xp__kicker">THE VAULT</p>
+            <h2>שמירה שמכבדת את הערך של הפריט.</h2>
+            <p>אחסון מבוטח, תנאים נכונים, קטלוג וגישה מסודרת לפריטים שלא אמורים להישאר במגירה.</p>
             <a class="colt-xp__text-link" href="<?php echo esc_url(home_url('/services/the-vault/')); ?>">לעמוד הכספת</a>
         </div>
         <div class="colt-xp__vault-core colt-reveal" aria-hidden="true">
@@ -147,13 +154,34 @@ $guardian_url = Colt_Experience::asset_url('assets/img/colt-logo.png');
 
     <section class="colt-xp__section colt-xp__section--services" id="colt-services" data-colt-scene="services">
         <div class="colt-xp__section-head colt-reveal">
-            <p class="colt-xp__kicker">03 / SERVICES</p>
-            <h2>בחר את המסלול שמתאים לאוסף שלך.</h2>
-            <p>כל כרטיס שירות הוא שער לעמוד רגוע יותר, מפורט יותר, עם CTA ברור.</p>
+            <p class="colt-xp__kicker">MAIN EXPERIENCES</p>
+            <h2>ארבע חוויות מרכזיות לאספן.</h2>
+            <p>המסלולים המרכזיים של COLT: קנייה, שמירה, עיצוב אישי ופתיחה מפתיעה.</p>
         </div>
 
         <div class="colt-xp__services">
-            <?php foreach ($services as $index => $service) : ?>
+            <?php foreach ($core_services as $index => $service) : ?>
+                <a class="colt-xp__service colt-reveal" style="--i: <?php echo esc_attr((string) $index); ?>" href="<?php echo esc_url($service['url']); ?>" data-tone="<?php echo esc_attr($service['tone']); ?>">
+                    <img src="<?php echo esc_url($service['image']); ?>" alt="" loading="lazy">
+                    <span class="colt-xp__service-index">0<?php echo esc_html((string) ($index + 1)); ?></span>
+                    <span class="colt-xp__service-eyebrow"><?php echo esc_html($service['eyebrow']); ?></span>
+                    <strong><?php echo esc_html($service['title']); ?></strong>
+                    <em><?php echo esc_html($service['text']); ?></em>
+                    <span class="colt-xp__service-arrow">↗</span>
+                </a>
+            <?php endforeach; ?>
+        </div>
+    </section>
+
+    <section class="colt-xp__section colt-xp__section--services" data-colt-scene="support">
+        <div class="colt-xp__section-head colt-reveal">
+            <p class="colt-xp__kicker">MORE SERVICES</p>
+            <h2>שירותים שמחברים בין אספנות, שוק ואסטרטגיה.</h2>
+            <p>למי שרוצה למצוא פריט, למכור נכון, לשלוח לדירוג או לבנות תיק אספנות עם כיוון.</p>
+        </div>
+
+        <div class="colt-xp__services colt-xp__services--support">
+            <?php foreach ($support_services as $index => $service) : ?>
                 <a class="colt-xp__service colt-reveal" style="--i: <?php echo esc_attr((string) $index); ?>" href="<?php echo esc_url($service['url']); ?>" data-tone="<?php echo esc_attr($service['tone']); ?>">
                     <img src="<?php echo esc_url($service['image']); ?>" alt="" loading="lazy">
                     <span class="colt-xp__service-index">0<?php echo esc_html((string) ($index + 1)); ?></span>

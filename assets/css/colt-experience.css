@@ -18,7 +18,7 @@
         radial-gradient(circle at 12% 22%, rgba(197, 54, 67, 0.22), transparent 34rem),
         radial-gradient(circle at 88% 62%, rgba(71, 109, 255, 0.16), transparent 30rem),
         linear-gradient(180deg, #05060a 0%, #0b0f17 44%, #05060a 100%);
-    font-family: "Assistant", "Heebo", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-family: "Rubik", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     isolation: isolate;
 }
 
@@ -325,7 +325,7 @@
 
 .colt-xp__cinema {
     position: relative;
-    height: 430vh;
+    height: 520vh;
     margin-top: -1px;
 }
 
@@ -337,7 +337,9 @@
     overflow: hidden;
     border-block: 1px solid rgba(247, 240, 223, 0.08);
     background:
+        linear-gradient(120deg, rgba(71, 109, 255, 0.16), transparent 32%),
         radial-gradient(circle at 50% 50%, rgba(217, 183, 111, 0.10), transparent 28rem),
+        radial-gradient(circle at 20% 18%, rgba(197, 54, 67, 0.24), transparent 34rem),
         linear-gradient(180deg, rgba(5, 6, 10, 0.42), rgba(5, 6, 10, 0.92));
 }
 
@@ -429,17 +431,34 @@
 
 .colt-xp__cinema-guardian {
     right: 50%;
-    bottom: 5vh;
-    width: min(440px, 40vw);
-    transform: translateX(50%);
+    bottom: 3vh;
+    width: min(520px, 44vw);
+    transform: translateX(50%) scale(0.28) rotateY(18deg);
+    transform-origin: 50% 48%;
     filter: drop-shadow(0 36px 90px rgba(0, 0, 0, 0.76));
+}
+
+.colt-xp__face-void {
+    position: absolute;
+    z-index: 4;
+    right: 50%;
+    bottom: 46vh;
+    width: 74px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: #000;
+    box-shadow:
+        0 0 42px rgba(0, 0, 0, 0.95),
+        0 0 90px rgba(217, 183, 111, 0.14);
+    transform: translateX(50%) scale(0.22);
+    opacity: 0;
 }
 
 .colt-xp__cinema-wordmark {
     top: 10vh;
     left: 50%;
     width: min(600px, 54vw);
-    opacity: 0.58;
+    opacity: 0.42;
     mix-blend-mode: screen;
     transform: translateX(-50%);
 }
@@ -453,7 +472,7 @@
     border: 1px solid rgba(255, 255, 255, 0.26);
     background: linear-gradient(145deg, rgba(255,255,255,0.24), rgba(255,255,255,0.055));
     box-shadow: 0 40px 90px rgba(0, 0, 0, 0.55);
-    transform: translateY(-50%) rotate(-8deg);
+    transform: translateY(-50%) rotate(-8deg) scale(0.86);
     transform-style: preserve-3d;
 }
 
@@ -534,6 +553,18 @@
     width: min(480px, 42vw);
     transform: translateY(-50%);
     pointer-events: auto;
+}
+
+.colt-xp__services--support {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.colt-xp__services--support .colt-xp__service {
+    min-height: 320px;
+}
+
+.colt-xp__services--support .colt-xp__service-index {
+    margin-bottom: 62px;
 }
 
 .colt-xp__cinema-paths a {
@@ -923,6 +954,10 @@
 
     .colt-xp__services,
     .colt-xp__products {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .colt-xp__services--support {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
