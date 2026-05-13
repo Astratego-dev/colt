@@ -46,8 +46,14 @@
 
         setFrame(0);
 
+        const chapters = Array.from(sequence.querySelectorAll('[data-origin-chapter]'));
+
         if (prefersReduced || !gsap || !ScrollTrigger || window.innerWidth < 981) {
             setFrame(4);
+            chapters.forEach((chapter, index) => {
+                chapter.style.opacity = index === 0 ? '1' : '0';
+                chapter.style.transform = 'none';
+            });
             return;
         }
 
@@ -63,7 +69,6 @@
         const pin = sequence.querySelector('.colt-origin__pin');
         const world = sequence.querySelector('.colt-origin__world');
         const copy = sequence.querySelector('.colt-origin__copy');
-        const metrics = sequence.querySelector('.colt-origin__metrics');
         const voidNode = sequence.querySelector('.colt-origin__void');
         const portal = sequence.querySelector('.colt-origin__portal');
         const portalRings = sequence.querySelectorAll('.colt-origin__portal span');
@@ -73,17 +78,24 @@
         const rail = sequence.querySelector('.colt-origin__rail');
         const serviceTab = sequence.querySelector('.colt-origin__service-tab');
 
-        const frameForProgress = (progress) => {
-            if (progress < 0.16) return 0;
-            if (progress < 0.32) return 1;
-            if (progress < 0.49) return 2;
-            if (progress < 0.66) return 3;
-            if (progress < 0.82) return 4;
-            return 5;
+        const showChapter = (index, at) => {
+            const chapter = chapters[index];
+            if (!chapter) return;
+            tl.to(chapter, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.22 }, at);
+            tl.to(chapter, { autoAlpha: 0, y: -32, filter: 'blur(10px)', duration: 0.2 }, at + 0.28);
         };
 
-        gsap.set(copy, { yPercent: -50, y: 0, autoAlpha: 1 });
-        gsap.set(guardian, { xPercent: 50, y: 0, scale: 0.18, autoAlpha: 1, transformOrigin: '50% 38%' });
+        const crossfadeFrame = (from, to, at) => {
+            if (!frames[from] || !frames[to]) return;
+            tl.to(frames[from], { autoAlpha: 0, duration: 0.12 }, at);
+            tl.to(frames[to], { autoAlpha: 1, duration: 0.12 }, at);
+        };
+
+        gsap.set(copy, { xPercent: 50, yPercent: -50, y: 0, autoAlpha: 1 });
+        gsap.set(chapters, { autoAlpha: 0, y: 32, filter: 'blur(10px)' });
+        gsap.set(frames, { autoAlpha: 0 });
+        if (frames[0]) gsap.set(frames[0], { autoAlpha: 1 });
+        gsap.set(guardian, { xPercent: 50, y: 0, scale: 0.16, autoAlpha: 1, transformOrigin: '50% 74%' });
         gsap.set(voidNode, { xPercent: -50, yPercent: -50, scale: 0.16, autoAlpha: 0 });
         gsap.set(portal, { xPercent: -50, yPercent: -50, scale: 0.18, rotate: 0, autoAlpha: 0 });
         gsap.set(rail, { autoAlpha: 1 });
@@ -99,44 +111,48 @@
                 pin,
                 anticipatePin: 1,
                 onUpdate: (self) => {
-                    const progress = self.progress;
-                    sequence.style.setProperty('--origin-progress', progress.toFixed(3));
-                    setFrame(frameForProgress(progress));
+                    sequence.style.setProperty('--origin-progress', self.progress.toFixed(3));
                 },
             },
         });
 
+        showChapter(0, 0.2);
+        showChapter(1, 0.62);
+        showChapter(2, 1.02);
+        crossfadeFrame(0, 1, 0.46);
+        crossfadeFrame(1, 2, 0.68);
+        crossfadeFrame(2, 3, 0.98);
+        crossfadeFrame(3, 4, 1.26);
+        crossfadeFrame(4, 5, 1.68);
+
         tl
-            .to(world, { scale: 1.08, xPercent: -1.2, yPercent: 1, duration: 0.42 }, 0)
-            .to(copy, { y: -28, autoAlpha: 0.9, duration: 0.36 }, 0)
-            .to(skyLines, { x: '-10vw', y: -10, stagger: 0.03, duration: 0.5 }, 0)
-            .to(atmosphere, { x: '-8vw', y: -8, stagger: 0.04, duration: 0.5 }, 0)
+            .to(world, { scale: 1.06, xPercent: -0.8, yPercent: 0.6, duration: 0.42 }, 0)
+            .to(skyLines, { x: '-8vw', y: -8, stagger: 0.03, duration: 0.5 }, 0)
+            .to(atmosphere, { x: '-6vw', y: -6, stagger: 0.04, duration: 0.5 }, 0)
             .to(label, { autoAlpha: 0, y: 18, duration: 0.22 }, 0.08)
             .to(rail, { y: -18, autoAlpha: 0.9, duration: 0.26 }, 0.08)
-            .to(guardian, { scale: 0.38, y: -28, duration: 0.42, ease: 'power1.inOut' }, 0.1)
+            .to(guardian, { scale: 0.28, y: -8, duration: 0.42, ease: 'power1.inOut' }, 0.1)
 
-            .to(world, { scale: 1.17, xPercent: -3, yPercent: 2, duration: 0.44 }, 0.42)
-            .to(guardian, { scale: 0.92, y: 4, duration: 0.48 }, 0.45)
-            .to(copy, { autoAlpha: 0.45, y: -56, duration: 0.36 }, 0.48)
+            .to(world, { scale: 1.15, xPercent: -2.2, yPercent: 1.8, duration: 0.46 }, 0.42)
+            .to(guardian, { scale: 0.58, y: -18, duration: 0.48 }, 0.46)
             .to(voidNode, { autoAlpha: 0.72, scale: 0.62, duration: 0.28 }, 0.56)
             .to(portal, { autoAlpha: 0.56, scale: 0.42, rotate: 40, duration: 0.32 }, 0.62)
 
-            .to(guardian, { scale: 1.52, y: 56, duration: 0.45 }, 0.82)
+            .to(world, { scale: 1.25, xPercent: -4.2, yPercent: 3, duration: 0.5 }, 0.84)
+            .to(guardian, { scale: 1.02, y: 16, duration: 0.5 }, 0.84)
             .to(voidNode, { scale: 1.55, autoAlpha: 0.92, duration: 0.42 }, 0.86)
-            .to(copy, { autoAlpha: 0, y: -112, duration: 0.34 }, 0.86)
-            .to(metrics, { autoAlpha: 0, y: -24, duration: 0.26 }, 0.88)
-            .to(world, { scale: 1.31, xPercent: -5, yPercent: 4, filter: 'saturate(1.25) contrast(1.15) brightness(.72)', duration: 0.54 }, 0.9)
+            .to(world, { filter: 'saturate(1.22) contrast(1.13) brightness(.76)', duration: 0.54 }, 0.94)
             .to(portalRings, { rotate: 220, scale: 1.12, stagger: 0.05, duration: 0.52 }, 0.94)
             .to(portal, { scale: 1.02, autoAlpha: 0.8, duration: 0.54 }, 1)
 
-            .to(guardian, { scale: 2.46, y: 142, autoAlpha: 0.72, duration: 0.58 }, 1.22)
+            .to(guardian, { scale: 1.72, y: 82, autoAlpha: 0.88, duration: 0.56 }, 1.28)
             .to(voidNode, { scale: 6.2, autoAlpha: 1, duration: 0.58 }, 1.22)
             .to(serviceTab, { x: -80, autoAlpha: 0, duration: 0.32 }, 1.24)
             .to(rail, { x: 40, autoAlpha: 0, duration: 0.34 }, 1.28)
             .to(skyLines, { x: '-38vw', autoAlpha: 0.18, duration: 0.56 }, 1.25)
             .to(portal, { scale: 1.85, autoAlpha: 0.92, duration: 0.58 }, 1.35)
 
-            .to(guardian, { scale: 3.24, y: 210, autoAlpha: 0.18, duration: 0.48 }, 1.78)
+            .to(guardian, { scale: 2.45, y: 170, autoAlpha: 0.3, duration: 0.48 }, 1.78)
             .to(voidNode, { scale: 18, duration: 0.62 }, 1.74)
             .to(portal, { scale: 3.1, autoAlpha: 0, duration: 0.5 }, 1.84)
             .to(world, { scale: 1.48, autoAlpha: 0.28, duration: 0.52 }, 1.86)

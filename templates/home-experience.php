@@ -14,14 +14,14 @@ $support_services = array_values(array_filter($services, static function ($servi
 $products = Colt_Experience::featured_products($product_limit);
 $logo_url = Colt_Experience::logo_url();
 $mark_url = Colt_Experience::asset_url('assets/img/colt-character.png');
-$origin_world_url = Colt_Experience::asset_url('assets/scene-01-origin/colt-origin-world.png');
+$origin_world_url = Colt_Experience::asset_url('assets/scene-01-origin/colt-origin-world-clean.png');
 $guardian_frames = [];
 for ($frame_index = 1; $frame_index <= 6; $frame_index++) {
     $guardian_frames[] = Colt_Experience::asset_url(sprintf('assets/scene-01-origin/guardian-frame-%02d.png', $frame_index));
 }
 ?>
 
-<section class="colt-xp" dir="rtl" data-colt-xp data-version="0.6.0">
+<section class="colt-xp" dir="rtl" data-colt-xp data-version="0.7.0">
     <canvas class="colt-xp__canvas" data-colt-canvas aria-hidden="true"></canvas>
     <div class="colt-xp__noise" aria-hidden="true"></div>
 
@@ -66,18 +66,28 @@ for ($frame_index = 1; $frame_index <= 6; $frame_index++) {
             <a class="colt-origin__service-tab" href="#colt-core">לגלות</a>
 
             <div class="colt-origin__copy">
-                <p class="colt-kicker">COLT COLLECTORS CLUB</p>
-                <h1>האוסף שלך מקבל במה של נכס.</h1>
-                <p>קלפים נדירים, סלאבים, כספת, תכשיטי אספנים ומסלולי חיפוש שמחברים בין תשוקה, ערך וסיפור אישי.</p>
-                <div class="colt-origin__actions">
-                    <a href="#colt-core">להתחיל את המסע</a>
-                    <a href="<?php echo esc_url(home_url('/shop/')); ?>">כניסה לחנות</a>
+                <div class="colt-origin__chapter" data-origin-chapter="0">
+                    <p class="colt-kicker">COLT COLLECTORS CLUB</p>
+                    <h1>האוסף שלך מקבל במה של נכס.</h1>
+                    <p>קלפים נדירים, סלאבים ושירותי אספנים שנבנים סביב ערך, נדירות וסיפור אישי.</p>
                 </div>
-                <div class="colt-origin__metrics" aria-label="שירותי COLT מרכזיים">
-                    <span><b>01</b>סינגלים וסלאבים</span>
-                    <span><b>02</b>THE VAULT</span>
-                    <span><b>03</b>תכשיטי אספנים</span>
-                    <span><b>04</b>Mystery Box</span>
+                <div class="colt-origin__chapter" data-origin-chapter="1">
+                    <p class="colt-kicker">MAIN EXPERIENCES</p>
+                    <h2>ארבע חוויות מרכזיות לאספן רציני.</h2>
+                    <div class="colt-origin__metrics" aria-label="שירותי COLT מרכזיים">
+                        <span><b>01</b>סינגלים וסלאבים</span>
+                        <span><b>02</b>THE VAULT</span>
+                        <span><b>03</b>תכשיטי אספנים</span>
+                        <span><b>04</b>Mystery Box</span>
+                    </div>
+                </div>
+                <div class="colt-origin__chapter" data-origin-chapter="2">
+                    <p class="colt-kicker">ENTER COLT</p>
+                    <h2>מצא, שמור, דרג ובנה את האוסף הבא שלך.</h2>
+                    <div class="colt-origin__actions">
+                        <a href="#colt-core">להתחיל את המסע</a>
+                        <a href="<?php echo esc_url(home_url('/shop/')); ?>">כניסה לחנות</a>
+                    </div>
                 </div>
             </div>
 

@@ -301,11 +301,29 @@
 
 .colt-origin__copy {
     z-index: 7;
-    right: max(214px, calc((100vw - 1120px) / 2));
-    top: 51%;
-    width: min(560px, calc(100vw - 72px));
-    transform: translateY(-50%);
+    right: 50%;
+    top: 44%;
+    width: min(780px, calc(100vw - 120px));
+    min-height: min(430px, 52vh);
+    text-align: center;
+    transform: translate(50%, -50%);
     text-shadow: 0 24px 70px rgba(0,0,0,.85);
+    pointer-events: none;
+}
+
+.colt-origin__chapter {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    opacity: 0;
+    transform: translateY(28px);
+}
+
+.colt-origin__chapter .colt-origin__actions,
+.colt-origin__chapter a {
+    pointer-events: auto;
 }
 
 .colt-kicker {
@@ -327,6 +345,11 @@
 
 .colt-xp h1 { font-size: clamp(52px, 8vw, 112px); }
 .colt-xp h2 { font-size: clamp(36px, 5.7vw, 78px); }
+.colt-origin__copy h1,
+.colt-origin__copy h2 {
+    max-width: 860px;
+    text-wrap: balance;
+}
 
 .colt-origin__copy p:not(.colt-kicker),
 .colt-section-head p,
@@ -335,6 +358,11 @@
     color: var(--muted);
     font-size: clamp(17px, 1.5vw, 21px);
     line-height: 1.72;
+}
+
+.colt-origin__copy p:not(.colt-kicker) {
+    margin-right: auto;
+    margin-left: auto;
 }
 
 .colt-origin__actions,
@@ -370,7 +398,8 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
     margin-top: 26px;
-    max-width: 520px;
+    width: min(560px, 100%);
+    max-width: 560px;
 }
 
 .colt-origin__metrics span {
@@ -395,11 +424,11 @@
 .colt-origin__guardian {
     z-index: 6;
     right: 50%;
-    bottom: -6vh;
+    bottom: 5vh;
     width: min(520px, 36vw);
     aspect-ratio: 2 / 3;
     transform: translateX(50%) translateY(0) scale(.18);
-    transform-origin: 50% 38%;
+    transform-origin: 50% 74%;
     filter:
         drop-shadow(0 34px 42px rgba(0,0,0,.78))
         drop-shadow(0 0 30px rgba(217,183,111,.1));
@@ -717,7 +746,10 @@
     .colt-origin__copy {
         width: 100%;
         margin: 0 auto 24px;
+        min-height: 440px;
+        text-align: center;
     }
+    .colt-origin__chapter { position: absolute; }
     .colt-origin__guardian {
         width: min(420px, 82vw);
         margin: -24px auto 0;
