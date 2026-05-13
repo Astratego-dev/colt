@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 760">
+  <defs>
+    <radialGradient id="g" cx="50%" cy="24%" r="64%"><stop offset="0" stop-color="#777982"/><stop offset=".43" stop-color="#191b22"/><stop offset="1" stop-color="#050609"/></radialGradient>
+    <radialGradient id="void" cx="50%" cy="50%" r="52%"><stop offset="0" stop-color="#000"/><stop offset=".72" stop-color="#000"/><stop offset="1" stop-color="#15100a"/></radialGradient>
+    <linearGradient id="gold" x1="0" x2="1"><stop offset="0" stop-color="#f3d887"/><stop offset="1" stop-color="#9a6b25"/></linearGradient>
+  </defs>
+  <ellipse cx="260" cy="714" rx="190" ry="38" fill="#000" opacity=".52"/>
+  <path d="M128 726c17-186 43-332 76-437 18-58 35-106 56-106s38 48 56 106c33 105 59 251 76 437H128Z" fill="url(#g)"/>
+  <path d="M86 431c29-116 86-196 174-196s145 80 174 196c18 74 26 177 27 295H59c1-118 9-221 27-295Z" fill="#0b0d11"/>
+  <path d="M139 373c26-114 70-190 121-190s95 76 121 190c-58-54-184-54-242 0Z" fill="#343b46"/>
+  <ellipse cx="260" cy="327" rx="103" ry="112" fill="url(#void)"/>
+  <path d="M91 536c45-70 102-114 169-132v78c-62 16-112 55-154 116l-15-62Z" fill="#191d24"/>
+  <path d="M429 536c-45-70-102-114-169-132v78c62 16 112 55 154 116l15-62Z" fill="#191d24"/>
+  <path d="M174 378c22-42 51-64 86-64s64 22 86 64" fill="none" stroke="#2a303a" stroke-width="22" stroke-linecap="round"/>
+  <rect x="230" y="390" width="9" height="60" rx="4" fill="url(#gold)"/>
+  <rect x="281" y="390" width="9" height="60" rx="4" fill="url(#gold)"/>
+</svg>

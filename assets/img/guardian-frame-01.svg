@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 760">
+  <defs>
+    <radialGradient id="g" cx="50%" cy="28%" r="62%">
+      <stop offset="0" stop-color="#56555a"/>
+      <stop offset=".46" stop-color="#15171c"/>
+      <stop offset="1" stop-color="#050609"/>
+    </radialGradient>
+    <linearGradient id="gold" x1="0" x2="1">
+      <stop offset="0" stop-color="#f3d887"/>
+      <stop offset="1" stop-color="#9a6b25"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="260" cy="714" rx="170" ry="32" fill="#000" opacity=".45"/>
+  <path d="M151 726c9-178 30-319 56-422 14-57 27-102 53-102s39 45 53 102c26 103 47 244 56 422H151Z" fill="url(#g)"/>
+  <path d="M127 419c20-92 61-160 133-160s113 68 133 160c14 66 20 176 22 307H105c2-131 8-241 22-307Z" fill="#0b0d11"/>
+  <path d="M164 384c19-92 53-159 96-159s77 67 96 159c-50-32-142-32-192 0Z" fill="#272b32"/>
+  <path d="M182 374c16-62 41-106 78-106s62 44 78 106c-45-22-111-22-156 0Z" fill="#000"/>
+  <path d="M126 501c-35 54-62 120-74 203h74c12-77 29-137 51-183l-51-20Z" fill="#111318"/>
+  <path d="M394 501c35 54 62 120 74 203h-74c-12-77-29-137-51-183l51-20Z" fill="#111318"/>
+  <rect x="235" y="396" width="9" height="56" rx="4" fill="url(#gold)"/>
+  <rect x="276" y="396" width="9" height="56" rx="4" fill="url(#gold)"/>
+</svg>
