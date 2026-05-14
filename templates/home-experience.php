@@ -15,10 +15,11 @@ $products = Colt_Experience::featured_products($product_limit);
 $logo_url = Colt_Experience::logo_url();
 $mark_url = Colt_Experience::asset_url('assets/img/colt-character.png');
 $origin_world_url = Colt_Experience::asset_url('assets/scene-01-origin/colt-origin-world-clean.png');
-$origin_video_url = Colt_Experience::asset_url('assets/scene-01-origin/colt-origin-scroll.mp4');
+$origin_frame_base_url = Colt_Experience::asset_url('assets/scene-01-origin/sequence/frame_');
+$origin_frame_poster_url = Colt_Experience::asset_url('assets/scene-01-origin/sequence/frame_0000.webp');
 ?>
 
-<section class="colt-xp" dir="rtl" data-colt-xp data-version="0.9.0">
+<section class="colt-xp" dir="rtl" data-colt-xp data-version="1.0.0">
     <canvas class="colt-xp__canvas" data-colt-canvas aria-hidden="true"></canvas>
     <div class="colt-xp__noise" aria-hidden="true"></div>
 
@@ -40,19 +41,23 @@ $origin_video_url = Colt_Experience::asset_url('assets/scene-01-origin/colt-orig
         style="<?php echo esc_attr("--colt-origin-world: url(" . esc_url($origin_world_url) . ");"); ?>"
     >
         <div class="colt-origin__pin">
-            <video
-                class="colt-origin__video"
-                data-origin-video
-                data-video-duration="10"
-                poster="<?php echo esc_url($origin_world_url); ?>"
-                preload="auto"
-                muted
-                playsinline
-                webkit-playsinline
+            <canvas
+                class="colt-origin__sequence"
+                data-origin-canvas
+                data-frame-base="<?php echo esc_url($origin_frame_base_url); ?>"
+                data-frame-count="180"
+                data-frame-pad="4"
+                data-frame-ext="webp"
+                aria-hidden="true"
+            ></canvas>
+            <img
+                class="colt-origin__poster"
+                src="<?php echo esc_url($origin_frame_poster_url); ?>"
+                alt=""
+                loading="eager"
+                decoding="sync"
                 aria-hidden="true"
             >
-                <source src="<?php echo esc_url($origin_video_url); ?>" type="video/mp4">
-            </video>
             <div class="colt-origin__world" aria-hidden="true"></div>
             <div class="colt-origin__atmosphere" aria-hidden="true">
                 <span></span>
@@ -68,9 +73,9 @@ $origin_video_url = Colt_Experience::asset_url('assets/scene-01-origin/colt-orig
 
             <div class="colt-origin__rail" aria-label="ניווט פתיחת COLT">
                 <p>[ COLT ORIGIN ]</p>
-                <a href="#colt-core">חוויות מרכזיות</a>
-                <a href="#colt-services">שירותי אספנים</a>
-                <a href="<?php echo esc_url(home_url('/shop/')); ?>">חנות</a>
+                <a href="#colt-core" data-origin-step="0">כניסה לעולם</a>
+                <a href="#colt-core" data-origin-step="1">ערך ונדירות</a>
+                <a href="<?php echo esc_url(home_url('/shop/')); ?>" data-origin-step="2">התחלה</a>
             </div>
 
             <a class="colt-origin__service-tab" href="#colt-core">לגלות</a>
@@ -78,12 +83,12 @@ $origin_video_url = Colt_Experience::asset_url('assets/scene-01-origin/colt-orig
             <div class="colt-origin__copy">
                 <div class="colt-origin__chapter" data-origin-chapter="0">
                     <p class="colt-kicker">COLT COLLECTORS CLUB</p>
-                    <h1>האוסף שלך מקבל במה של נכס.</h1>
-                    <p>קלפים נדירים, סלאבים ושירותי אספנים שנבנים סביב ערך, נדירות וסיפור אישי.</p>
+                    <h1>נכנסים לעולם שבו אוסף הופך לנכס.</h1>
+                    <p>קלפים נדירים, סלאבים ופריטי אספנות מקבלים כאן במה שנבנית סביב ערך, נדירות וסיפור אישי.</p>
                 </div>
                 <div class="colt-origin__chapter" data-origin-chapter="1">
-                    <p class="colt-kicker">MAIN EXPERIENCES</p>
-                    <h2>ארבע חוויות מרכזיות לאספן רציני.</h2>
+                    <p class="colt-kicker">CURATED VALUE</p>
+                    <h2>לא רק קונים פריט. בונים אסטרטגיית אספנות.</h2>
                     <div class="colt-origin__metrics" aria-label="שירותי COLT מרכזיים">
                         <span><b>01</b>סינגלים וסלאבים</span>
                         <span><b>02</b>THE VAULT</span>
@@ -93,7 +98,7 @@ $origin_video_url = Colt_Experience::asset_url('assets/scene-01-origin/colt-orig
                 </div>
                 <div class="colt-origin__chapter" data-origin-chapter="2">
                     <p class="colt-kicker">ENTER COLT</p>
-                    <h2>מצא, שמור, דרג ובנה את האוסף הבא שלך.</h2>
+                    <h2>מצא, שמור, דרג ובנה את הצעד הבא שלך.</h2>
                     <div class="colt-origin__actions">
                         <a href="#colt-core">להתחיל את המסע</a>
                         <a href="<?php echo esc_url(home_url('/shop/')); ?>">כניסה לחנות</a>

@@ -34,15 +34,19 @@ def cover(image: Image.Image, width: int, height: int, scale: float, pan_x: floa
     return resized.crop((left, top, left + width, top + height))
 
 
-def alpha_crop(image: Image.Image, padding: int = 16) -> Image.Image:
-    bbox = image.getchannel("A").getbbox()
+def alpha_crop(image: Image.Image, padding: int = 16, threshold: int = 12) -> Image.Image:
+    hard_alpha = image.getchannel("A").point(lambda value: 255 if value > threshold else 0)
+    bbox = hard_alpha.getbbox()
     if not bbox:
         return image
     left = max(0, bbox[0] - padding)
     top = max(0, bbox[1] - padding)
     right = min(image.width, bbox[2] + padding)
     bottom = min(image.height, bbox[3] + padding)
-    return image.crop((left, top, right, bottom))
+    cropped = image.crop((left, top, right, bottom))
+    clean_alpha = cropped.getchannel("A").point(lambda value: 0 if value <= threshold else value)
+    cropped.putalpha(clean_alpha)
+    return cropped
 
 
 def camera_crop(world: Image.Image, center_x: float, center_y: float, view_width: float, out_w: int, out_h: int) -> Image.Image:
@@ -56,11 +60,20 @@ def camera_crop(world: Image.Image, center_x: float, center_y: float, view_width
 
 
 def character_pair(frames: list[Image.Image], progress: float) -> tuple[Image.Image, Image.Image, float]:
-    stops = [0.0, 0.28, 0.48, 0.67, 0.84, 1.0]
-    for index in range(len(stops) - 1):
-        if stops[index] <= progress <= stops[index + 1]:
-            local = (progress - stops[index]) / (stops[index + 1] - stops[index])
-            return frames[index], frames[index + 1], ease_in_out(local)
+    # Keep the turn cinematic instead of constantly morphing the character.
+    # The larger pose changes happen behind camera motion and title beats.
+    beats = [
+        (0.0, 0.31, 0, 0),
+        (0.31, 0.43, 0, 2),
+        (0.43, 0.64, 2, 2),
+        (0.64, 0.78, 2, 3),
+        (0.78, 0.9, 3, 4),
+        (0.9, 1.0, 4, 5),
+    ]
+    for start, end, first, second in beats:
+        if start <= progress <= end:
+            local = 0.0 if start == end else (progress - start) / (end - start)
+            return frames[first], frames[second], ease_in_out(local)
     return frames[-2], frames[-1], 1.0
 
 
@@ -80,8 +93,12 @@ def paste_character(world: Image.Image, first: Image.Image, second: Image.Image,
     first_plate.alpha_composite(first_scaled, ((width - first_scaled.width) // 2, height - first_scaled.height))
     second_plate.alpha_composite(second_scaled, ((width - second_scaled.width) // 2, height - second_scaled.height))
     blended = Image.blend(first_plate, second_plate, mix)
-
     alpha = blended.getchannel("A")
+    blended_rgb = blended.convert("RGB")
+    blended_rgb = ImageEnhance.Contrast(blended_rgb).enhance(1.04 + progress * 0.05)
+    blended_rgb = ImageEnhance.Sharpness(blended_rgb).enhance(1.08)
+    blended = blended_rgb.convert("RGBA")
+    blended.putalpha(alpha)
 
     world_x = int(world.width * 0.5)
     bottom = int(world.height * 0.724)
@@ -98,10 +115,17 @@ def paste_character(world: Image.Image, first: Image.Image, second: Image.Image,
     shadow.putalpha(shadow_alpha)
     world.alpha_composite(shadow, (int(world_x - shadow_w * 0.5), bottom - 9))
 
-    glow = Image.new("RGBA", blended.size, (217, 183, 111, 0))
-    glow_alpha = alpha.filter(ImageFilter.GaussianBlur(8))
-    glow.putalpha(ImageEnhance.Brightness(glow_alpha).enhance(0.2))
-    world.alpha_composite(glow, (x, y))
+    halo = Image.new("RGBA", blended.size, (206, 54, 154, 0))
+    halo_alpha = alpha.filter(ImageFilter.GaussianBlur(15))
+    halo.putalpha(ImageEnhance.Brightness(halo_alpha).enhance(0.18))
+    world.alpha_composite(halo, (x - 2, y - 1))
+
+    rim = Image.new("RGBA", blended.size, (247, 207, 132, 0))
+    rim_alpha = alpha.filter(ImageFilter.GaussianBlur(2))
+    rim_alpha = ImageEnhance.Brightness(rim_alpha).enhance(0.16)
+    rim.putalpha(rim_alpha)
+    world.alpha_composite(rim, (x + 3, y - 2))
+
     world.alpha_composite(blended, (x, y))
     return float(world_x), float(face_center_y)
 
@@ -150,14 +174,37 @@ def add_light_sweep(base: Image.Image, progress: float) -> None:
     base.alpha_composite(overlay)
 
 
+def add_film_grade(base: Image.Image, progress: float) -> None:
+    vignette = Image.new("RGBA", base.size, (0, 0, 0, 0))
+    small_w, small_h = 480, 270
+    mask = Image.new("L", (small_w, small_h), 0)
+    pixels = mask.load()
+    cx = small_w * 0.5
+    cy = small_h * 0.52
+    max_distance = math.sqrt(cx * cx + cy * cy)
+    for y in range(small_h):
+        for x in range(small_w):
+            dx = (x - cx) / max_distance
+            dy = (y - cy) / max_distance
+            value = max(0.0, min(1.0, math.sqrt(dx * dx + dy * dy) * 1.72 - 0.36))
+            alpha = int((82 + progress * 48) * value)
+            pixels[x, y] = alpha
+    mask = mask.resize(base.size, Image.Resampling.BICUBIC).filter(ImageFilter.GaussianBlur(18))
+    vignette.putalpha(mask)
+    base.alpha_composite(vignette)
+
+
 def main() -> int:
-    if len(sys.argv) != 4:
-        print("usage: render-origin-video.py <repo> <frames-out-dir> <frame-count>")
+    if len(sys.argv) not in (4, 5, 6):
+        print("usage: render-origin-video.py <repo> <frames-out-dir> <frame-count> [jpg|webp] [quality]")
         return 2
 
     repo = Path(sys.argv[1])
     out_dir = Path(sys.argv[2])
     frame_count = int(sys.argv[3])
+    image_format = (sys.argv[4] if len(sys.argv) >= 5 else "jpg").lower()
+    quality = int(sys.argv[5]) if len(sys.argv) >= 6 else (76 if image_format == "webp" else 90)
+    extension = "webp" if image_format == "webp" else "jpg"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     width, height = 1920, 1080
@@ -174,6 +221,7 @@ def main() -> int:
         world = cover(background, world_width, world_height, 1.08, 0.0, 0.0).convert("RGBA")
         world = ImageEnhance.Color(world).enhance(1.08 + progress * 0.13)
         world = ImageEnhance.Contrast(world).enhance(1.04 + progress * 0.06)
+        world = ImageEnhance.Sharpness(world).enhance(1.16)
 
         first, second, mix = character_pair(frames, progress)
         face_x, face_y = paste_character(world, first, second, mix, progress)
@@ -188,6 +236,7 @@ def main() -> int:
 
         plate = camera_crop(world, center_x, center_y, view_width, width, height)
         add_light_sweep(plate, progress)
+        add_film_grade(plate, progress)
         add_void(plate, progress)
 
         if progress > 0.9:
@@ -195,7 +244,11 @@ def main() -> int:
             plate.alpha_composite(fade)
 
         rgb = plate.convert("RGB")
-        rgb.save(out_dir / f"frame_{frame:04d}.jpg", quality=90, optimize=True, progressive=False)
+        save_path = out_dir / f"frame_{frame:04d}.{extension}"
+        if image_format == "webp":
+            rgb.save(save_path, "WEBP", quality=quality, method=6)
+        else:
+            rgb.save(save_path, "JPEG", quality=quality, optimize=True, progressive=False)
 
     return 0
 
