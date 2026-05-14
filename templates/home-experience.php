@@ -19,7 +19,7 @@ $origin_frame_base_url = Colt_Experience::asset_url('assets/scene-01-origin/sequ
 $origin_frame_poster_url = Colt_Experience::asset_url('assets/scene-01-origin/sequence/frame_0000.webp');
 ?>
 
-<section class="colt-xp" dir="rtl" data-colt-xp data-version="1.0.0">
+<section class="colt-xp" dir="rtl" data-colt-xp data-version="1.1.0">
     <canvas class="colt-xp__canvas" data-colt-canvas aria-hidden="true"></canvas>
     <div class="colt-xp__noise" aria-hidden="true"></div>
 
@@ -113,23 +113,55 @@ $origin_frame_poster_url = Colt_Experience::asset_url('assets/scene-01-origin/se
         </div>
     </section>
 
-    <section class="colt-core" id="colt-core" data-colt-scene="core">
-        <div class="colt-section-head colt-reveal">
-            <p class="colt-kicker">MAIN EXPERIENCES</p>
-            <h2>ארבע חוויות מרכזיות לאספן.</h2>
-            <p>המסלולים שמגדירים את COLT: לקנות, לשמור, להפוך פריט לאובייקט, ולפתוח Mystery Box.</p>
-        </div>
+    <section class="colt-core-world" id="colt-core" data-core-world data-colt-scene="core">
+        <div class="colt-core-world__pin">
+            <div class="colt-core-world__garden" aria-hidden="true">
+                <span class="colt-core-world__sun"></span>
+                <span class="colt-core-world__river"></span>
+            </div>
 
-        <div class="colt-core__grid">
-            <?php foreach ($core_services as $index => $service) : ?>
-                <a class="colt-core-card colt-reveal" href="<?php echo esc_url($service['url']); ?>" style="--i: <?php echo esc_attr((string) $index); ?>">
-                    <img src="<?php echo esc_url($service['image']); ?>" alt="" loading="lazy">
-                    <span>0<?php echo esc_html((string) ($index + 1)); ?></span>
-                    <small><?php echo esc_html($service['eyebrow']); ?></small>
-                    <strong><?php echo esc_html($service['title']); ?></strong>
-                    <em><?php echo esc_html($service['text']); ?></em>
-                </a>
-            <?php endforeach; ?>
+            <div class="colt-core-world__rings" aria-hidden="true">
+                <span></span><span></span><span></span><span></span>
+            </div>
+
+            <div class="colt-core-world__bloom" aria-hidden="true">
+                <?php for ($petal = 0; $petal < 18; $petal++) : ?>
+                    <span></span>
+                <?php endfor; ?>
+            </div>
+
+            <div class="colt-core-world__copy" data-core-copy>
+                <p class="colt-kicker">MAIN EXPERIENCES</p>
+                <h2>עולם השירותים המרכזיים של COLT.</h2>
+                <p>ארבע כניסות שונות לאותו מסע אספנות: קנייה מדויקת, שמירת ערך, אובייקט אישי וחוויית פתיחה.</p>
+            </div>
+
+            <div class="colt-core-world__services" aria-label="שירותי COLT מרכזיים">
+                <?php foreach ($core_services as $index => $service) : ?>
+                    <a
+                        class="colt-core-world__card colt-core-world__card--<?php echo esc_attr($service['tone']); ?>"
+                        data-core-card
+                        href="<?php echo esc_url($service['url']); ?>"
+                        style="--i: <?php echo esc_attr((string) $index); ?>"
+                    >
+                        <span class="colt-core-world__number">0<?php echo esc_html((string) ($index + 1)); ?></span>
+                        <span class="colt-core-world__visual" aria-hidden="true"><i></i><b></b></span>
+                        <small><?php echo esc_html($service['eyebrow']); ?></small>
+                        <strong><?php echo esc_html($service['title']); ?></strong>
+                        <em><?php echo esc_html($service['text']); ?></em>
+                        <span class="colt-core-world__cta">לעמוד השירות</span>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+
+            <div class="colt-core-world__progress" aria-hidden="true">
+                <span data-core-dot="0"></span>
+                <span data-core-dot="1"></span>
+                <span data-core-dot="2"></span>
+                <span data-core-dot="3"></span>
+            </div>
+
+            <div class="colt-core-world__aperture" aria-hidden="true"></div>
         </div>
     </section>
 

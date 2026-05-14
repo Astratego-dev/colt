@@ -8,6 +8,7 @@
         setupReveal(root, prefersReduced);
         setupCanvas(root, prefersReduced);
         setupOrigin(root, prefersReduced);
+        setupCoreWorld(root, prefersReduced);
     });
 
     function setupReveal(root, prefersReduced) {
@@ -283,6 +284,100 @@
         if (start === end) return value >= end ? 1 : 0;
         const x = Math.max(0, Math.min(1, (value - start) / (end - start)));
         return x * x * (3 - 2 * x);
+    }
+
+    function setupCoreWorld(root, prefersReduced) {
+        const gsap = window.gsap;
+        const ScrollTrigger = window.ScrollTrigger;
+        const scene = root.querySelector('[data-core-world]');
+        if (!scene) return;
+
+        const pin = scene.querySelector('.colt-core-world__pin');
+        const copy = scene.querySelector('[data-core-copy]');
+        const cards = Array.from(scene.querySelectorAll('[data-core-card]'));
+        const dots = Array.from(scene.querySelectorAll('[data-core-dot]'));
+        const rings = scene.querySelectorAll('.colt-core-world__rings span');
+        const petals = scene.querySelectorAll('.colt-core-world__bloom span');
+        const garden = scene.querySelector('.colt-core-world__garden');
+
+        const updateStage = (progress) => {
+            const portal = smoothstep(0.02, 0.18, progress) * 96;
+            const glow = smoothstep(0.12, 0.42, progress);
+            const active = Math.max(0, Math.min(cards.length - 1, Math.floor(smoothstep(0.33, 0.94, progress) * cards.length)));
+            scene.style.setProperty('--core-portal', `${portal.toFixed(2)}vmax`);
+            scene.style.setProperty('--core-glow', glow.toFixed(3));
+            scene.style.setProperty('--core-progress', progress.toFixed(3));
+            scene.style.setProperty('--core-shift-x', `${(-4 * progress).toFixed(2)}vw`);
+            scene.style.setProperty('--core-shift-y', `${(2 * progress).toFixed(2)}vh`);
+            scene.dataset.coreStage = `${active}`;
+            cards.forEach((card, index) => card.classList.toggle('is-active', index === active));
+            dots.forEach((dot, index) => dot.classList.toggle('is-active', index === active));
+        };
+
+        if (prefersReduced || !gsap || !ScrollTrigger || window.innerWidth < 981) {
+            updateStage(1);
+            if (copy) {
+                copy.style.opacity = '1';
+                copy.style.transform = 'none';
+            }
+            cards.forEach((card) => {
+                card.style.opacity = '1';
+                card.style.transform = 'none';
+                card.style.pointerEvents = 'auto';
+            });
+            return;
+        }
+
+        gsap.registerPlugin(ScrollTrigger);
+
+        gsap.set(copy, { autoAlpha: 0, y: 34, filter: 'blur(12px)' });
+        gsap.set(cards, { autoAlpha: 0, y: 80, scale: 0.88, rotateX: 8, filter: 'blur(14px)', pointerEvents: 'none' });
+        gsap.set(rings, { scale: 0.48, autoAlpha: 0, rotate: -24 });
+        gsap.set(petals, { autoAlpha: 0, y: 40, rotate: -12 });
+        updateStage(0);
+
+        const tl = gsap.timeline({
+            defaults: { ease: 'power2.inOut' },
+            scrollTrigger: {
+                trigger: scene,
+                start: 'top top',
+                end: 'bottom bottom',
+                scrub: 0.88,
+                pin,
+                anticipatePin: 1,
+                onUpdate: (self) => updateStage(self.progress),
+            },
+        });
+
+        tl
+            .to(garden, { scale: 1.06, xPercent: -2.2, yPercent: -1.4, duration: 0.9 }, 0)
+            .to(rings, { autoAlpha: 1, scale: 1, rotate: 0, stagger: 0.035, duration: 0.34 }, 0.08)
+            .to(rings, { scale: 1.56, rotate: 28, stagger: 0.02, duration: 0.64 }, 0.34)
+            .to(copy, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.22 }, 0.2)
+            .to(copy, { autoAlpha: 0, y: -36, filter: 'blur(9px)', duration: 0.18 }, 0.46)
+            .to(petals, { autoAlpha: 1, y: 0, rotate: 0, stagger: 0.012, duration: 0.36 }, 0.18);
+
+        cards.forEach((card, index) => {
+            const at = 0.38 + index * 0.13;
+            tl.to(card, {
+                autoAlpha: 1,
+                y: 0,
+                scale: 1,
+                rotateX: 0,
+                filter: 'blur(0px)',
+                pointerEvents: 'auto',
+                duration: 0.22,
+            }, at);
+            tl.to(card, {
+                y: -12,
+                scale: index === cards.length - 1 ? 1.02 : 0.98,
+                duration: 0.16,
+            }, at + 0.18);
+        });
+
+        tl
+            .to(cards.slice(0, -1), { y: -24, scale: 0.96, autoAlpha: 0.9, stagger: 0.03, duration: 0.22 }, 0.9)
+            .to(rings, { scale: 2.24, autoAlpha: 0.38, stagger: 0.02, duration: 0.28 }, 0.86);
     }
 
     function setupCanvas(root, prefersReduced) {
