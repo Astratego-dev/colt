@@ -64,7 +64,7 @@
             });
         };
 
-        if (prefersReduced || !gsap || !ScrollTrigger || window.innerWidth < 981) {
+        if (prefersReduced || !gsap || !ScrollTrigger) {
             renderer.setProgress(0);
             updateChapters(0.18);
             return;
@@ -72,19 +72,47 @@
 
         gsap.registerPlugin(ScrollTrigger);
 
-        if (window.Lenis && !window.__coltLenis) {
-            window.__coltLenis = new window.Lenis({ duration: 1.18, smoothWheel: true, wheelMultiplier: 0.82 });
-            window.__coltLenis.on('scroll', ScrollTrigger.update);
-            gsap.ticker.add((time) => window.__coltLenis.raf(time * 1000));
-            gsap.ticker.lagSmoothing(0);
-        }
-
         const pin = sequence.querySelector('.colt-origin__pin');
         const skyLines = sequence.querySelectorAll('.colt-origin__sky span');
         const atmosphere = sequence.querySelectorAll('.colt-origin__atmosphere span');
         const label = sequence.querySelector('.colt-origin__label');
         const rail = sequence.querySelector('.colt-origin__rail');
         const serviceTab = sequence.querySelector('.colt-origin__service-tab');
+
+        if (isCompactViewport()) {
+            root.classList.add('is-mobile-motion');
+            gsap.set(chapters, { autoAlpha: 0, y: 28, filter: 'blur(10px)' });
+            renderer.setProgress(0);
+            updateChapters(0);
+
+            gsap.timeline({
+                defaults: { ease: 'power2.inOut' },
+                scrollTrigger: {
+                    trigger: sequence,
+                    start: 'top top',
+                    end: 'bottom bottom',
+                    scrub: 0.78,
+                    pin,
+                    anticipatePin: 1,
+                    onUpdate: (self) => {
+                        sequence.style.setProperty('--origin-progress', self.progress.toFixed(3));
+                        renderer.setProgress(self.progress);
+                        updateChapters(self.progress);
+                    },
+                },
+            })
+                .to(skyLines, { x: '-18vw', autoAlpha: 0.36, stagger: 0.04, duration: 0.72 }, 0)
+                .to(atmosphere, { x: '-10vw', y: -8, stagger: 0.04, duration: 0.72 }, 0)
+                .to(label, { autoAlpha: 0, y: 18, duration: 0.18 }, 0.08);
+            return;
+        }
+
+        if (window.Lenis && !window.__coltLenis) {
+            window.__coltLenis = new window.Lenis({ duration: 1.18, smoothWheel: true, wheelMultiplier: 0.82 });
+            window.__coltLenis.on('scroll', ScrollTrigger.update);
+            gsap.ticker.add((time) => window.__coltLenis.raf(time * 1000));
+            gsap.ticker.lagSmoothing(0);
+        }
 
         gsap.set(chapters, { autoAlpha: 0, y: 32, filter: 'blur(10px)' });
         gsap.set(rail, { autoAlpha: 1 });
@@ -288,6 +316,10 @@
         return x * x * (3 - 2 * x);
     }
 
+    function isCompactViewport() {
+        return window.matchMedia('(max-width: 980px)').matches;
+    }
+
     function setupCoreWorld(root, prefersReduced) {
         const gsap = window.gsap;
         const ScrollTrigger = window.ScrollTrigger;
@@ -312,11 +344,12 @@
             scene.style.setProperty('--core-shift-x', `${(-4 * progress).toFixed(2)}vw`);
             scene.style.setProperty('--core-shift-y', `${(2 * progress).toFixed(2)}vh`);
             scene.dataset.coreStage = `${active}`;
+            scene.classList.toggle('is-card-stage', progress > 0.3);
             cards.forEach((card, index) => card.classList.toggle('is-active', index === active));
             dots.forEach((dot, index) => dot.classList.toggle('is-active', index === active));
         };
 
-        if (prefersReduced || !gsap || !ScrollTrigger || window.innerWidth < 981) {
+        if (prefersReduced || !gsap || !ScrollTrigger) {
             updateStage(1);
             if (copy) {
                 copy.style.opacity = '1';
@@ -331,6 +364,36 @@
         }
 
         gsap.registerPlugin(ScrollTrigger);
+
+        if (isCompactViewport()) {
+            root.classList.add('is-mobile-motion');
+            updateStage(0);
+            if (copy) {
+                gsap.set(copy, { autoAlpha: 0, y: 24, filter: 'blur(10px)' });
+            }
+            gsap.set(rings, { autoAlpha: 0.28, scale: 0.92, rotate: -12 });
+            gsap.set(petals, { autoAlpha: 0.42, y: 18, rotate: -8 });
+
+            gsap.timeline({
+                defaults: { ease: 'power2.inOut' },
+                scrollTrigger: {
+                    trigger: scene,
+                    start: 'top top',
+                    end: 'bottom bottom',
+                    scrub: 0.74,
+                    pin,
+                    anticipatePin: 1,
+                    onUpdate: (self) => updateStage(self.progress),
+                },
+            })
+                .to(garden, { scale: 1.09, xPercent: -4, yPercent: -2.4, duration: 0.9 }, 0)
+                .to(rings, { autoAlpha: 0.82, scale: 1.1, rotate: 22, stagger: 0.03, duration: 0.55 }, 0.06)
+                .to(petals, { autoAlpha: 0.82, y: 0, rotate: 0, stagger: 0.01, duration: 0.42 }, 0.1)
+                .to(copy, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.18 }, 0.04)
+                .to(copy, { autoAlpha: 0, y: -24, filter: 'blur(8px)', duration: 0.18 }, 0.25)
+                .to(rings, { scale: 1.34, rotate: 42, stagger: 0.025, duration: 0.42 }, 0.62);
+            return;
+        }
 
         gsap.set(copy, { autoAlpha: 0, y: 34, filter: 'blur(12px)' });
         gsap.set(cards, { autoAlpha: 0, y: 80, scale: 0.88, rotateX: 8, filter: 'blur(14px)', pointerEvents: 'none' });
@@ -405,11 +468,12 @@
             scene.style.setProperty('--orbit-progress', progress.toFixed(3));
             scene.style.setProperty('--orbit-focus', focus.toFixed(3));
             scene.dataset.orbitStage = `${active}`;
+            scene.classList.toggle('is-planet-stage', progress > 0.28);
             planets.forEach((planet, index) => planet.classList.toggle('is-active', index === active));
             dockItems.forEach((item, index) => item.classList.toggle('is-active', index === active || (index === dockItems.length - 1 && active >= dockItems.length)));
         };
 
-        if (prefersReduced || !gsap || !ScrollTrigger || window.innerWidth < 981) {
+        if (prefersReduced || !gsap || !ScrollTrigger) {
             updateStage(0.72);
             if (copy) {
                 copy.style.opacity = '1';
@@ -430,6 +494,37 @@
         }
 
         gsap.registerPlugin(ScrollTrigger);
+
+        if (isCompactViewport()) {
+            root.classList.add('is-mobile-motion');
+            updateStage(0);
+            if (copy) {
+                gsap.set(copy, { autoAlpha: 0, y: 24, filter: 'blur(10px)' });
+            }
+            gsap.set(guardianWrap, { autoAlpha: 0, y: 62, scale: 0.9, filter: 'blur(10px)' });
+            gsap.set(rings, { autoAlpha: 0.22, scale: 0.86, rotate: -12 });
+
+            gsap.timeline({
+                defaults: { ease: 'power2.inOut' },
+                scrollTrigger: {
+                    trigger: scene,
+                    start: 'top top',
+                    end: 'bottom bottom',
+                    scrub: 0.74,
+                    pin,
+                    anticipatePin: 1,
+                    onUpdate: (self) => updateStage(self.progress),
+                },
+            })
+                .to(space, { scale: 1.15, xPercent: -5, yPercent: -3, stagger: 0.035, duration: 0.92 }, 0)
+                .to(copy, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.2 }, 0.03)
+                .to(copy, { autoAlpha: 0, y: -24, filter: 'blur(8px)', duration: 0.18 }, 0.24)
+                .to(guardianWrap, { autoAlpha: 1, y: 0, scale: 1, filter: 'blur(0px)', duration: 0.32 }, 0.12)
+                .to(rings, { autoAlpha: 0.9, scale: 1.08, rotate: 22, stagger: 0.035, duration: 0.48 }, 0.18)
+                .to(guardianWrap, { y: -14, scale: 1.04, duration: 0.38 }, 0.64)
+                .to(rings, { scale: 1.22, rotate: 40, stagger: 0.025, duration: 0.38 }, 0.68);
+            return;
+        }
 
         gsap.set(copy, { autoAlpha: 0, y: 34, filter: 'blur(12px)' });
         gsap.set(guardianWrap, { autoAlpha: 0, y: 90, scale: 0.86, filter: 'blur(12px)' });
