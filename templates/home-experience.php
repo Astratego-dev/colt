@@ -17,9 +17,10 @@ $mark_url = Colt_Experience::asset_url('assets/img/colt-character.png');
 $origin_world_url = Colt_Experience::asset_url('assets/scene-01-origin/colt-origin-world-clean.png');
 $origin_frame_base_url = Colt_Experience::asset_url('assets/scene-01-origin/sequence/frame_');
 $origin_frame_poster_url = Colt_Experience::asset_url('assets/scene-01-origin/sequence/frame_0000.webp');
+$orbit_guardian_url = Colt_Experience::asset_url('assets/scene-01-origin/guardian-frame-01.png');
 ?>
 
-<section class="colt-xp" dir="rtl" data-colt-xp data-version="1.1.0">
+<section class="colt-xp" dir="rtl" data-colt-xp data-version="1.2.0">
     <canvas class="colt-xp__canvas" data-colt-canvas aria-hidden="true"></canvas>
     <div class="colt-xp__noise" aria-hidden="true"></div>
 
@@ -165,34 +166,52 @@ $origin_frame_poster_url = Colt_Experience::asset_url('assets/scene-01-origin/se
         </div>
     </section>
 
-    <section class="colt-deep" data-colt-scene="vault">
-        <div class="colt-deep__visual colt-reveal" aria-hidden="true">
-            <span></span><span></span><span></span>
-            <b>VAULT</b>
-        </div>
-        <div class="colt-deep__copy colt-reveal">
-            <p class="colt-kicker">SECURE VALUE</p>
-            <h2>פריטים יקרים צריכים תנאים שמתאימים לערך שלהם.</h2>
-            <p>THE VAULT מיועד לאחסון מבוטח והרמטי, עם חשיבה על שמירת ערך לאורך זמן וגישה מסודרת לפריטים החשובים שלך.</p>
-            <a href="<?php echo esc_url(home_url('/services/the-vault/')); ?>">לעמוד הכספת</a>
-        </div>
-    </section>
+    <section class="colt-orbit" id="colt-services" data-orbit-world data-colt-scene="orbit">
+        <div class="colt-orbit__pin">
+            <div class="colt-orbit__space" aria-hidden="true">
+                <span></span><span></span><span></span><span></span>
+            </div>
 
-    <section class="colt-services" id="colt-services" data-colt-scene="services">
-        <div class="colt-section-head colt-reveal">
-            <p class="colt-kicker">COLLECTOR SERVICES</p>
-            <h2>שירותים לאספנים שרוצים יותר מעוד רכישה.</h2>
-            <p>איתור, דירוג, מכירה, תיק השקעות ופריטים מבוקשים, כולם מחוברים למסע אספנות אחד.</p>
-        </div>
-        <div class="colt-services__list">
-            <?php foreach ($support_services as $index => $service) : ?>
-                <a class="colt-service-row colt-reveal" href="<?php echo esc_url($service['url']); ?>" style="--i: <?php echo esc_attr((string) $index); ?>">
-                    <span>0<?php echo esc_html((string) ($index + 1)); ?></span>
-                    <strong><?php echo esc_html($service['title']); ?></strong>
-                    <em><?php echo esc_html($service['text']); ?></em>
-                    <b>↗</b>
-                </a>
-            <?php endforeach; ?>
+            <div class="colt-orbit__copy" data-orbit-copy>
+                <p class="colt-kicker">COLLECTOR UNIVERSE</p>
+                <h2>שירותים שמקיפים את האוסף שלך מכל כיוון.</h2>
+                <p>איתור, דירוג, מכירה חיה, פריטים מבוקשים ותיק אספנות פיננסי, כולם נפתחים מתוך מערכת אחת.</p>
+            </div>
+
+            <div class="colt-orbit__system" aria-label="שירותי אספנים נוספים">
+                <div class="colt-orbit__rings" aria-hidden="true">
+                    <span></span><span></span><span></span><span></span>
+                </div>
+
+                <div class="colt-orbit__guardian-wrap" aria-hidden="true">
+                    <img class="colt-orbit__guardian" src="<?php echo esc_url($orbit_guardian_url); ?>" alt="" loading="lazy">
+                    <span></span>
+                </div>
+
+                <?php foreach ($support_services as $index => $service) : ?>
+                    <a
+                        class="colt-orbit__planet colt-orbit__planet--<?php echo esc_attr($service['tone']); ?>"
+                        data-orbit-planet
+                        data-hyperspace-link
+                        href="<?php echo esc_url($service['url']); ?>"
+                        style="--i: <?php echo esc_attr((string) $index); ?>"
+                    >
+                        <span class="colt-orbit__planet-body" aria-hidden="true"><i></i><b></b></span>
+                        <span class="colt-orbit__planet-copy">
+                            <small>0<?php echo esc_html((string) ($index + 1)); ?> / <?php echo esc_html($service['eyebrow']); ?></small>
+                            <strong><?php echo esc_html($service['title']); ?></strong>
+                            <em><?php echo esc_html($service['text']); ?></em>
+                        </span>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+
+            <div class="colt-orbit__dock" aria-hidden="true">
+                <span>SEARCH</span>
+                <span>GRADE</span>
+                <span>SELL</span>
+                <span>BUILD</span>
+            </div>
         </div>
     </section>
 
@@ -226,4 +245,10 @@ $origin_frame_poster_url = Colt_Experience::asset_url('assets/scene-01-origin/se
             <a href="<?php echo esc_url(home_url('/services/the-vault/')); ?>">לשירותי COLT</a>
         </div>
     </section>
+
+    <div class="colt-hyperspace" data-hyperspace aria-hidden="true">
+        <?php for ($ray = 0; $ray < 32; $ray++) : ?>
+            <span style="--angle: <?php echo esc_attr((string) ($ray * 11.25)); ?>deg; --delay: -<?php echo esc_attr((string) ($ray * 8)); ?>ms;"></span>
+        <?php endfor; ?>
+    </div>
 </section>

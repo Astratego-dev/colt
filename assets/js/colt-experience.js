@@ -9,6 +9,8 @@
         setupCanvas(root, prefersReduced);
         setupOrigin(root, prefersReduced);
         setupCoreWorld(root, prefersReduced);
+        setupOrbitWorld(root, prefersReduced);
+        setupHyperspace(root, prefersReduced);
     });
 
     function setupReveal(root, prefersReduced) {
@@ -378,6 +380,135 @@
         tl
             .to(cards.slice(0, -1), { y: -24, scale: 0.96, autoAlpha: 0.9, stagger: 0.03, duration: 0.22 }, 0.9)
             .to(rings, { scale: 2.24, autoAlpha: 0.38, stagger: 0.02, duration: 0.28 }, 0.86);
+    }
+
+    function setupOrbitWorld(root, prefersReduced) {
+        const gsap = window.gsap;
+        const ScrollTrigger = window.ScrollTrigger;
+        const scene = root.querySelector('[data-orbit-world]');
+        if (!scene) return;
+
+        const pin = scene.querySelector('.colt-orbit__pin');
+        const copy = scene.querySelector('[data-orbit-copy]');
+        const planets = Array.from(scene.querySelectorAll('[data-orbit-planet]'));
+        const rings = scene.querySelectorAll('.colt-orbit__rings span');
+        const space = scene.querySelectorAll('.colt-orbit__space span');
+        const guardianWrap = scene.querySelector('.colt-orbit__guardian-wrap');
+        const dockItems = scene.querySelectorAll('.colt-orbit__dock span');
+
+        const updateStage = (progress) => {
+            const focus = smoothstep(0.2, 0.96, progress);
+            const active = planets.length
+                ? Math.max(0, Math.min(planets.length - 1, Math.floor(focus * planets.length)))
+                : 0;
+
+            scene.style.setProperty('--orbit-progress', progress.toFixed(3));
+            scene.style.setProperty('--orbit-focus', focus.toFixed(3));
+            scene.dataset.orbitStage = `${active}`;
+            planets.forEach((planet, index) => planet.classList.toggle('is-active', index === active));
+            dockItems.forEach((item, index) => item.classList.toggle('is-active', index === active || (index === dockItems.length - 1 && active >= dockItems.length)));
+        };
+
+        if (prefersReduced || !gsap || !ScrollTrigger || window.innerWidth < 981) {
+            updateStage(0.72);
+            if (copy) {
+                copy.style.opacity = '1';
+                copy.style.transform = 'none';
+            }
+            planets.forEach((planet) => {
+                planet.style.opacity = '1';
+                planet.style.transform = 'none';
+                planet.style.filter = 'none';
+                planet.style.pointerEvents = 'auto';
+            });
+            if (guardianWrap) {
+                guardianWrap.style.opacity = '1';
+                guardianWrap.style.transform = 'none';
+                guardianWrap.style.filter = 'none';
+            }
+            return;
+        }
+
+        gsap.registerPlugin(ScrollTrigger);
+
+        gsap.set(copy, { autoAlpha: 0, y: 34, filter: 'blur(12px)' });
+        gsap.set(guardianWrap, { autoAlpha: 0, y: 90, scale: 0.86, filter: 'blur(12px)' });
+        gsap.set(rings, { autoAlpha: 0, scale: 0.42, rotate: -18 });
+        gsap.set(planets, { autoAlpha: 0, y: 82, scale: 0.72, filter: 'blur(18px)', pointerEvents: 'none' });
+        gsap.set(dockItems, { autoAlpha: 0, y: 20 });
+        updateStage(0);
+
+        const tl = gsap.timeline({
+            defaults: { ease: 'power2.inOut' },
+            scrollTrigger: {
+                trigger: scene,
+                start: 'top top',
+                end: 'bottom bottom',
+                scrub: 0.92,
+                pin,
+                anticipatePin: 1,
+                onUpdate: (self) => updateStage(self.progress),
+            },
+        });
+
+        tl
+            .to(space, { scale: 1.12, xPercent: -3.4, yPercent: -2.2, stagger: 0.035, duration: 0.94 }, 0)
+            .to(copy, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.22 }, 0.04)
+            .to(copy, { autoAlpha: 0, y: -36, filter: 'blur(10px)', duration: 0.18 }, 0.36)
+            .to(guardianWrap, { autoAlpha: 1, y: 0, scale: 1, filter: 'blur(0px)', duration: 0.32 }, 0.1)
+            .to(rings, { autoAlpha: 1, scale: 1, rotate: 0, stagger: 0.04, duration: 0.34 }, 0.2)
+            .to(planets, {
+                autoAlpha: 1,
+                y: 0,
+                scale: 1,
+                filter: 'blur(0px)',
+                pointerEvents: 'auto',
+                stagger: 0.055,
+                duration: 0.34,
+            }, 0.31)
+            .to(dockItems, { autoAlpha: 1, y: 0, stagger: 0.035, duration: 0.24 }, 0.45)
+            .to(rings, { scale: 1.16, rotate: 30, stagger: 0.025, duration: 0.56 }, 0.54)
+            .to(planets, { y: -22, stagger: 0.035, duration: 0.28 }, 0.66)
+            .to(guardianWrap, { y: -18, scale: 1.07, duration: 0.34 }, 0.7)
+            .to(space, { scale: 1.2, xPercent: -7, yPercent: -4, duration: 0.36 }, 0.82);
+    }
+
+    function setupHyperspace(root, prefersReduced) {
+        const overlay = root.querySelector('[data-hyperspace]');
+        if (!overlay) return;
+
+        root.querySelectorAll('[data-hyperspace-link]').forEach((link) => {
+            link.addEventListener('click', (event) => {
+                if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+                    return;
+                }
+                if (link.target && link.target !== '_self') {
+                    return;
+                }
+
+                let href = link.href;
+                if (!href) return;
+
+                try {
+                    const target = new URL(href, window.location.href);
+                    const current = new URL(window.location.href);
+                    if (target.origin === current.origin && target.pathname === current.pathname && target.hash) {
+                        return;
+                    }
+                    href = target.href;
+                } catch (error) {
+                    return;
+                }
+
+                event.preventDefault();
+                overlay.classList.add('is-active');
+                root.classList.add('is-traveling');
+                document.documentElement.classList.add('colt-is-traveling');
+                window.setTimeout(() => {
+                    window.location.href = href;
+                }, prefersReduced ? 100 : 760);
+            });
+        });
     }
 
     function setupCanvas(root, prefersReduced) {

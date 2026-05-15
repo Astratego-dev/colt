@@ -833,6 +833,530 @@
     background: radial-gradient(circle at 50% 50%, transparent 0 var(--core-portal), #050409 calc(var(--core-portal) + 1px) 100%);
 }
 
+.colt-orbit {
+    --orbit-progress: 0;
+    --orbit-focus: 0;
+    position: relative;
+    height: 560vh;
+    min-height: 100vh;
+    margin-top: -1px;
+    color: #fff8df;
+    background: #060817;
+    direction: rtl;
+}
+
+.colt-orbit__pin {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    min-height: 680px;
+    overflow: hidden;
+    isolation: isolate;
+    background:
+        radial-gradient(circle at 52% 42%, rgba(255, 244, 190, .16), transparent 18rem),
+        radial-gradient(circle at 18% 18%, rgba(255, 139, 197, .28), transparent 25rem),
+        radial-gradient(circle at 82% 24%, rgba(115, 232, 218, .22), transparent 28rem),
+        linear-gradient(180deg, #09102d 0%, #15123b 36%, #32184a 66%, #0b1025 100%);
+}
+
+.colt-orbit__pin::before,
+.colt-orbit__pin::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.colt-orbit__pin::before {
+    opacity: .62;
+    background:
+        radial-gradient(circle at 50% 52%, transparent 0 16rem, rgba(255,255,255,.08) 16.2rem 16.5rem, transparent 16.8rem),
+        linear-gradient(90deg, rgba(6,8,23,.68), transparent 28%, transparent 68%, rgba(6,8,23,.72)),
+        linear-gradient(0deg, rgba(6,8,23,.88), transparent 28%, transparent 70%, rgba(6,8,23,.2));
+}
+
+.colt-orbit__pin::after {
+    opacity: .42;
+    background:
+        linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.028) 1px, transparent 1px);
+    background-size: 78px 78px;
+    mask-image: radial-gradient(circle at 50% 52%, #000, transparent 74%);
+}
+
+.colt-orbit__space,
+.colt-orbit__copy,
+.colt-orbit__system,
+.colt-orbit__dock {
+    position: absolute;
+}
+
+.colt-orbit__space {
+    z-index: 1;
+    inset: -8vh -8vw;
+    overflow: hidden;
+}
+
+.colt-orbit__space span {
+    position: absolute;
+    display: block;
+    border-radius: 999px;
+    opacity: .8;
+    filter: blur(24px);
+    animation: coltNebulaFlow 14s ease-in-out infinite;
+}
+
+.colt-orbit__space span:nth-child(1) {
+    right: 5%;
+    top: 10%;
+    width: 42vw;
+    height: 20vh;
+    background: rgba(255, 154, 205, .46);
+}
+
+.colt-orbit__space span:nth-child(2) {
+    left: 1%;
+    top: 28%;
+    width: 36vw;
+    height: 18vh;
+    background: rgba(112, 228, 220, .44);
+    animation-delay: -4s;
+}
+
+.colt-orbit__space span:nth-child(3) {
+    right: 24%;
+    bottom: 6%;
+    width: 52vw;
+    height: 22vh;
+    background: rgba(255, 215, 134, .32);
+    animation-delay: -7s;
+}
+
+.colt-orbit__space span:nth-child(4) {
+    left: 18%;
+    bottom: 22%;
+    width: 28vw;
+    height: 18vh;
+    background: rgba(179, 152, 255, .34);
+    animation-delay: -10s;
+}
+
+.colt-orbit__copy {
+    z-index: 8;
+    right: 50%;
+    top: 44%;
+    display: grid;
+    justify-items: center;
+    width: min(830px, calc(100% - 90px));
+    text-align: center;
+    translate: 50% -50%;
+    text-shadow: 0 24px 70px rgba(0,0,0,.62);
+}
+
+.colt-orbit__copy .colt-kicker {
+    color: #9df1dc;
+}
+
+.colt-orbit__copy h2 {
+    max-width: 900px;
+    color: #fff8df;
+    font-size: clamp(44px, 6.8vw, 96px);
+}
+
+.colt-orbit__copy p:not(.colt-kicker) {
+    max-width: 680px;
+    color: rgba(255,248,223,.74);
+    font-size: clamp(17px, 1.55vw, 22px);
+    line-height: 1.72;
+}
+
+.colt-orbit__system {
+    z-index: 6;
+    inset: 0;
+    width: min(1380px, calc(100% - 52px));
+    margin: 0 auto;
+}
+
+.colt-orbit__system::before,
+.colt-orbit__system::after {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+}
+
+.colt-orbit__system::before {
+    z-index: 0;
+    inset: 0;
+    opacity: .48;
+    background:
+        radial-gradient(circle, rgba(255,255,255,.86) 0 1px, transparent 1.5px),
+        radial-gradient(circle, rgba(157,241,220,.72) 0 1px, transparent 1.4px),
+        radial-gradient(circle, rgba(255,151,205,.68) 0 1px, transparent 1.5px);
+    background-position: 0 0, 70px 40px, 130px 90px;
+    background-size: 220px 220px, 180px 180px, 260px 260px;
+    mask-image: radial-gradient(circle at 50% 44%, #000 0 52%, transparent 78%);
+    animation: coltStarDrift 28s linear infinite;
+}
+
+.colt-orbit__system::after {
+    z-index: 2;
+    right: -12%;
+    left: -12%;
+    bottom: -20%;
+    height: 42%;
+    border-radius: 50% 50% 0 0;
+    opacity: .72;
+    background:
+        radial-gradient(circle at 56% 8%, rgba(255,255,255,.34), transparent 9rem),
+        linear-gradient(135deg, rgba(120,230,217,.84), rgba(255,188,133,.56) 48%, rgba(255,148,204,.64));
+    box-shadow: 0 -36px 120px rgba(157,241,220,.18);
+    filter: blur(.4px);
+}
+
+.colt-orbit__rings {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.colt-orbit__rings span {
+    position: absolute;
+    right: 50%;
+    top: 52%;
+    width: min(970px, 70vw);
+    height: min(450px, 42vh);
+    border: 1px solid rgba(255,248,223,.22);
+    border-radius: 50%;
+    translate: 50% -50%;
+    transform: rotateX(64deg) rotateZ(-7deg);
+    box-shadow: 0 0 62px rgba(112,228,220,.14), inset 0 0 42px rgba(255,143,198,.09);
+}
+
+.colt-orbit__rings span:nth-child(2) {
+    width: min(760px, 57vw);
+    height: min(340px, 34vh);
+    border-color: rgba(255,190,124,.28);
+}
+
+.colt-orbit__rings span:nth-child(3) {
+    width: min(540px, 43vw);
+    height: min(250px, 27vh);
+    border-color: rgba(157,241,220,.32);
+}
+
+.colt-orbit__rings span:nth-child(4) {
+    width: min(340px, 30vw);
+    height: min(160px, 19vh);
+    border-color: rgba(255,150,204,.35);
+}
+
+.colt-orbit__guardian-wrap {
+    position: absolute;
+    z-index: 4;
+    right: 50%;
+    bottom: 0;
+    display: grid;
+    place-items: end center;
+    width: min(390px, 29vw);
+    height: min(620px, 70vh);
+    translate: 50% 0;
+    pointer-events: none;
+}
+
+.colt-orbit__guardian {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center bottom;
+    opacity: .94;
+    filter:
+        drop-shadow(0 0 30px rgba(157,241,220,.28))
+        drop-shadow(0 42px 62px rgba(0,0,0,.54))
+        saturate(1.08);
+    animation: coltGuardianBreathe 5.6s ease-in-out infinite;
+}
+
+.colt-orbit__guardian-wrap span {
+    position: absolute;
+    right: 50%;
+    bottom: 4%;
+    z-index: 1;
+    width: 58%;
+    height: 13%;
+    border-radius: 50%;
+    background: radial-gradient(ellipse, rgba(255,248,223,.28), rgba(112,228,220,.12) 48%, transparent 70%);
+    filter: blur(12px);
+    translate: 50% 0;
+}
+
+.colt-orbit__planet {
+    --planet-size: 112px;
+    --orbit-delay: 0s;
+    position: absolute;
+    z-index: 5;
+    display: grid;
+    gap: 12px;
+    width: min(300px, 24vw);
+    min-height: 170px;
+    color: #fff8df;
+    opacity: 0;
+    pointer-events: none;
+    outline: none;
+}
+
+.colt-orbit__planet:nth-of-type(1) {
+    right: 6%;
+    top: 23%;
+    --planet-size: 126px;
+    --orbit-delay: -1.2s;
+}
+
+.colt-orbit__planet:nth-of-type(2) {
+    left: 7%;
+    top: 18%;
+    --planet-size: 106px;
+    --orbit-delay: -3.7s;
+}
+
+.colt-orbit__planet:nth-of-type(3) {
+    right: 12%;
+    bottom: 18%;
+    --planet-size: 118px;
+    --orbit-delay: -5.1s;
+}
+
+.colt-orbit__planet:nth-of-type(4) {
+    left: 11%;
+    bottom: 16%;
+    --planet-size: 112px;
+    --orbit-delay: -7.3s;
+}
+
+.colt-orbit__planet:nth-of-type(5) {
+    right: calc(50% - 55px);
+    top: 8%;
+    --planet-size: 104px;
+    --orbit-delay: -9.1s;
+}
+
+.colt-orbit__planet-body {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: var(--planet-size);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background:
+        radial-gradient(circle at 30% 24%, rgba(255,255,255,.92), transparent 18%),
+        radial-gradient(circle at 68% 72%, rgba(7,9,25,.5), transparent 34%),
+        linear-gradient(135deg, #ff9bc8, #ffd98a 52%, #86e5d6);
+    box-shadow:
+        inset -18px -20px 34px rgba(8,10,30,.28),
+        inset 14px 16px 26px rgba(255,255,255,.18),
+        0 0 32px rgba(157,241,220,.24),
+        0 28px 72px rgba(0,0,0,.34);
+    animation: coltOrbitFloat 7.5s ease-in-out infinite;
+    animation-delay: var(--orbit-delay);
+}
+
+.colt-orbit__planet-body::before,
+.colt-orbit__planet-body::after {
+    content: "";
+    position: absolute;
+    inset: 15%;
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.colt-orbit__planet-body::before {
+    border: 1px solid rgba(255,255,255,.34);
+    transform: rotateX(68deg) rotateZ(-14deg) scaleX(1.55);
+}
+
+.colt-orbit__planet-body::after {
+    inset: -12%;
+    border: 1px solid rgba(255,248,223,.16);
+    transform: rotateX(74deg) rotateZ(18deg) scaleX(1.45);
+}
+
+.colt-orbit__planet-body i,
+.colt-orbit__planet-body b {
+    display: block;
+    grid-area: 1 / 1;
+    border-radius: 999px;
+}
+
+.colt-orbit__planet-body i {
+    width: 58%;
+    height: 10px;
+    background: rgba(255,255,255,.42);
+    filter: blur(3px);
+    transform: rotate(-17deg) translateY(-12px);
+}
+
+.colt-orbit__planet-body b {
+    width: 70%;
+    height: 2px;
+    background: rgba(8,10,30,.22);
+    box-shadow: 0 15px 0 rgba(8,10,30,.13), 0 -16px 0 rgba(255,255,255,.16);
+    transform: rotate(-13deg);
+}
+
+.colt-orbit__planet--wanted .colt-orbit__planet-body { background: radial-gradient(circle at 30% 24%, rgba(255,255,255,.9), transparent 18%), linear-gradient(135deg, #ff8ab6, #fff0a5 52%, #8ee6d8); }
+.colt-orbit__planet--search .colt-orbit__planet-body { background: radial-gradient(circle at 30% 24%, rgba(255,255,255,.9), transparent 18%), linear-gradient(135deg, #a8f0df, #f8c2df 50%, #ffc37a); }
+.colt-orbit__planet--grading .colt-orbit__planet-body { background: radial-gradient(circle at 30% 24%, rgba(255,255,255,.9), transparent 18%), linear-gradient(135deg, #ffe08b, #b9ecff 52%, #d2b0ff); }
+.colt-orbit__planet--whatnot .colt-orbit__planet-body { background: radial-gradient(circle at 30% 24%, rgba(255,255,255,.9), transparent 18%), linear-gradient(135deg, #ffad8f, #ff91ce 48%, #96eadf); }
+.colt-orbit__planet--portfolio .colt-orbit__planet-body { background: radial-gradient(circle at 30% 24%, rgba(255,255,255,.9), transparent 18%), linear-gradient(135deg, #d8c1ff, #9cebdc 52%, #ffe59b); }
+
+.colt-orbit__planet-copy {
+    display: grid;
+    gap: 6px;
+    width: min(300px, 100%);
+    padding: 13px 14px;
+    border: 1px solid rgba(255,248,223,.16);
+    border-radius: 8px;
+    background: rgba(9,13,36,.46);
+    box-shadow: 0 24px 70px rgba(0,0,0,.25);
+    backdrop-filter: blur(18px);
+    transform: translateY(8px);
+    transition: border-color .26s ease, background .26s ease, transform .26s ease, box-shadow .26s ease;
+}
+
+.colt-orbit__planet small {
+    color: #9df1dc;
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.colt-orbit__planet strong {
+    color: #fff8df;
+    font-size: clamp(24px, 2vw, 34px);
+    line-height: 1;
+}
+
+.colt-orbit__planet em {
+    color: rgba(255,248,223,.72);
+    font-style: normal;
+    line-height: 1.5;
+}
+
+.colt-orbit__planet:hover,
+.colt-orbit__planet:focus {
+    z-index: 9;
+}
+
+.colt-orbit__planet:hover .colt-orbit__planet-copy,
+.colt-orbit__planet:focus .colt-orbit__planet-copy,
+.colt-orbit__planet.is-active .colt-orbit__planet-copy {
+    border-color: rgba(157,241,220,.48);
+    background: rgba(9,13,36,.64);
+    box-shadow: 0 32px 90px rgba(112,228,220,.15), inset 0 0 0 1px rgba(255,255,255,.12);
+    transform: translateY(0);
+}
+
+.colt-orbit__planet:hover .colt-orbit__planet-body,
+.colt-orbit__planet:focus .colt-orbit__planet-body,
+.colt-orbit__planet.is-active .colt-orbit__planet-body {
+    box-shadow:
+        inset -18px -20px 34px rgba(8,10,30,.25),
+        inset 14px 16px 26px rgba(255,255,255,.22),
+        0 0 42px rgba(255,248,223,.34),
+        0 0 72px rgba(157,241,220,.28),
+        0 30px 80px rgba(0,0,0,.34);
+}
+
+.colt-orbit__dock {
+    z-index: 9;
+    right: max(20px, calc((100vw - 1380px) / 2));
+    bottom: 32px;
+    display: flex;
+    gap: 8px;
+    pointer-events: none;
+}
+
+.colt-orbit__dock span {
+    display: block;
+    padding: 8px 10px;
+    border: 1px solid rgba(255,248,223,.15);
+    color: rgba(255,248,223,.58);
+    background: rgba(6,8,23,.34);
+    font-size: 11px;
+    font-weight: 900;
+    backdrop-filter: blur(14px);
+}
+
+.colt-orbit__dock span.is-active {
+    color: #06111a;
+    border-color: rgba(157,241,220,.7);
+    background: #9df1dc;
+}
+
+.colt-hyperspace {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    overflow: hidden;
+    pointer-events: none;
+    opacity: 0;
+    background:
+        radial-gradient(circle at 50% 50%, rgba(255,255,255,.94) 0 7%, rgba(157,241,220,.72) 8% 13%, rgba(255,144,203,.46) 14% 24%, rgba(7,8,26,.96) 56%),
+        #07081a;
+    filter: saturate(1.18);
+    transition: opacity .16s ease;
+}
+
+.colt-hyperspace::before,
+.colt-hyperspace::after {
+    content: "";
+    position: absolute;
+    inset: -18%;
+    opacity: .72;
+    background:
+        linear-gradient(90deg, transparent, rgba(255,255,255,.24), transparent),
+        radial-gradient(circle, transparent 0 19%, rgba(255,255,255,.2) 20%, transparent 21%);
+    background-size: 16vw 100%, 24vw 24vw;
+    filter: blur(10px);
+    transform: scaleX(.32);
+}
+
+.colt-hyperspace::after {
+    opacity: .42;
+    transform: scaleY(.32) rotate(90deg);
+}
+
+.colt-hyperspace span {
+    position: absolute;
+    right: 50%;
+    top: 50%;
+    width: 2px;
+    height: 64vmax;
+    border-radius: 999px;
+    opacity: 0;
+    background: linear-gradient(180deg, transparent, rgba(255,255,255,.96), rgba(157,241,220,.74), transparent);
+    box-shadow: 0 0 18px rgba(255,255,255,.52);
+    transform-origin: 50% 100%;
+    translate: 50% -100%;
+    rotate: var(--angle);
+    scale: 1 .08;
+}
+
+.colt-hyperspace.is-active {
+    opacity: 1;
+}
+
+.colt-hyperspace.is-active span {
+    animation: coltHyperspaceRay .76s cubic-bezier(.15,.78,.12,1) forwards;
+    animation-delay: var(--delay);
+}
+
+html.colt-is-traveling body {
+    cursor: wait;
+}
+
 .colt-core,
 .colt-deep,
 .colt-services,
@@ -1032,6 +1556,33 @@
     72% { translate: 14px -18px; rotate: -18deg; }
 }
 
+@keyframes coltNebulaFlow {
+    0%, 100% { translate: 0 0; scale: 1; opacity: .72; }
+    42% { translate: -34px 18px; scale: 1.08; opacity: .88; }
+    74% { translate: 22px -26px; scale: .96; opacity: .62; }
+}
+
+@keyframes coltStarDrift {
+    to { background-position: -220px 120px, -110px 180px, -260px 90px; }
+}
+
+@keyframes coltGuardianBreathe {
+    0%, 100% { translate: 0 0; filter: drop-shadow(0 0 30px rgba(157,241,220,.28)) drop-shadow(0 42px 62px rgba(0,0,0,.54)) saturate(1.08); }
+    50% { translate: 0 -10px; filter: drop-shadow(0 0 42px rgba(255,151,205,.3)) drop-shadow(0 46px 70px rgba(0,0,0,.58)) saturate(1.14); }
+}
+
+@keyframes coltOrbitFloat {
+    0%, 100% { translate: 0 0; rotate: -2deg; }
+    35% { translate: -16px 12px; rotate: 5deg; }
+    68% { translate: 12px -18px; rotate: -6deg; }
+}
+
+@keyframes coltHyperspaceRay {
+    0% { opacity: 0; scale: 1 .08; filter: blur(6px); }
+    22% { opacity: .95; scale: 1 .74; filter: blur(2px); }
+    100% { opacity: .15; scale: 1 1.75; filter: blur(10px); }
+}
+
 @media (max-width: 980px) {
     .colt-origin { height: auto; }
     .colt-origin__pin { position: relative; min-height: 100vh; height: auto; padding: 132px 20px 80px; }
@@ -1093,6 +1644,71 @@
         filter: none !important;
         pointer-events: auto;
     }
+    .colt-orbit { height: auto; }
+    .colt-orbit__pin {
+        position: relative;
+        height: auto;
+        min-height: 100vh;
+        padding: 122px 20px 78px;
+    }
+    .colt-orbit__space { inset: 0; }
+    .colt-orbit__copy {
+        position: relative;
+        inset: auto;
+        width: 100%;
+        margin: 0 auto 26px;
+        opacity: 1;
+        translate: 0 0;
+        transform: none;
+    }
+    .colt-orbit__copy h2 { font-size: clamp(40px, 10vw, 72px); }
+    .colt-orbit__system {
+        position: relative;
+        inset: auto;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        width: 100%;
+    }
+    .colt-orbit__rings {
+        inset: -30px 0 auto;
+        height: 420px;
+        opacity: .5;
+    }
+    .colt-orbit__rings span {
+        width: min(720px, 102vw);
+        height: min(330px, 46vh);
+        top: 50%;
+    }
+    .colt-orbit__guardian-wrap {
+        position: relative;
+        right: auto;
+        bottom: auto;
+        grid-column: 1 / -1;
+        width: min(330px, 72vw);
+        height: 380px;
+        margin: 0 auto -34px;
+        opacity: 1;
+        translate: 0 0;
+    }
+    .colt-orbit__planet {
+        position: relative;
+        inset: auto !important;
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        align-items: center;
+        width: 100%;
+        min-height: 0;
+        opacity: 1;
+        pointer-events: auto;
+        --planet-size: 82px;
+    }
+    .colt-orbit__planet-body { width: var(--planet-size); }
+    .colt-orbit__planet-copy {
+        width: 100%;
+        transform: none;
+    }
+    .colt-orbit__dock { display: none; }
     .colt-section-head, .colt-deep { grid-template-columns: 1fr; }
     .colt-core__grid, .colt-products__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .colt-service-row { grid-template-columns: 52px 1fr 42px; }
@@ -1106,6 +1722,9 @@
     .colt-nav__links a { padding: 8px 9px; font-size: 12px; }
     .colt-core-world__services { grid-template-columns: 1fr; }
     .colt-core-world__card { min-height: 230px; }
+    .colt-orbit__system { grid-template-columns: 1fr; }
+    .colt-orbit__planet { --planet-size: 74px; }
+    .colt-orbit__planet-copy { padding: 12px; }
     .colt-core__grid, .colt-products__grid { grid-template-columns: 1fr; }
     .colt-core, .colt-deep, .colt-services, .colt-products, .colt-end { padding: 76px 0; }
 }
