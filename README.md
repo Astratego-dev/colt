@@ -13,7 +13,7 @@ Place this shortcode on the WordPress home page:
 Optional product count:
 
 ```text
-[colt_home_experience products="8"]
+[colt_home_experience products="12"]
 ```
 
 ## What It Does

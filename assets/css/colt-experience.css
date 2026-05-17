@@ -1293,6 +1293,90 @@
         0 30px 80px rgba(0,0,0,.34);
 }
 
+.colt-orbit.has-3d-planets .colt-orbit__three.is-loaded {
+    opacity: 1;
+    filter: drop-shadow(0 0 42px rgba(157,241,220,.22));
+}
+
+.colt-orbit.has-3d-planets .colt-orbit__planet {
+    display: block;
+    width: min(318px, 24vw);
+    min-height: 0;
+    overflow: visible;
+}
+
+.colt-orbit.has-3d-planets .colt-orbit__planet:nth-of-type(1) {
+    right: 7.5%;
+    top: 20%;
+    --planet-hit-size: clamp(150px, 13vw, 220px);
+    --hit-right: 54%;
+    --hit-top: -3%;
+}
+
+.colt-orbit.has-3d-planets .colt-orbit__planet:nth-of-type(2) {
+    left: 6%;
+    top: 22%;
+    --planet-hit-size: clamp(160px, 14vw, 230px);
+    --hit-right: 46%;
+    --hit-top: -1%;
+}
+
+.colt-orbit.has-3d-planets .colt-orbit__planet:nth-of-type(3) {
+    right: 13%;
+    bottom: 17%;
+    --planet-hit-size: clamp(138px, 12vw, 198px);
+    --hit-right: 40%;
+    --hit-top: -12%;
+}
+
+.colt-orbit.has-3d-planets .colt-orbit__planet:nth-of-type(4) {
+    left: 10%;
+    bottom: 18%;
+    --planet-hit-size: clamp(132px, 11vw, 184px);
+    --hit-right: 58%;
+    --hit-top: -14%;
+}
+
+.colt-orbit.has-3d-planets .colt-orbit__planet:nth-of-type(5) {
+    right: 50%;
+    top: 5%;
+    width: min(300px, 26vw);
+    translate: 50% 0;
+    --planet-hit-size: clamp(118px, 10vw, 168px);
+    --hit-right: 50%;
+    --hit-top: -6%;
+}
+
+.colt-orbit.has-3d-planets .colt-orbit__planet-body {
+    position: absolute;
+    right: var(--hit-right, 50%);
+    top: var(--hit-top, 50%);
+    z-index: 1;
+    width: var(--planet-hit-size, clamp(132px, 12vw, 200px));
+    opacity: 0;
+    pointer-events: auto;
+    background: transparent;
+    box-shadow: none;
+    animation: none;
+    translate: 50% -50%;
+}
+
+.colt-orbit.has-3d-planets .colt-orbit__planet-body::before,
+.colt-orbit.has-3d-planets .colt-orbit__planet-body::after,
+.colt-orbit.has-3d-planets .colt-orbit__planet-body i,
+.colt-orbit.has-3d-planets .colt-orbit__planet-body b {
+    display: none;
+}
+
+.colt-orbit.has-3d-planets .colt-orbit__planet-copy {
+    position: relative;
+    z-index: 2;
+    width: min(318px, 100%);
+    border-color: rgba(255,248,223,.24);
+    background: linear-gradient(135deg, rgba(9,13,36,.66), rgba(9,13,36,.42));
+    box-shadow: 0 26px 82px rgba(0,0,0,.3), inset 0 0 0 1px rgba(255,255,255,.08);
+}
+
 .colt-orbit__dock {
     z-index: 9;
     right: max(20px, calc((100vw - 1380px) / 2));
@@ -1585,7 +1669,7 @@ html.colt-is-traveling body {
     display: flex;
     flex-direction: row-reverse;
     align-items: stretch;
-    gap: 18px;
+    gap: 12px;
     width: max-content;
     min-width: 100%;
     will-change: transform;
@@ -1594,9 +1678,9 @@ html.colt-is-traveling body {
 .colt-product-card {
     position: relative;
     display: grid;
-    grid-template-rows: minmax(250px, 1fr) auto;
-    width: clamp(238px, 22vw, 332px);
-    min-height: min(560px, 58vh);
+    grid-template-rows: minmax(220px, 1fr) auto;
+    width: clamp(208px, 18vw, 282px);
+    min-height: min(500px, 54vh);
     overflow: hidden;
     border: 1px solid rgba(20,59,60,.14);
     border-radius: 8px;
@@ -1667,7 +1751,7 @@ html.colt-is-traveling body {
     z-index: 2;
     width: 100%;
     height: 100%;
-    max-height: 330px;
+    max-height: 286px;
     object-fit: contain;
     padding: 10px;
     filter: drop-shadow(0 24px 34px rgba(20,59,60,.18));
@@ -2617,6 +2701,13 @@ html.colt-is-traveling body {
         opacity: 1;
         transform: translateY(0);
     }
+    .colt-xp.is-mobile-motion .colt-orbit.has-3d-planets .colt-orbit__planet {
+        display: block;
+        width: min(300px, calc(100% - 32px));
+    }
+    .colt-xp.is-mobile-motion .colt-orbit.has-3d-planets .colt-orbit__planet-body {
+        display: none;
+    }
     .colt-products {
         height: 430vh;
     }
@@ -2663,12 +2754,12 @@ html.colt-is-traveling body {
         padding: 30px 16px;
     }
     .colt-products__track {
-        gap: 12px;
+        gap: 10px;
     }
     .colt-product-card {
-        width: min(270px, 72vw);
-        min-height: min(430px, 54vh);
-        grid-template-rows: minmax(190px, 1fr) auto;
+        width: min(238px, 64vw);
+        min-height: min(388px, 50vh);
+        grid-template-rows: minmax(172px, 1fr) auto;
     }
     .colt-product-card:nth-child(2n),
     .colt-product-card:nth-child(3n) {
@@ -2678,7 +2769,7 @@ html.colt-is-traveling body {
         padding: 18px;
     }
     .colt-product-card__media img {
-        max-height: 230px;
+        max-height: 202px;
     }
     .colt-product-card__body {
         padding: 14px;

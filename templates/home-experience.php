@@ -3,7 +3,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-$product_limit = isset($atts['products']) ? (int) $atts['products'] : 8;
+$product_limit = isset($atts['products']) ? (int) $atts['products'] : 12;
 $services = Colt_Experience::services();
 $core_services = array_values(array_filter($services, static function ($service) {
     return isset($service['group']) && $service['group'] === 'core';
@@ -35,6 +35,18 @@ $product_showcase = !empty($products) ? $products : [
     ],
     [
         'title' => 'Collector accessories',
+        'url' => home_url('/shop/'),
+        'image' => Colt_Experience::asset_url('assets/img/vault-service.jpg'),
+        'price' => '',
+    ],
+    [
+        'title' => 'Sports cards showcase',
+        'url' => home_url('/shop/'),
+        'image' => Colt_Experience::asset_url('assets/img/hunter-service.jpg'),
+        'price' => '',
+    ],
+    [
+        'title' => 'Marvel / Disney collectibles',
         'url' => home_url('/shop/'),
         'image' => Colt_Experience::asset_url('assets/img/vault-service.jpg'),
         'price' => '',
@@ -86,7 +98,7 @@ $social_links = [
 ];
 ?>
 
-<section class="colt-xp" dir="rtl" data-colt-xp data-version="1.5.0">
+<section class="colt-xp" dir="rtl" data-colt-xp data-version="1.6.0">
     <canvas class="colt-xp__canvas" data-colt-canvas aria-hidden="true"></canvas>
     <div class="colt-xp__noise" aria-hidden="true"></div>
 

@@ -26,7 +26,7 @@ final class Colt_Experience
     public function render_home_experience($atts = [])
     {
         $atts = shortcode_atts([
-            'products' => 8,
+            'products' => 12,
             'contact_url' => home_url('/contact/'),
             'instagram' => '',
             'tiktok' => '',

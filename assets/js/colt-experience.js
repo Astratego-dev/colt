@@ -612,14 +612,19 @@
 
             const loader = new loaderModule.GLTFLoader();
             const specs = [
-                { position: [-2.25, 0.46, -0.3], scale: 1.28, spin: 0.007, drift: 0.9 },
-                { position: [2.1, 0.7, -0.55], scale: 1.02, spin: -0.006, drift: 1.3 },
-                { position: [0.35, -0.72, 0.1], scale: 0.92, spin: 0.008, drift: 1.8 },
+                { position: [2.18, 0.92, -0.52], scale: 1.1, spin: -0.006, drift: 0.9, push: 0.44 },
+                { position: [-2.3, 0.64, -0.34], scale: 1.18, spin: 0.006, drift: 1.45, push: -0.46 },
+                { position: [1.52, -1.04, 0.08], scale: 1.02, spin: 0.008, drift: 2.1, push: 0.28 },
+                { position: [-1.78, -1.02, -0.04], scale: 0.92, spin: -0.007, drift: 2.75, push: -0.3 },
+                { position: [0.0, 1.38, -0.62], scale: 0.82, spin: 0.006, drift: 3.4, push: 0.12 },
             ];
+            const sourceSpec = { position: [0, 0, 0], scale: 1, spin: 0, drift: 0, push: 0 };
 
-            const groups = await Promise.all(modelUrls.map((url, index) => loadOrbitModel(loader, THREE, url, specs[index] || specs[0])));
+            const sources = await Promise.all(modelUrls.map((url) => loadOrbitModel(loader, THREE, url, sourceSpec)));
+            const groups = specs.map((spec, index) => cloneOrbitModel(sources[index % sources.length], spec));
             groups.forEach((group) => world.add(group));
             mount.classList.add('is-loaded');
+            orbitScene.classList.add('has-3d-planets');
 
             const resize = () => {
                 const rect = mount.getBoundingClientRect();
@@ -640,9 +645,9 @@
                     group.rotation.y += spec.spin;
                     group.rotation.x = Math.sin(time * 0.00045 + index) * 0.12;
                     group.rotation.z = Math.cos(time * 0.00035 + index) * 0.08;
-                    group.position.x = spec.position[0] + Math.sin(time * 0.00035 + spec.drift) * 0.11 + (progress - 0.5) * (index - 1) * 0.42;
-                    group.position.y = spec.position[1] + Math.cos(time * 0.00042 + spec.drift) * 0.08 + focus * (index === 2 ? -0.18 : 0.08);
-                    const pulse = 1 + Math.sin(time * 0.001 + index) * 0.035 + focus * 0.08;
+                    group.position.x = spec.position[0] + Math.sin(time * 0.00035 + spec.drift) * 0.1 + (progress - 0.5) * spec.push;
+                    group.position.y = spec.position[1] + Math.cos(time * 0.00042 + spec.drift) * 0.08 + focus * (index === 4 ? -0.06 : 0.08);
+                    const pulse = 1 + Math.sin(time * 0.001 + index) * 0.035 + focus * (index === 4 ? 0.04 : 0.08);
                     group.scale.setScalar(group.userData.baseScale * pulse);
                 });
                 camera.position.z = 6.4 - focus * 0.76;
@@ -673,9 +678,14 @@
                     if (!child.isMesh) return;
                     child.frustumCulled = false;
                     if (child.material) {
-                        child.material = child.material.clone();
-                        child.material.roughness = Math.min(1, (child.material.roughness || 0.55) + 0.12);
-                        child.material.metalness = Math.max(0, (child.material.metalness || 0) * 0.4);
+                        child.material = Array.isArray(child.material)
+                            ? child.material.map((material) => material.clone())
+                            : child.material.clone();
+                        const materials = Array.isArray(child.material) ? child.material : [child.material];
+                        materials.forEach((material) => {
+                            material.roughness = Math.min(1, (material.roughness || 0.55) + 0.12);
+                            material.metalness = Math.max(0, (material.metalness || 0) * 0.4);
+                        });
                     }
                 });
 
@@ -683,11 +693,28 @@
                 group.add(object);
                 group.position.set(spec.position[0], spec.position[1], spec.position[2]);
                 group.userData.spec = spec;
-                group.userData.baseScale = spec.scale / maxSize;
+                group.userData.modelScale = 1 / maxSize;
+                group.userData.baseScale = spec.scale * group.userData.modelScale;
                 group.scale.setScalar(group.userData.baseScale);
                 resolve(group);
             }, undefined, reject);
         });
+    }
+
+    function cloneOrbitModel(source, spec) {
+        const group = source.clone(true);
+        group.traverse((child) => {
+            if (!child.isMesh || !child.material) return;
+            child.material = Array.isArray(child.material)
+                ? child.material.map((material) => material.clone())
+                : child.material.clone();
+        });
+        group.position.set(spec.position[0], spec.position[1], spec.position[2]);
+        group.userData.spec = spec;
+        group.userData.modelScale = source.userData.modelScale || 1;
+        group.userData.baseScale = spec.scale * group.userData.modelScale;
+        group.scale.setScalar(group.userData.baseScale);
+        return group;
     }
 
     function setupFinale(root, prefersReduced) {
