@@ -10,6 +10,7 @@
         setupOrigin(root, prefersReduced);
         setupCoreWorld(root, prefersReduced);
         setupOrbitWorld(root, prefersReduced);
+        setupFinale(root, prefersReduced);
         setupHyperspace(root, prefersReduced);
     });
 
@@ -566,6 +567,66 @@
             .to(planets, { y: -22, stagger: 0.035, duration: 0.28 }, 0.66)
             .to(guardianWrap, { y: -18, scale: 1.07, duration: 0.34 }, 0.7)
             .to(space, { scale: 1.2, xPercent: -7, yPercent: -4, duration: 0.36 }, 0.82);
+    }
+
+    function setupFinale(root, prefersReduced) {
+        const gsap = window.gsap;
+        const ScrollTrigger = window.ScrollTrigger;
+        const scene = root.querySelector('[data-finale]');
+        if (!scene) return;
+
+        const pin = scene.querySelector('.colt-finale__pin');
+        const garden = scene.querySelector('.colt-finale__garden');
+        const brand = scene.querySelector('[data-finale-brand]');
+        const contact = scene.querySelector('[data-finale-contact]');
+        const socials = scene.querySelector('[data-finale-socials]');
+        const socialLinks = scene.querySelectorAll('.colt-finale__social');
+        const petals = scene.querySelectorAll('.colt-finale__petals span');
+        const halos = scene.querySelectorAll('.colt-finale__halo span');
+
+        if (prefersReduced || !gsap || !ScrollTrigger) {
+            [brand, contact, socials].forEach((item) => {
+                if (!item) return;
+                item.style.opacity = '1';
+                item.style.transform = 'none';
+                item.style.filter = 'none';
+            });
+            return;
+        }
+
+        gsap.registerPlugin(ScrollTrigger);
+
+        gsap.set(brand, { autoAlpha: 0, y: 38, scale: 0.96, filter: 'blur(12px)' });
+        gsap.set(contact, { autoAlpha: 0, x: isCompactViewport() ? 0 : 70, y: isCompactViewport() ? 34 : 0, filter: 'blur(12px)' });
+        gsap.set(socials, { autoAlpha: 0, x: isCompactViewport() ? 0 : -70, y: isCompactViewport() ? 34 : 0, filter: 'blur(12px)' });
+        gsap.set(socialLinks, { autoAlpha: 0, y: 22, scale: 0.94 });
+        gsap.set(petals, { autoAlpha: 0, y: 30, rotate: -18 });
+        gsap.set(halos, { autoAlpha: 0, scale: 0.58, rotate: -18 });
+
+        gsap.timeline({
+            defaults: { ease: 'power2.inOut' },
+            scrollTrigger: {
+                trigger: scene,
+                start: 'top top',
+                end: 'bottom bottom',
+                scrub: 0.78,
+                pin,
+                anticipatePin: 1,
+                onUpdate: (self) => {
+                    scene.style.setProperty('--finale-progress', self.progress.toFixed(3));
+                },
+            },
+        })
+            .to(garden, { scale: 1.08, xPercent: -2.5, yPercent: -1.8, duration: 0.95 }, 0)
+            .to(halos, { autoAlpha: 0.74, scale: 1, rotate: 18, stagger: 0.04, duration: 0.34 }, 0.04)
+            .to(petals, { autoAlpha: 0.88, y: 0, rotate: 0, stagger: 0.012, duration: 0.42 }, 0.08)
+            .to(brand, { autoAlpha: 1, y: 0, scale: 1, filter: 'blur(0px)', duration: 0.24 }, 0.08)
+            .to(brand, { autoAlpha: isCompactViewport() ? 0.42 : 0.62, y: isCompactViewport() ? -72 : -26, scale: 0.96, filter: 'blur(6px)', duration: 0.22 }, 0.38)
+            .to(contact, { autoAlpha: 1, x: 0, y: 0, filter: 'blur(0px)', duration: 0.28 }, 0.34)
+            .to(socials, { autoAlpha: 1, x: 0, y: 0, filter: 'blur(0px)', duration: 0.28 }, 0.44)
+            .to(socialLinks, { autoAlpha: 1, y: 0, scale: 1, stagger: 0.04, duration: 0.28 }, 0.5)
+            .to(halos, { scale: 1.24, rotate: 44, stagger: 0.04, duration: 0.38 }, 0.68)
+            .to(petals, { y: -26, x: -18, stagger: 0.008, duration: 0.32 }, 0.74);
     }
 
     function setupHyperspace(root, prefersReduced) {

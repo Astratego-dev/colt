@@ -1357,6 +1357,354 @@ html.colt-is-traveling body {
     cursor: wait;
 }
 
+.colt-finale {
+    --finale-progress: 0;
+    position: relative;
+    height: 460vh;
+    min-height: 100vh;
+    margin-top: -1px;
+    color: #123a3c;
+    background: #aee8db;
+    direction: rtl;
+}
+
+.colt-finale__pin {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    min-height: 680px;
+    overflow: hidden;
+    isolation: isolate;
+    background:
+        radial-gradient(circle at 18% 18%, rgba(255, 145, 196, .54), transparent 26rem),
+        radial-gradient(circle at 82% 18%, rgba(255, 229, 155, .68), transparent 24rem),
+        linear-gradient(180deg, #f8a9d0 0%, #ffd6a6 38%, #aee8db 78%, #6fd4c6 100%);
+}
+
+.colt-finale__pin::before,
+.colt-finale__pin::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.colt-finale__pin::before {
+    background:
+        radial-gradient(circle at 50% 54%, rgba(255,255,255,.46) 0 8rem, transparent 8.4rem),
+        linear-gradient(90deg, rgba(18,58,60,.24), transparent 24%, transparent 74%, rgba(18,58,60,.18)),
+        linear-gradient(0deg, rgba(18,58,60,.16), transparent 30%, transparent 76%, rgba(255,255,255,.2));
+    opacity: .72;
+}
+
+.colt-finale__pin::after {
+    opacity: .24;
+    background:
+        linear-gradient(rgba(18,58,60,.12) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(18,58,60,.1) 1px, transparent 1px);
+    background-size: 86px 86px;
+    mask-image: linear-gradient(to bottom, transparent 0, #000 18%, #000 84%, transparent 100%);
+}
+
+.colt-finale__garden,
+.colt-finale__petals,
+.colt-finale__halo,
+.colt-finale__brand,
+.colt-finale__contact,
+.colt-finale__socials {
+    position: absolute;
+}
+
+.colt-finale__garden {
+    z-index: 1;
+    inset: -5vh -5vw;
+    transform-origin: 50% 58%;
+}
+
+.colt-finale__garden::before,
+.colt-finale__garden::after {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+}
+
+.colt-finale__garden::before {
+    right: -10%;
+    left: -10%;
+    bottom: -16%;
+    height: 42%;
+    border-radius: 50% 50% 0 0;
+    background:
+        radial-gradient(circle at 28% 18%, rgba(255,255,255,.32), transparent 9rem),
+        linear-gradient(135deg, rgba(255, 246, 180, .9), rgba(116, 218, 202, .88) 52%, rgba(255, 154, 204, .58));
+    box-shadow: 0 -34px 100px rgba(255, 145, 196, .24);
+}
+
+.colt-finale__garden::after {
+    right: 50%;
+    bottom: 0;
+    width: min(880px, 86vw);
+    height: 36%;
+    border-radius: 50% 50% 0 0;
+    background: linear-gradient(180deg, rgba(255,255,255,.46), rgba(111, 212, 198, .82) 48%, rgba(55, 161, 156, .52));
+    filter: blur(.4px);
+    opacity: .74;
+    transform: translateX(50%) perspective(760px) rotateX(62deg) scaleX(1.12);
+    animation: coltFinaleRiver 7s ease-in-out infinite;
+}
+
+.colt-finale__sun,
+.colt-finale__moon,
+.colt-finale__river {
+    position: absolute;
+    display: block;
+    pointer-events: none;
+}
+
+.colt-finale__sun {
+    right: 10%;
+    top: 12%;
+    width: min(230px, 17vw);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: radial-gradient(circle, #fffdf1 0 35%, #ffe69a 36% 63%, rgba(255,230,154,0) 67%);
+}
+
+.colt-finale__moon {
+    left: 13%;
+    top: 16%;
+    width: min(120px, 10vw);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: radial-gradient(circle at 36% 32%, #fff, #f8c7df 54%, rgba(248,199,223,0) 68%);
+    filter: blur(.2px);
+}
+
+.colt-finale__river {
+    right: 7%;
+    top: 30%;
+    width: 78vw;
+    height: 2px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.88), rgba(111,212,198,.8), transparent);
+    box-shadow: 0 0 30px rgba(255,255,255,.54);
+    transform: rotate(-6deg);
+}
+
+.colt-finale__petals {
+    z-index: 5;
+    inset: 0;
+    pointer-events: none;
+}
+
+.colt-finale__petals span {
+    position: absolute;
+    width: 15px;
+    height: 22px;
+    border-radius: 62% 38% 66% 34%;
+    background: radial-gradient(circle at 34% 28%, #fff, #ffd4e4 48%, #ff86b9 100%);
+    box-shadow: 0 10px 20px rgba(218,74,135,.14);
+    opacity: .74;
+    animation: coltFinalePetal 10s ease-in-out infinite;
+}
+
+.colt-finale__petals span:nth-child(1) { right: 6%; top: 18%; animation-delay: -1s; }
+.colt-finale__petals span:nth-child(2) { right: 13%; top: 58%; animation-delay: -4s; scale: .78; }
+.colt-finale__petals span:nth-child(3) { right: 22%; top: 31%; animation-delay: -7s; scale: 1.16; }
+.colt-finale__petals span:nth-child(4) { right: 32%; top: 13%; animation-delay: -2s; }
+.colt-finale__petals span:nth-child(5) { right: 41%; top: 72%; animation-delay: -6s; scale: .7; }
+.colt-finale__petals span:nth-child(6) { right: 50%; top: 20%; animation-delay: -8s; }
+.colt-finale__petals span:nth-child(7) { right: 60%; top: 64%; animation-delay: -3s; scale: 1.1; }
+.colt-finale__petals span:nth-child(8) { right: 68%; top: 26%; animation-delay: -5s; }
+.colt-finale__petals span:nth-child(9) { right: 77%; top: 71%; animation-delay: -9s; scale: .82; }
+.colt-finale__petals span:nth-child(10) { right: 88%; top: 18%; animation-delay: -2.6s; }
+.colt-finale__petals span:nth-child(11) { right: 92%; top: 56%; animation-delay: -6.7s; scale: .74; }
+.colt-finale__petals span:nth-child(12) { right: 4%; top: 83%; animation-delay: -8.4s; }
+.colt-finale__petals span:nth-child(13) { right: 17%; top: 8%; animation-delay: -4.7s; scale: .7; }
+.colt-finale__petals span:nth-child(14) { right: 27%; top: 86%; animation-delay: -7.2s; }
+.colt-finale__petals span:nth-child(15) { right: 38%; top: 45%; animation-delay: -3.8s; scale: .9; }
+.colt-finale__petals span:nth-child(16) { right: 48%; top: 7%; animation-delay: -9.1s; scale: 1.14; }
+.colt-finale__petals span:nth-child(17) { right: 57%; top: 82%; animation-delay: -1.4s; }
+.colt-finale__petals span:nth-child(18) { right: 67%; top: 11%; animation-delay: -5.4s; scale: .76; }
+.colt-finale__petals span:nth-child(19) { right: 74%; top: 42%; animation-delay: -8.1s; }
+.colt-finale__petals span:nth-child(20) { right: 85%; top: 84%; animation-delay: -3.3s; scale: .68; }
+.colt-finale__petals span:nth-child(21) { right: 11%; top: 41%; animation-delay: -9.8s; scale: .86; }
+.colt-finale__petals span:nth-child(22) { right: 35%; top: 61%; animation-delay: -6.1s; }
+.colt-finale__petals span:nth-child(23) { right: 63%; top: 36%; animation-delay: -4.2s; scale: 1.08; }
+.colt-finale__petals span:nth-child(24) { right: 81%; top: 6%; animation-delay: -7.8s; scale: .8; }
+
+.colt-finale__halo {
+    z-index: 4;
+    inset: 0;
+    pointer-events: none;
+}
+
+.colt-finale__halo span {
+    position: absolute;
+    right: 50%;
+    top: 44%;
+    width: min(760px, 62vw);
+    aspect-ratio: 1;
+    border: 1px solid rgba(18,58,60,.16);
+    border-radius: 50%;
+    translate: 50% -50%;
+    box-shadow: 0 0 0 18px rgba(255,255,255,.1), 0 0 72px rgba(255,145,196,.18);
+}
+
+.colt-finale__halo span:nth-child(2) {
+    width: min(560px, 50vw);
+    border-color: rgba(255,255,255,.34);
+}
+
+.colt-finale__halo span:nth-child(3) {
+    width: min(350px, 34vw);
+    border-color: rgba(18,58,60,.18);
+}
+
+.colt-finale__brand {
+    z-index: 7;
+    right: 50%;
+    top: 43%;
+    display: grid;
+    justify-items: center;
+    width: min(760px, calc(100% - 96px));
+    text-align: center;
+    translate: 50% -50%;
+}
+
+.colt-finale__brand img {
+    width: min(280px, 22vw);
+    margin-bottom: 12px;
+    filter: drop-shadow(0 26px 52px rgba(18,58,60,.22));
+}
+
+.colt-finale__brand .colt-kicker,
+.colt-finale__contact .colt-kicker,
+.colt-finale__socials .colt-kicker {
+    color: #0f7772;
+}
+
+.colt-finale__brand h2 {
+    color: #143b3c;
+    font-size: clamp(46px, 6.6vw, 104px);
+    text-shadow: 0 18px 54px rgba(255,255,255,.38);
+}
+
+.colt-finale__brand p:not(.colt-kicker) {
+    max-width: 650px;
+    color: rgba(20,59,60,.76);
+    font-size: clamp(17px, 1.45vw, 22px);
+    line-height: 1.72;
+}
+
+.colt-finale__contact {
+    z-index: 8;
+    right: max(26px, calc((100vw - 1240px) / 2));
+    bottom: 9%;
+    display: grid;
+    gap: 22px;
+    width: min(530px, 38vw);
+    padding: 24px;
+    border: 1px solid rgba(20,59,60,.14);
+    border-radius: 8px;
+    background:
+        linear-gradient(135deg, rgba(255,255,255,.72), rgba(255,255,255,.32)),
+        linear-gradient(135deg, rgba(255,145,196,.3), rgba(111,212,198,.28));
+    box-shadow: 0 30px 90px rgba(20,59,60,.18);
+    backdrop-filter: blur(18px);
+}
+
+.colt-finale__contact h3 {
+    margin: 0;
+    color: #143b3c;
+    font-size: clamp(28px, 3.2vw, 48px);
+    line-height: 1.02;
+}
+
+.colt-finale__contact p:not(.colt-kicker) {
+    margin: 0;
+    color: rgba(20,59,60,.74);
+    line-height: 1.65;
+}
+
+.colt-finale__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.colt-finale__actions a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    padding: 0 18px;
+    border: 1px solid rgba(20,59,60,.18);
+    border-radius: 8px;
+    color: #143b3c;
+    background: rgba(255,255,255,.34);
+    font-weight: 900;
+}
+
+.colt-finale__actions a:first-child {
+    color: #0b2526;
+    border-color: rgba(111,212,198,.7);
+    background: linear-gradient(135deg, #9df1dc, #ffe69a);
+}
+
+.colt-finale__socials {
+    z-index: 8;
+    left: max(26px, calc((100vw - 1240px) / 2));
+    bottom: 9%;
+    display: grid;
+    gap: 10px;
+    width: min(430px, 32vw);
+}
+
+.colt-finale__socials .colt-kicker {
+    margin: 0 0 4px;
+}
+
+.colt-finale__social {
+    display: grid;
+    gap: 4px;
+    min-height: 82px;
+    padding: 14px 16px;
+    border: 1px solid rgba(20,59,60,.14);
+    border-radius: 8px;
+    background: rgba(255,255,255,.42);
+    box-shadow: 0 20px 60px rgba(20,59,60,.12);
+    backdrop-filter: blur(16px);
+    transition: transform .26s ease, border-color .26s ease, background .26s ease, box-shadow .26s ease;
+}
+
+.colt-finale__social:hover,
+.colt-finale__social:focus {
+    border-color: rgba(15,119,114,.42);
+    background: rgba(255,255,255,.68);
+    box-shadow: 0 28px 76px rgba(20,59,60,.18);
+    transform: translateY(-4px);
+}
+
+.colt-finale__social span {
+    color: #143b3c;
+    font-size: 22px;
+    font-weight: 900;
+    line-height: 1;
+}
+
+.colt-finale__social em {
+    color: rgba(20,59,60,.68);
+    font-style: normal;
+    line-height: 1.45;
+}
+
+.colt-finale__social--instagram { background: linear-gradient(135deg, rgba(255,255,255,.58), rgba(255,145,196,.34)); }
+.colt-finale__social--tiktok { background: linear-gradient(135deg, rgba(255,255,255,.58), rgba(157,241,220,.34)); }
+.colt-finale__social--whatnot { background: linear-gradient(135deg, rgba(255,255,255,.58), rgba(255,230,154,.42)); }
+.colt-finale__social--whatsapp { background: linear-gradient(135deg, rgba(255,255,255,.58), rgba(111,212,198,.4)); }
+
 .colt-core,
 .colt-deep,
 .colt-services,
@@ -1581,6 +1929,17 @@ html.colt-is-traveling body {
     0% { opacity: 0; scale: 1 .08; filter: blur(6px); }
     22% { opacity: .95; scale: 1 .74; filter: blur(2px); }
     100% { opacity: .15; scale: 1 1.75; filter: blur(10px); }
+}
+
+@keyframes coltFinalePetal {
+    0%, 100% { translate: 0 0; rotate: -8deg; }
+    36% { translate: -24px 30px; rotate: 18deg; }
+    72% { translate: 18px -22px; rotate: -16deg; }
+}
+
+@keyframes coltFinaleRiver {
+    0%, 100% { opacity: .68; filter: blur(.4px); }
+    50% { opacity: .84; filter: blur(1.2px); }
 }
 
 @media (max-width: 980px) {
@@ -1878,6 +2237,67 @@ html.colt-is-traveling body {
         opacity: 1;
         transform: translateY(0);
     }
+    .colt-finale { height: 420vh; }
+    .colt-finale__pin {
+        height: 100vh;
+        height: 100svh;
+        min-height: 100svh;
+    }
+    .colt-finale__sun {
+        width: 160px;
+        right: 8%;
+        top: 10%;
+    }
+    .colt-finale__moon {
+        width: 82px;
+        left: 10%;
+        top: 13%;
+    }
+    .colt-finale__halo span {
+        width: min(520px, 112vw);
+        top: 38%;
+    }
+    .colt-finale__brand {
+        top: 28%;
+        width: calc(100% - 32px);
+    }
+    .colt-finale__brand img {
+        width: min(190px, 42vw);
+    }
+    .colt-finale__brand h2 {
+        font-size: clamp(38px, 10vw, 66px);
+    }
+    .colt-finale__brand p:not(.colt-kicker) {
+        font-size: 16px;
+        line-height: 1.62;
+    }
+    .colt-finale__contact {
+        right: 16px;
+        left: 16px;
+        bottom: 28%;
+        width: auto;
+        padding: 16px;
+    }
+    .colt-finale__contact h3 {
+        font-size: clamp(25px, 7vw, 38px);
+    }
+    .colt-finale__socials {
+        right: 16px;
+        left: 16px;
+        bottom: 18px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        width: auto;
+    }
+    .colt-finale__social {
+        min-height: 74px;
+        padding: 12px;
+    }
+    .colt-finale__social span {
+        font-size: 18px;
+    }
+    .colt-finale__social em {
+        font-size: 13px;
+    }
     .colt-section-head, .colt-deep { grid-template-columns: 1fr; }
     .colt-core__grid, .colt-products__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .colt-service-row { grid-template-columns: 52px 1fr 42px; }
@@ -1894,6 +2314,30 @@ html.colt-is-traveling body {
     .colt-orbit__system { grid-template-columns: 1fr; }
     .colt-orbit__planet { --planet-size: 74px; }
     .colt-orbit__planet-copy { padding: 12px; }
+    .colt-finale__brand { top: 24%; }
+    .colt-finale__brand img { width: min(160px, 40vw); }
+    .colt-finale__brand p:not(.colt-kicker) { display: none; }
+    .colt-finale__contact {
+        bottom: 31%;
+    }
+    .colt-finale__contact p:not(.colt-kicker) {
+        display: none;
+    }
+    .colt-finale__actions a {
+        flex: 1 1 120px;
+        min-height: 44px;
+    }
+    .colt-finale__socials {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+    .colt-finale__social {
+        min-height: 58px;
+        align-content: center;
+    }
+    .colt-finale__social em {
+        display: none;
+    }
     .colt-core__grid, .colt-products__grid { grid-template-columns: 1fr; }
     .colt-core, .colt-deep, .colt-services, .colt-products, .colt-end { padding: 76px 0; }
 }

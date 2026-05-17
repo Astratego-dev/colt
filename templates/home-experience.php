@@ -18,9 +18,36 @@ $origin_world_url = Colt_Experience::asset_url('assets/scene-01-origin/colt-orig
 $origin_frame_base_url = Colt_Experience::asset_url('assets/scene-01-origin/sequence/frame_');
 $origin_frame_poster_url = Colt_Experience::asset_url('assets/scene-01-origin/sequence/frame_0000.webp');
 $orbit_guardian_url = Colt_Experience::asset_url('assets/scene-01-origin/guardian-frame-01.png');
+$contact_url = !empty($atts['contact_url']) ? (string) $atts['contact_url'] : home_url('/contact/');
+$social_links = [
+    [
+        'label' => 'Instagram',
+        'detail' => 'דרופים, סטוריז ופריטים חדשים',
+        'url' => !empty($atts['instagram']) ? (string) $atts['instagram'] : '#colt-contact',
+        'tone' => 'instagram',
+    ],
+    [
+        'label' => 'TikTok',
+        'detail' => 'פתיחות, רגעים והיילייטים',
+        'url' => !empty($atts['tiktok']) ? (string) $atts['tiktok'] : '#colt-contact',
+        'tone' => 'tiktok',
+    ],
+    [
+        'label' => 'Whatnot',
+        'detail' => 'לייבים ומכירות בזמן אמת',
+        'url' => !empty($atts['whatnot']) ? (string) $atts['whatnot'] : '#colt-contact',
+        'tone' => 'whatnot',
+    ],
+    [
+        'label' => 'WhatsApp',
+        'detail' => 'שאלות, איתור ושירות אישי',
+        'url' => !empty($atts['whatsapp']) ? (string) $atts['whatsapp'] : $contact_url,
+        'tone' => 'whatsapp',
+    ],
+];
 ?>
 
-<section class="colt-xp" dir="rtl" data-colt-xp data-version="1.2.1">
+<section class="colt-xp" dir="rtl" data-colt-xp data-version="1.3.0">
     <canvas class="colt-xp__canvas" data-colt-canvas aria-hidden="true"></canvas>
     <div class="colt-xp__noise" aria-hidden="true"></div>
 
@@ -31,6 +58,7 @@ $orbit_guardian_url = Colt_Experience::asset_url('assets/scene-01-origin/guardia
         <div class="colt-nav__links">
             <a href="#colt-core">חוויות מרכזיות</a>
             <a href="#colt-services">שירותים</a>
+            <a href="#colt-contact">יצירת קשר</a>
             <a href="<?php echo esc_url(home_url('/shop/')); ?>">חנות</a>
         </div>
     </nav>
@@ -236,13 +264,56 @@ $orbit_guardian_url = Colt_Experience::asset_url('assets/scene-01-origin/guardia
         </section>
     <?php endif; ?>
 
-    <section class="colt-end" data-colt-scene="end">
-        <img src="<?php echo esc_url($mark_url); ?>" alt="" loading="lazy">
-        <p class="colt-kicker">OWN THE LEGACY</p>
-        <h2>בחר את הצעד הבא באוסף שלך.</h2>
-        <div>
-            <a href="<?php echo esc_url(home_url('/shop/')); ?>">לחנות</a>
-            <a href="<?php echo esc_url(home_url('/services/the-vault/')); ?>">לשירותי COLT</a>
+    <section class="colt-finale" id="colt-contact" data-finale data-colt-scene="end">
+        <div class="colt-finale__pin">
+            <div class="colt-finale__garden" aria-hidden="true">
+                <span class="colt-finale__sun"></span>
+                <span class="colt-finale__river"></span>
+                <span class="colt-finale__moon"></span>
+            </div>
+
+            <div class="colt-finale__petals" aria-hidden="true">
+                <?php for ($petal = 0; $petal < 24; $petal++) : ?>
+                    <span></span>
+                <?php endfor; ?>
+            </div>
+
+            <div class="colt-finale__halo" aria-hidden="true">
+                <span></span><span></span><span></span>
+            </div>
+
+            <div class="colt-finale__brand" data-finale-brand>
+                <img src="<?php echo esc_url($mark_url); ?>" alt="" loading="lazy">
+                <p class="colt-kicker">COLT COLLECTORS CLUB</p>
+                <h2>המקום שבו אספנות מקבלת בית.</h2>
+                <p>אנחנו מחברים בין קלפים, פריטים נדירים, שירותי שמירה, איתור, דירוג ומכירה, כדי שכל אספן יוכל להתקדם בביטחון ובסטייל.</p>
+            </div>
+
+            <div class="colt-finale__contact" data-finale-contact>
+                <div>
+                    <p class="colt-kicker">START A CONVERSATION</p>
+                    <h3>יש פריט למכור, קלף לחפש או אוסף לבנות?</h3>
+                    <p>שלחו לנו הודעה ונבין יחד מה הצעד הנכון: קנייה, מכירה, דירוג, כספת או בניית תיק אספנות.</p>
+                </div>
+                <div class="colt-finale__actions">
+                    <a href="<?php echo esc_url($contact_url); ?>">יצירת קשר</a>
+                    <a href="<?php echo esc_url(home_url('/shop/')); ?>">לחנות</a>
+                </div>
+            </div>
+
+            <div class="colt-finale__socials" data-finale-socials aria-label="עקבו אחרינו">
+                <p class="colt-kicker">FOLLOW THE DROP</p>
+                <?php foreach ($social_links as $index => $social) : ?>
+                    <a
+                        class="colt-finale__social colt-finale__social--<?php echo esc_attr($social['tone']); ?>"
+                        href="<?php echo esc_url($social['url']); ?>"
+                        style="--i: <?php echo esc_attr((string) $index); ?>"
+                    >
+                        <span><?php echo esc_html($social['label']); ?></span>
+                        <em><?php echo esc_html($social['detail']); ?></em>
+                    </a>
+                <?php endforeach; ?>
+            </div>
         </div>
     </section>
 

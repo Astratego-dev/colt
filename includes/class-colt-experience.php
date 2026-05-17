@@ -27,6 +27,11 @@ final class Colt_Experience
     {
         $atts = shortcode_atts([
             'products' => 8,
+            'contact_url' => home_url('/contact/'),
+            'instagram' => '',
+            'tiktok' => '',
+            'whatnot' => '',
+            'whatsapp' => '',
         ], $atts, 'colt_home_experience');
 
         $this->enqueue_assets();
