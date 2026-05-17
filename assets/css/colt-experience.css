@@ -1019,7 +1019,7 @@
         radial-gradient(circle, rgba(255,151,205,.68) 0 1px, transparent 1.5px);
     background-position: 0 0, 70px 40px, 130px 90px;
     background-size: 220px 220px, 180px 180px, 260px 260px;
-    mask-image: radial-gradient(circle at 50% 44%, #000 0 52%, transparent 78%);
+    mask-image: radial-gradient(circle at 50% 52%, #000 0 52%, transparent 78%);
     animation: coltStarDrift 28s linear infinite;
 }
 
@@ -1048,7 +1048,7 @@
 .colt-orbit__rings span {
     position: absolute;
     right: 50%;
-    top: 52%;
+    top: 56%;
     width: min(970px, 70vw);
     height: min(450px, 42vh);
     border: 1px solid rgba(255,248,223,.22);
@@ -1307,7 +1307,7 @@
 
 .colt-orbit.has-3d-planets .colt-orbit__planet:nth-of-type(1) {
     right: 7.5%;
-    top: 20%;
+    top: 25%;
     --planet-hit-size: clamp(150px, 13vw, 220px);
     --hit-right: 54%;
     --hit-top: -3%;
@@ -1315,7 +1315,7 @@
 
 .colt-orbit.has-3d-planets .colt-orbit__planet:nth-of-type(2) {
     left: 6%;
-    top: 22%;
+    top: 29%;
     --planet-hit-size: clamp(160px, 14vw, 230px);
     --hit-right: 46%;
     --hit-top: -1%;
@@ -1323,7 +1323,7 @@
 
 .colt-orbit.has-3d-planets .colt-orbit__planet:nth-of-type(3) {
     right: 13%;
-    bottom: 17%;
+    bottom: 12%;
     --planet-hit-size: clamp(138px, 12vw, 198px);
     --hit-right: 40%;
     --hit-top: -12%;
@@ -1331,7 +1331,7 @@
 
 .colt-orbit.has-3d-planets .colt-orbit__planet:nth-of-type(4) {
     left: 10%;
-    bottom: 18%;
+    bottom: 12%;
     --planet-hit-size: clamp(132px, 11vw, 184px);
     --hit-right: 58%;
     --hit-top: -14%;
@@ -1339,7 +1339,7 @@
 
 .colt-orbit.has-3d-planets .colt-orbit__planet:nth-of-type(5) {
     right: 50%;
-    top: 5%;
+    top: 12%;
     width: min(300px, 26vw);
     translate: 50% 0;
     --planet-hit-size: clamp(118px, 10vw, 168px);
@@ -1375,6 +1375,30 @@
     border-color: rgba(255,248,223,.24);
     background: linear-gradient(135deg, rgba(9,13,36,.66), rgba(9,13,36,.42));
     box-shadow: 0 26px 82px rgba(0,0,0,.3), inset 0 0 0 1px rgba(255,255,255,.08);
+}
+
+.colt-orbit.is-planet-traveling .colt-orbit__three {
+    z-index: 12;
+    filter: drop-shadow(0 0 58px rgba(255,248,223,.32));
+}
+
+.colt-orbit.is-planet-traveling .colt-orbit__planet {
+    pointer-events: none;
+}
+
+.colt-orbit.is-planet-traveling .colt-orbit__planet-copy {
+    opacity: 0;
+    transform: translateY(20px) scale(.96);
+    transition: opacity .28s ease, transform .34s cubic-bezier(.2,.9,.2,1);
+}
+
+.colt-orbit.is-planet-traveling .colt-orbit__copy,
+.colt-orbit.is-planet-traveling .colt-orbit__rings,
+.colt-orbit.is-planet-traveling .colt-orbit__guardian-wrap,
+.colt-orbit.is-planet-traveling .colt-orbit__dock {
+    opacity: .18 !important;
+    filter: blur(7px) saturate(.7);
+    transition: opacity .34s ease, filter .34s ease;
 }
 
 .colt-orbit__dock {
@@ -1581,7 +1605,7 @@ html.colt-is-traveling body {
 .colt-products__intro {
     z-index: 8;
     right: max(24px, calc((100vw - 1260px) / 2));
-    top: 13%;
+    top: 10%;
     display: grid;
     gap: 8px;
     width: min(560px, calc(100% - 56px));
@@ -1608,7 +1632,7 @@ html.colt-is-traveling body {
 .colt-products__categories {
     z-index: 7;
     left: max(24px, calc((100vw - 1260px) / 2));
-    top: 14%;
+    top: 11%;
     display: grid;
     grid-template-columns: repeat(2, minmax(160px, 1fr));
     gap: 10px;
@@ -1657,12 +1681,12 @@ html.colt-is-traveling body {
 .colt-products__category--graded { background: linear-gradient(135deg, rgba(255,255,255,.58), rgba(255,255,255,.36)); }
 
 .colt-products__viewport {
-    z-index: 6;
+    z-index: 9;
     right: 0;
     left: 0;
-    bottom: 10%;
+    bottom: 5%;
     overflow: visible;
-    padding: 36px max(28px, calc((100vw - 1260px) / 2));
+    padding: 28px max(26px, calc((100vw - 1260px) / 2));
 }
 
 .colt-products__track {
@@ -1678,9 +1702,9 @@ html.colt-is-traveling body {
 .colt-product-card {
     position: relative;
     display: grid;
-    grid-template-rows: minmax(220px, 1fr) auto;
-    width: clamp(208px, 18vw, 282px);
-    min-height: min(500px, 54vh);
+    grid-template-rows: minmax(198px, 1fr) auto;
+    width: clamp(196px, 16.5vw, 264px);
+    min-height: min(462px, 50vh);
     overflow: hidden;
     border: 1px solid rgba(20,59,60,.14);
     border-radius: 8px;
@@ -1751,7 +1775,7 @@ html.colt-is-traveling body {
     z-index: 2;
     width: 100%;
     height: 100%;
-    max-height: 286px;
+    max-height: 252px;
     object-fit: contain;
     padding: 10px;
     filter: drop-shadow(0 24px 34px rgba(20,59,60,.18));

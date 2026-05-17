@@ -612,11 +612,11 @@
 
             const loader = new loaderModule.GLTFLoader();
             const specs = [
-                { position: [2.18, 0.92, -0.52], scale: 1.1, spin: -0.006, drift: 0.9, push: 0.44 },
-                { position: [-2.3, 0.64, -0.34], scale: 1.18, spin: 0.006, drift: 1.45, push: -0.46 },
-                { position: [1.52, -1.04, 0.08], scale: 1.02, spin: 0.008, drift: 2.1, push: 0.28 },
-                { position: [-1.78, -1.02, -0.04], scale: 0.92, spin: -0.007, drift: 2.75, push: -0.3 },
-                { position: [0.0, 1.38, -0.62], scale: 0.82, spin: 0.006, drift: 3.4, push: 0.12 },
+                { position: [2.18, 0.54, -0.52], scale: 1.1, spin: -0.006, drift: 0.9, push: 0.44 },
+                { position: [-2.3, 0.28, -0.34], scale: 1.18, spin: 0.006, drift: 1.45, push: -0.46 },
+                { position: [1.52, -1.18, 0.08], scale: 1.02, spin: 0.008, drift: 2.1, push: 0.28 },
+                { position: [-1.78, -1.18, -0.04], scale: 0.92, spin: -0.007, drift: 2.75, push: -0.3 },
+                { position: [0.0, 0.9, -0.62], scale: 0.82, spin: 0.006, drift: 3.4, push: 0.12 },
             ];
             const sourceSpec = { position: [0, 0, 0], scale: 1, spin: 0, drift: 0, push: 0 };
 
@@ -625,6 +625,19 @@
             groups.forEach((group) => world.add(group));
             mount.classList.add('is-loaded');
             orbitScene.classList.add('has-3d-planets');
+            const travelState = { activeIndex: -1, startedAt: 0, duration: 1040 };
+
+            orbitScene.__coltFocusPlanet = (index) => {
+                const activeIndex = Math.max(0, Math.min(groups.length - 1, index));
+                travelState.activeIndex = activeIndex;
+                travelState.startedAt = performance.now();
+                travelState.duration = isCompactViewport() ? 900 : 1040;
+                groups.forEach((group) => {
+                    group.userData.travelStartPosition = group.position.clone();
+                    group.userData.travelStartScale = group.scale.x;
+                });
+                return travelState.duration;
+            };
 
             const resize = () => {
                 const rect = mount.getBoundingClientRect();
@@ -640,19 +653,50 @@
                 if (!document.body.contains(mount)) return;
                 const progress = parseFloat(orbitScene.style.getPropertyValue('--orbit-progress')) || 0;
                 const focus = parseFloat(orbitScene.style.getPropertyValue('--orbit-focus')) || 0;
+                const travelProgress = travelState.activeIndex >= 0
+                    ? smoothstep(0, 1, (time - travelState.startedAt) / travelState.duration)
+                    : 0;
                 groups.forEach((group, index) => {
                     const spec = group.userData.spec;
                     group.rotation.y += spec.spin;
                     group.rotation.x = Math.sin(time * 0.00045 + index) * 0.12;
                     group.rotation.z = Math.cos(time * 0.00035 + index) * 0.08;
-                    group.position.x = spec.position[0] + Math.sin(time * 0.00035 + spec.drift) * 0.1 + (progress - 0.5) * spec.push;
-                    group.position.y = spec.position[1] + Math.cos(time * 0.00042 + spec.drift) * 0.08 + focus * (index === 4 ? -0.06 : 0.08);
+                    const naturalX = spec.position[0] + Math.sin(time * 0.00035 + spec.drift) * 0.1 + (progress - 0.5) * spec.push;
+                    const naturalY = spec.position[1] + Math.cos(time * 0.00042 + spec.drift) * 0.08 + focus * (index === 4 ? -0.02 : 0.04);
+                    const naturalZ = spec.position[2];
                     const pulse = 1 + Math.sin(time * 0.001 + index) * 0.035 + focus * (index === 4 ? 0.04 : 0.08);
-                    group.scale.setScalar(group.userData.baseScale * pulse);
+                    const naturalScale = group.userData.baseScale * pulse;
+
+                    if (travelProgress > 0 && travelState.activeIndex === index) {
+                        const start = group.userData.travelStartPosition || group.position;
+                        const startScale = group.userData.travelStartScale || naturalScale;
+                        group.position.x = start.x + (0 - start.x) * travelProgress;
+                        group.position.y = start.y + ((isCompactViewport() ? -0.04 : -0.02) - start.y) * travelProgress;
+                        group.position.z = start.z + (1.72 - start.z) * travelProgress;
+                        group.rotation.y += 0.032 + travelProgress * 0.032;
+                        group.rotation.x *= 1 - travelProgress * 0.38;
+                        group.rotation.z *= 1 - travelProgress * 0.3;
+                        group.scale.setScalar(startScale + (group.userData.baseScale * (isCompactViewport() ? 2.35 : 2.75) - startScale) * travelProgress);
+                        return;
+                    }
+
+                    if (travelProgress > 0) {
+                        const side = index % 2 === 0 ? 1 : -1;
+                        group.position.x = naturalX + side * 0.46 * travelProgress;
+                        group.position.y = naturalY + (index < travelState.activeIndex ? 0.22 : -0.22) * travelProgress;
+                        group.position.z = naturalZ - 1.1 * travelProgress;
+                        group.scale.setScalar(naturalScale * (1 - 0.42 * travelProgress));
+                        return;
+                    }
+
+                    group.position.x = naturalX;
+                    group.position.y = naturalY;
+                    group.position.z = naturalZ;
+                    group.scale.setScalar(naturalScale);
                 });
                 camera.position.z = 6.4 - focus * 0.76;
                 camera.position.x = (progress - 0.5) * 0.32;
-                camera.lookAt(0, 0.05, 0);
+                camera.lookAt(0, -0.08, 0);
                 renderer.render(world, camera);
                 window.requestAnimationFrame(render);
             };
@@ -822,14 +866,14 @@
         }
 
         gsap.registerPlugin(ScrollTrigger);
+        const compact = isCompactViewport();
 
         gsap.set(intro, { autoAlpha: 0, y: 34, filter: 'blur(12px)' });
         gsap.set(categories, { autoAlpha: 0, y: 34, scale: 0.92, filter: 'blur(10px)' });
-        gsap.set(cards, { autoAlpha: 0, y: 70, rotate: 4, scale: 0.86, filter: 'blur(16px)' });
+        gsap.set(cards, { autoAlpha: 0.9, y: compact ? 34 : 46, rotate: 2.5, scale: 0.94, filter: 'blur(6px)' });
         gsap.set(tickerItems, { autoAlpha: 0, y: 18 });
         updateStage(0);
 
-        const compact = isCompactViewport();
         const tl = gsap.timeline({
             defaults: { ease: 'power2.inOut' },
             scrollTrigger: {
@@ -849,7 +893,7 @@
             .to(intro, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.2 }, 0.04)
             .to(intro, { autoAlpha: compact ? 0.5 : 0.62, y: compact ? -48 : -28, filter: 'blur(5px)', duration: 0.18 }, 0.32)
             .to(categories, { autoAlpha: 1, y: 0, scale: 1, filter: 'blur(0px)', stagger: 0.035, duration: 0.3 }, 0.18)
-            .to(cards, { autoAlpha: 1, y: 0, rotate: 0, scale: 1, filter: 'blur(0px)', stagger: 0.04, duration: 0.36 }, 0.28)
+            .to(cards, { autoAlpha: 1, y: 0, rotate: 0, scale: 1, filter: 'blur(0px)', stagger: 0.035, duration: 0.36 }, 0.12)
             .to(tickerItems, { autoAlpha: 1, y: 0, stagger: 0.035, duration: 0.24 }, 0.42)
             .to(track, { x: () => trackShift(), duration: 0.68, ease: 'none' }, 0.3)
             .to(categories, { x: compact ? -26 : -90, stagger: 0.018, duration: 0.54 }, 0.44)
@@ -884,13 +928,36 @@
                     return;
                 }
 
+                const orbitPlanet = link.matches('[data-orbit-planet]') ? link : null;
+                const orbitWorld = orbitPlanet ? orbitPlanet.closest('[data-orbit-world]') : null;
+                let travelDelay = prefersReduced ? 100 : 760;
+                let overlayDelay = 0;
+
+                if (!prefersReduced && orbitWorld && typeof orbitWorld.__coltFocusPlanet === 'function') {
+                    const planets = Array.from(orbitWorld.querySelectorAll('[data-orbit-planet]'));
+                    const planetIndex = planets.indexOf(orbitPlanet);
+                    if (planetIndex >= 0) {
+                        orbitWorld.classList.add('is-planet-traveling');
+                        planets.forEach((planet) => planet.classList.remove('is-travel-target'));
+                        orbitPlanet.classList.add('is-travel-target');
+                        travelDelay = Math.max(1120, orbitWorld.__coltFocusPlanet(planetIndex) + 260);
+                        overlayDelay = Math.max(520, travelDelay - 540);
+                    }
+                }
+
                 event.preventDefault();
-                overlay.classList.add('is-active');
                 root.classList.add('is-traveling');
                 document.documentElement.classList.add('colt-is-traveling');
+                if (overlayDelay > 0) {
+                    window.setTimeout(() => {
+                        overlay.classList.add('is-active');
+                    }, overlayDelay);
+                } else {
+                    overlay.classList.add('is-active');
+                }
                 window.setTimeout(() => {
                     window.location.href = href;
-                }, prefersReduced ? 100 : 760);
+                }, travelDelay);
             });
         });
     }
