@@ -16,6 +16,12 @@ Optional product count:
 [colt_home_experience products="12"]
 ```
 
+Vault service page:
+
+```text
+[colt_vault_experience]
+```
+
 ## What It Does
 
 - Renders a premium COLT home experience.

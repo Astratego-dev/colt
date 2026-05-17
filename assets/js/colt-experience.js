@@ -13,6 +13,7 @@
         setupProductWorld(root, prefersReduced);
         setupFinale(root, prefersReduced);
         setupHyperspace(root, prefersReduced);
+        setupVaultExperience(root, prefersReduced);
     });
 
     function setupReveal(root, prefersReduced) {
@@ -931,7 +932,7 @@
                 const orbitPlanet = link.matches('[data-orbit-planet]') ? link : null;
                 const orbitWorld = orbitPlanet ? orbitPlanet.closest('[data-orbit-world]') : null;
                 let travelDelay = prefersReduced ? 100 : 760;
-                let overlayDelay = 0;
+                let shouldShowOverlay = !orbitPlanet;
 
                 if (!prefersReduced && orbitWorld && typeof orbitWorld.__coltFocusPlanet === 'function') {
                     const planets = Array.from(orbitWorld.querySelectorAll('[data-orbit-planet]'));
@@ -941,18 +942,14 @@
                         planets.forEach((planet) => planet.classList.remove('is-travel-target'));
                         orbitPlanet.classList.add('is-travel-target');
                         travelDelay = Math.max(1120, orbitWorld.__coltFocusPlanet(planetIndex) + 260);
-                        overlayDelay = Math.max(520, travelDelay - 540);
+                        shouldShowOverlay = false;
                     }
                 }
 
                 event.preventDefault();
                 root.classList.add('is-traveling');
                 document.documentElement.classList.add('colt-is-traveling');
-                if (overlayDelay > 0) {
-                    window.setTimeout(() => {
-                        overlay.classList.add('is-active');
-                    }, overlayDelay);
-                } else {
+                if (shouldShowOverlay) {
                     overlay.classList.add('is-active');
                 }
                 window.setTimeout(() => {
@@ -1015,5 +1012,134 @@
         resize();
         window.addEventListener('resize', resize, { passive: true });
         requestAnimationFrame(draw);
+    }
+
+    function setupVaultExperience(root, prefersReduced) {
+        const gsap = window.gsap;
+        const ScrollTrigger = window.ScrollTrigger;
+        const vault = root.matches('[data-vault-xp]') ? root : root.querySelector('[data-vault-xp]');
+        if (!vault) return;
+
+        const hero = vault.querySelector('[data-vault-hero]');
+        const inside = vault.querySelector('[data-vault-inside]');
+        const protocol = vault.querySelector('[data-vault-protocol]');
+        const contact = vault.querySelector('[data-vault-contact]');
+
+        if (prefersReduced || !gsap || !ScrollTrigger) {
+            vault.querySelectorAll('[data-vault-hero-copy], [data-vault-ledger], [data-vault-inside-copy], [data-vault-feature], [data-vault-step], [data-vault-contact-brand], [data-vault-contact-panel]').forEach((item) => {
+                item.style.opacity = '1';
+                item.style.transform = 'none';
+                item.style.filter = 'none';
+            });
+            return;
+        }
+
+        gsap.registerPlugin(ScrollTrigger);
+
+        if (hero) {
+            const pin = hero.querySelector('.colt-vault-hero__pin');
+            const bg = hero.querySelector('[data-vault-hero-bg]');
+            const door = hero.querySelector('[data-vault-door]');
+            const copy = hero.querySelector('[data-vault-hero-copy]');
+            const ledger = hero.querySelector('[data-vault-ledger]');
+            const scans = hero.querySelectorAll('.colt-vault-hero__scan span');
+
+            gsap.set(copy, { autoAlpha: 0, y: 34, filter: 'blur(12px)' });
+            gsap.set(ledger, { autoAlpha: 0, y: 24, filter: 'blur(10px)' });
+            gsap.set(scans, { autoAlpha: 0, scaleX: 0.2 });
+
+            gsap.timeline({
+                defaults: { ease: 'power2.inOut' },
+                scrollTrigger: {
+                    trigger: hero,
+                    start: 'top top',
+                    end: 'bottom bottom',
+                    scrub: 0.82,
+                    pin,
+                    anticipatePin: 1,
+                },
+            })
+                .to(bg, { scale: 1.18, xPercent: isCompactViewport() ? -4 : -2, duration: 0.92 }, 0)
+                .to(door, { scale: 1.18, rotate: -18, xPercent: isCompactViewport() ? 0 : 7, duration: 0.72 }, 0.12)
+                .to(copy, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.24 }, 0.05)
+                .to(copy, { autoAlpha: isCompactViewport() ? 0.42 : 0.66, y: -38, filter: 'blur(5px)', duration: 0.2 }, 0.42)
+                .to(scans, { autoAlpha: 0.82, scaleX: 1, stagger: 0.06, duration: 0.28 }, 0.2)
+                .to(ledger, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.3 }, 0.5)
+                .to(door, { scale: 1.38, rotate: -34, xPercent: isCompactViewport() ? 0 : 13, filter: 'blur(2px)', duration: 0.3 }, 0.68);
+        }
+
+        if (inside) {
+            const pin = inside.querySelector('.colt-vault-inside__pin');
+            const bg = inside.querySelector('[data-vault-inside-bg]');
+            const copy = inside.querySelector('[data-vault-inside-copy]');
+            const features = inside.querySelectorAll('[data-vault-feature]');
+            const slabs = inside.querySelectorAll('.colt-vault-inside__slabs span');
+            const glass = inside.querySelectorAll('.colt-vault-inside__glass span');
+
+            gsap.set(copy, { autoAlpha: 0, y: 34, filter: 'blur(12px)' });
+            gsap.set(features, { autoAlpha: 0, y: 42, scale: 0.94, filter: 'blur(12px)' });
+            gsap.set(slabs, { autoAlpha: 0, y: 80, rotate: 10, scale: 0.72, filter: 'blur(10px)' });
+            gsap.set(glass, { autoAlpha: 0, scaleY: 0.4 });
+
+            gsap.timeline({
+                defaults: { ease: 'power2.inOut' },
+                scrollTrigger: {
+                    trigger: inside,
+                    start: 'top top',
+                    end: 'bottom bottom',
+                    scrub: 0.86,
+                    pin,
+                    anticipatePin: 1,
+                },
+            })
+                .to(bg, { scale: 1.14, xPercent: isCompactViewport() ? 2 : 4, duration: 0.95 }, 0)
+                .to(glass, { autoAlpha: 0.56, scaleY: 1, stagger: 0.05, duration: 0.34 }, 0.02)
+                .to(copy, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.24 }, 0.08)
+                .to(features, { autoAlpha: 1, y: 0, scale: 1, filter: 'blur(0px)', stagger: 0.055, duration: 0.38 }, 0.28)
+                .to(slabs, { autoAlpha: 1, y: 0, rotate: 0, scale: 1, filter: 'blur(0px)', stagger: 0.045, duration: 0.36 }, 0.18)
+                .to(slabs, { y: (index) => (index % 2 === 0 ? -28 : 24), rotate: (index) => (index % 2 === 0 ? -6 : 6), stagger: 0.02, duration: 0.5 }, 0.55)
+                .to(copy, { autoAlpha: isCompactViewport() ? 0.42 : 0.58, y: -24, filter: 'blur(4px)', duration: 0.22 }, 0.68);
+        }
+
+        if (protocol) {
+            const copy = protocol.querySelector('[data-vault-protocol-copy]');
+            const steps = protocol.querySelectorAll('[data-vault-step]');
+            const rings = protocol.querySelectorAll('.colt-vault-protocol__rings span');
+
+            gsap.set(copy, { autoAlpha: 0, y: 30, filter: 'blur(12px)' });
+            gsap.set(steps, { autoAlpha: 0, y: 52, scale: 0.92, filter: 'blur(12px)' });
+            gsap.set(rings, { autoAlpha: 0.22, scale: 0.76, rotate: -16 });
+
+            gsap.timeline({
+                defaults: { ease: 'power2.inOut' },
+                scrollTrigger: {
+                    trigger: protocol,
+                    start: 'top 72%',
+                    end: 'bottom 78%',
+                    scrub: 0.65,
+                },
+            })
+                .to(rings, { autoAlpha: 0.86, scale: 1.12, rotate: 26, stagger: 0.04, duration: 0.6 }, 0)
+                .to(copy, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.26 }, 0.05)
+                .to(steps, { autoAlpha: 1, y: 0, scale: 1, filter: 'blur(0px)', stagger: 0.08, duration: 0.44 }, 0.22);
+        }
+
+        if (contact) {
+            const brand = contact.querySelector('[data-vault-contact-brand]');
+            const panel = contact.querySelector('[data-vault-contact-panel]');
+            gsap.set([brand, panel], { autoAlpha: 0, y: 36, filter: 'blur(12px)' });
+
+            gsap.timeline({
+                defaults: { ease: 'power2.out' },
+                scrollTrigger: {
+                    trigger: contact,
+                    start: 'top 74%',
+                    end: 'center 52%',
+                    scrub: 0.58,
+                },
+            })
+                .to(brand, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.42 }, 0)
+                .to(panel, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.42 }, 0.12);
+        }
     }
 })();

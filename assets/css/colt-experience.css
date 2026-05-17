@@ -2182,6 +2182,486 @@ html.colt-is-traveling body {
 .colt-finale__social--whatnot { background: linear-gradient(135deg, rgba(255,255,255,.58), rgba(255,230,154,.42)); }
 .colt-finale__social--whatsapp { background: linear-gradient(135deg, rgba(255,255,255,.58), rgba(111,212,198,.4)); }
 
+.colt-vault-xp {
+    --vault-cream: #fff3cf;
+    --vault-aqua: #8af0df;
+    --vault-rose: #ff9cc9;
+    --vault-gold: #d9b76f;
+    background:
+        radial-gradient(circle at 16% 14%, rgba(255,156,201,.16), transparent 30rem),
+        radial-gradient(circle at 86% 26%, rgba(138,240,223,.18), transparent 32rem),
+        linear-gradient(180deg, #05070c, #0c1119 45%, #07080f);
+}
+
+.colt-vault-nav .colt-nav__links {
+    border-color: rgba(255,243,207,.14);
+    background: rgba(7,9,15,.48);
+}
+
+.colt-vault-hero,
+.colt-vault-inside {
+    position: relative;
+    height: 520vh;
+    min-height: 100vh;
+}
+
+.colt-vault-hero__pin,
+.colt-vault-inside__pin {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    min-height: 680px;
+    overflow: hidden;
+    isolation: isolate;
+    background: #05070c;
+}
+
+.colt-vault-hero__backdrop,
+.colt-vault-inside__backdrop,
+.colt-vault-hero__door,
+.colt-vault-hero__scan,
+.colt-vault-hero__copy,
+.colt-vault-hero__ledger,
+.colt-vault-hero__scroll,
+.colt-vault-inside__glass,
+.colt-vault-inside__copy,
+.colt-vault-inside__features,
+.colt-vault-inside__slabs {
+    position: absolute;
+}
+
+.colt-vault-hero__backdrop,
+.colt-vault-inside__backdrop {
+    inset: -5vh -5vw;
+    z-index: 0;
+    background-position: center;
+    background-size: cover;
+    filter: saturate(1.06) contrast(1.04);
+    transform-origin: 50% 58%;
+}
+
+.colt-vault-hero__backdrop {
+    background-image:
+        linear-gradient(90deg, rgba(5,7,12,.74), rgba(5,7,12,.12) 42%, rgba(5,7,12,.72)),
+        linear-gradient(0deg, rgba(5,7,12,.86), transparent 34%, rgba(5,7,12,.26)),
+        var(--vault-entrance);
+}
+
+.colt-vault-inside__backdrop {
+    background-image:
+        linear-gradient(90deg, rgba(5,7,12,.78), rgba(5,7,12,.18) 52%, rgba(5,7,12,.78)),
+        linear-gradient(0deg, rgba(5,7,12,.82), transparent 34%, rgba(5,7,12,.18)),
+        var(--vault-interior);
+}
+
+.colt-vault-hero__pin::after,
+.colt-vault-inside__pin::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    opacity: .28;
+    background:
+        linear-gradient(rgba(255,243,207,.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,243,207,.04) 1px, transparent 1px);
+    background-size: 76px 76px;
+    mask-image: linear-gradient(to bottom, transparent 0, #000 18%, #000 82%, transparent 100%);
+}
+
+.colt-vault-hero__door {
+    z-index: 3;
+    right: 52%;
+    top: 52%;
+    display: grid;
+    place-items: center;
+    width: min(420px, 28vw);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    opacity: .72;
+    border: 1px solid rgba(255,243,207,.28);
+    translate: 50% -50%;
+    pointer-events: none;
+    box-shadow:
+        inset 0 0 0 18px rgba(255,243,207,.04),
+        0 0 90px rgba(138,240,223,.18);
+}
+
+.colt-vault-hero__door span {
+    grid-area: 1 / 1;
+    display: block;
+    border-radius: 50%;
+    border: 1px solid rgba(255,243,207,.22);
+}
+
+.colt-vault-hero__door span:nth-child(1) { width: 82%; height: 82%; }
+.colt-vault-hero__door span:nth-child(2) { width: 56%; height: 56%; border-color: rgba(138,240,223,.28); }
+.colt-vault-hero__door span:nth-child(3) { width: 22%; height: 22%; background: rgba(255,243,207,.1); }
+
+.colt-vault-hero__scan {
+    z-index: 4;
+    inset: 0;
+    pointer-events: none;
+}
+
+.colt-vault-hero__scan span {
+    position: absolute;
+    right: 16%;
+    left: 16%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(138,240,223,.78), rgba(255,156,201,.48), transparent);
+    box-shadow: 0 0 22px rgba(138,240,223,.42);
+    transform-origin: 50% 50%;
+}
+
+.colt-vault-hero__scan span:nth-child(1) { top: 26%; }
+.colt-vault-hero__scan span:nth-child(2) { top: 49%; }
+.colt-vault-hero__scan span:nth-child(3) { top: 72%; }
+
+.colt-vault-hero__copy {
+    z-index: 6;
+    right: max(24px, calc((100vw - 1220px) / 2));
+    top: 19%;
+    display: grid;
+    gap: 12px;
+    width: min(620px, calc(100% - 56px));
+    text-shadow: 0 24px 60px rgba(0,0,0,.6);
+}
+
+.colt-vault-hero__copy .colt-kicker,
+.colt-vault-inside__copy .colt-kicker,
+.colt-vault-protocol__copy .colt-kicker,
+.colt-vault-contact__brand .colt-kicker {
+    color: var(--vault-aqua);
+}
+
+.colt-vault-hero__copy h1,
+.colt-vault-inside__copy h2,
+.colt-vault-protocol__copy h2,
+.colt-vault-contact__brand h2 {
+    margin: 0;
+    color: var(--vault-cream);
+    font-size: clamp(44px, 6.4vw, 104px);
+    line-height: .92;
+}
+
+.colt-vault-hero__copy p:not(.colt-kicker),
+.colt-vault-inside__copy p:not(.colt-kicker),
+.colt-vault-protocol__copy p:not(.colt-kicker),
+.colt-vault-contact__brand p:not(.colt-kicker) {
+    margin: 0;
+    max-width: 560px;
+    color: rgba(255,243,207,.76);
+    font-size: clamp(17px, 1.35vw, 21px);
+    line-height: 1.65;
+}
+
+.colt-vault-hero__actions,
+.colt-vault-contact__panel {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.colt-vault-hero__actions a,
+.colt-vault-contact__panel a {
+    display: grid;
+    place-items: center;
+    min-height: 48px;
+    padding: 12px 18px;
+    border: 1px solid rgba(255,243,207,.18);
+    border-radius: 8px;
+    color: var(--vault-cream);
+    background: rgba(255,243,207,.08);
+    font-weight: 900;
+    backdrop-filter: blur(16px);
+    transition: transform .24s ease, background .24s ease, border-color .24s ease;
+}
+
+.colt-vault-hero__actions a:first-child,
+.colt-vault-contact__panel a:first-child {
+    color: #061018;
+    border-color: transparent;
+    background: linear-gradient(135deg, var(--vault-aqua), var(--vault-cream));
+}
+
+.colt-vault-hero__actions a:hover,
+.colt-vault-hero__actions a:focus,
+.colt-vault-contact__panel a:hover,
+.colt-vault-contact__panel a:focus {
+    transform: translateY(-3px);
+    border-color: rgba(138,240,223,.44);
+    background: rgba(255,243,207,.14);
+}
+
+.colt-vault-hero__ledger {
+    z-index: 7;
+    left: max(24px, calc((100vw - 1220px) / 2));
+    bottom: 10%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(150px, 1fr));
+    gap: 10px;
+    width: min(520px, 38vw);
+}
+
+.colt-vault-hero__ledger span {
+    display: grid;
+    gap: 4px;
+    min-height: 76px;
+    padding: 14px;
+    border: 1px solid rgba(255,243,207,.16);
+    border-radius: 8px;
+    color: rgba(255,243,207,.82);
+    background: rgba(7,9,15,.5);
+    box-shadow: 0 24px 70px rgba(0,0,0,.32);
+    backdrop-filter: blur(18px);
+    font-weight: 800;
+}
+
+.colt-vault-hero__ledger b {
+    color: var(--vault-aqua);
+    font-size: 12px;
+}
+
+.colt-vault-hero__scroll {
+    z-index: 8;
+    right: 50%;
+    bottom: 28px;
+    display: grid;
+    justify-items: center;
+    gap: 10px;
+    color: rgba(255,243,207,.68);
+    font-size: 12px;
+    font-weight: 900;
+    translate: 50% 0;
+}
+
+.colt-vault-hero__scroll b {
+    width: 42px;
+    height: 42px;
+    border: 1px solid rgba(255,243,207,.18);
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(138,240,223,.48), rgba(255,156,201,.12) 45%, rgba(7,9,15,.52));
+    box-shadow: 0 0 34px rgba(138,240,223,.22);
+}
+
+.colt-vault-inside__glass {
+    z-index: 3;
+    inset: 0;
+    pointer-events: none;
+}
+
+.colt-vault-inside__glass span {
+    position: absolute;
+    top: 8%;
+    bottom: 8%;
+    width: 1px;
+    background: linear-gradient(180deg, transparent, rgba(138,240,223,.44), rgba(255,243,207,.2), transparent);
+    box-shadow: 0 0 22px rgba(138,240,223,.26);
+    transform-origin: 50% 50%;
+}
+
+.colt-vault-inside__glass span:nth-child(1) { right: 18%; }
+.colt-vault-inside__glass span:nth-child(2) { right: 38%; }
+.colt-vault-inside__glass span:nth-child(3) { right: 62%; }
+.colt-vault-inside__glass span:nth-child(4) { right: 82%; }
+
+.colt-vault-inside__copy {
+    z-index: 6;
+    right: max(24px, calc((100vw - 1220px) / 2));
+    top: 13%;
+    display: grid;
+    gap: 10px;
+    width: min(540px, calc(100% - 56px));
+    text-shadow: 0 22px 58px rgba(0,0,0,.62);
+}
+
+.colt-vault-inside__copy h2,
+.colt-vault-protocol__copy h2,
+.colt-vault-contact__brand h2 {
+    font-size: clamp(38px, 5vw, 82px);
+}
+
+.colt-vault-inside__features {
+    z-index: 7;
+    left: max(24px, calc((100vw - 1220px) / 2));
+    top: 12%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(190px, 1fr));
+    gap: 12px;
+    width: min(590px, 43vw);
+}
+
+.colt-vault-feature,
+.colt-vault-step {
+    display: grid;
+    gap: 8px;
+    padding: 16px;
+    border: 1px solid rgba(255,243,207,.15);
+    border-radius: 8px;
+    color: var(--vault-cream);
+    background: linear-gradient(135deg, rgba(7,9,15,.72), rgba(255,243,207,.08));
+    box-shadow: 0 24px 70px rgba(0,0,0,.3), inset 0 0 0 1px rgba(255,255,255,.06);
+    backdrop-filter: blur(18px);
+}
+
+.colt-vault-feature small,
+.colt-vault-step small {
+    color: var(--vault-aqua);
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.colt-vault-feature strong,
+.colt-vault-step strong {
+    font-size: clamp(20px, 1.55vw, 28px);
+    line-height: 1.08;
+}
+
+.colt-vault-feature p,
+.colt-vault-step p {
+    margin: 0;
+    color: rgba(255,243,207,.7);
+    line-height: 1.55;
+}
+
+.colt-vault-inside__slabs {
+    z-index: 5;
+    right: 50%;
+    bottom: 8%;
+    width: min(760px, 54vw);
+    height: min(260px, 27vh);
+    translate: 50% 0;
+    pointer-events: none;
+}
+
+.colt-vault-inside__slabs span {
+    position: absolute;
+    display: block;
+    width: clamp(74px, 7vw, 112px);
+    aspect-ratio: 2.5 / 3.5;
+    border: 1px solid rgba(255,243,207,.32);
+    border-radius: 8px;
+    background:
+        linear-gradient(180deg, rgba(255,255,255,.68), rgba(255,255,255,.18) 22%, transparent 23%),
+        linear-gradient(135deg, rgba(138,240,223,.5), rgba(255,156,201,.36));
+    box-shadow: 0 28px 70px rgba(0,0,0,.34), inset 0 0 0 6px rgba(255,255,255,.08);
+}
+
+.colt-vault-inside__slabs span i {
+    position: absolute;
+    inset: 28% 14% 12%;
+    border-radius: 6px;
+    background:
+        radial-gradient(circle at 42% 28%, rgba(255,243,207,.72), transparent 25%),
+        linear-gradient(135deg, rgba(7,9,15,.62), rgba(217,183,111,.46));
+}
+
+.colt-vault-inside__slabs span:nth-child(1) { right: 2%; bottom: 8%; rotate: -14deg; }
+.colt-vault-inside__slabs span:nth-child(2) { right: 24%; bottom: 20%; rotate: 7deg; }
+.colt-vault-inside__slabs span:nth-child(3) { right: 46%; bottom: 4%; rotate: -4deg; }
+.colt-vault-inside__slabs span:nth-child(4) { right: 67%; bottom: 22%; rotate: 12deg; }
+.colt-vault-inside__slabs span:nth-child(5) { right: 86%; bottom: 8%; rotate: -8deg; }
+
+.colt-vault-protocol {
+    position: relative;
+    min-height: 120vh;
+    padding: 150px max(24px, calc((100vw - 1220px) / 2));
+    overflow: hidden;
+    background:
+        radial-gradient(circle at 72% 18%, rgba(138,240,223,.18), transparent 28rem),
+        radial-gradient(circle at 18% 76%, rgba(255,156,201,.16), transparent 24rem),
+        linear-gradient(180deg, #07080f, #10131b);
+}
+
+.colt-vault-protocol__pin {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    gap: 42px;
+}
+
+.colt-vault-protocol__rings {
+    position: absolute;
+    inset: -120px 0 auto;
+    z-index: -1;
+    height: 580px;
+    pointer-events: none;
+}
+
+.colt-vault-protocol__rings span {
+    position: absolute;
+    right: 50%;
+    top: 50%;
+    width: min(900px, 82vw);
+    height: min(380px, 44vh);
+    border: 1px solid rgba(255,243,207,.12);
+    border-radius: 50%;
+    translate: 50% -50%;
+    transform: rotateX(62deg) rotateZ(-8deg);
+}
+
+.colt-vault-protocol__rings span:nth-child(2) { width: min(640px, 66vw); border-color: rgba(138,240,223,.18); }
+.colt-vault-protocol__rings span:nth-child(3) { width: min(420px, 48vw); border-color: rgba(255,156,201,.18); }
+
+.colt-vault-protocol__copy {
+    display: grid;
+    gap: 10px;
+    max-width: 720px;
+}
+
+.colt-vault-protocol__steps {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.colt-vault-contact {
+    position: relative;
+    padding: 120px max(24px, calc((100vw - 1220px) / 2)) 140px;
+    background:
+        linear-gradient(135deg, rgba(255,243,207,.08), rgba(138,240,223,.08)),
+        #07080f;
+}
+
+.colt-vault-contact__shell {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(280px, .72fr);
+    gap: 20px;
+    align-items: stretch;
+}
+
+.colt-vault-contact__brand,
+.colt-vault-contact__panel {
+    border: 1px solid rgba(255,243,207,.14);
+    border-radius: 8px;
+    background: rgba(7,9,15,.62);
+    box-shadow: 0 34px 100px rgba(0,0,0,.32);
+    backdrop-filter: blur(20px);
+}
+
+.colt-vault-contact__brand {
+    display: grid;
+    grid-template-columns: minmax(130px, 210px) minmax(0, 1fr);
+    gap: 22px;
+    align-items: center;
+    padding: clamp(22px, 3vw, 42px);
+}
+
+.colt-vault-contact__brand img {
+    width: 100%;
+    max-height: 280px;
+    object-fit: contain;
+    filter: drop-shadow(0 34px 70px rgba(0,0,0,.52));
+}
+
+.colt-vault-contact__panel {
+    align-content: center;
+    display: grid;
+    gap: 12px;
+    padding: clamp(22px, 3vw, 34px);
+}
+
 .colt-core,
 .colt-deep,
 .colt-services,
@@ -2865,6 +3345,89 @@ html.colt-is-traveling body {
     .colt-finale__social em {
         font-size: 13px;
     }
+    .colt-vault-hero,
+    .colt-vault-inside {
+        height: 460vh;
+    }
+    .colt-vault-hero__pin,
+    .colt-vault-inside__pin {
+        height: 100vh;
+        height: 100svh;
+        min-height: 100svh;
+    }
+    .colt-vault-hero__backdrop,
+    .colt-vault-inside__backdrop {
+        inset: -4vh -26vw;
+    }
+    .colt-vault-hero__copy,
+    .colt-vault-inside__copy {
+        right: 16px;
+        left: 16px;
+        top: 13%;
+        width: auto;
+    }
+    .colt-vault-hero__copy h1,
+    .colt-vault-inside__copy h2 {
+        font-size: clamp(38px, 10vw, 66px);
+    }
+    .colt-vault-hero__copy p:not(.colt-kicker),
+    .colt-vault-inside__copy p:not(.colt-kicker) {
+        max-width: 430px;
+        font-size: 16px;
+    }
+    .colt-vault-hero__door {
+        right: 50%;
+        top: 50%;
+        width: min(320px, 74vw);
+    }
+    .colt-vault-hero__ledger {
+        right: 16px;
+        left: 16px;
+        bottom: 82px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        width: auto;
+    }
+    .colt-vault-hero__ledger span {
+        min-height: 62px;
+        padding: 11px;
+        font-size: 13px;
+    }
+    .colt-vault-inside__features {
+        right: 16px;
+        left: 16px;
+        top: auto;
+        bottom: 76px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        width: auto;
+    }
+    .colt-vault-feature {
+        padding: 12px;
+    }
+    .colt-vault-feature p {
+        display: none;
+    }
+    .colt-vault-inside__slabs {
+        bottom: 28%;
+        width: min(560px, 90vw);
+    }
+    .colt-vault-protocol {
+        min-height: auto;
+        padding: 96px 16px;
+    }
+    .colt-vault-protocol__steps,
+    .colt-vault-contact__shell {
+        grid-template-columns: 1fr;
+    }
+    .colt-vault-contact {
+        padding: 90px 16px 110px;
+    }
+    .colt-vault-contact__brand {
+        grid-template-columns: 1fr;
+    }
+    .colt-vault-contact__brand img {
+        width: min(210px, 46vw);
+        margin: 0 auto;
+    }
     .colt-section-head, .colt-deep { grid-template-columns: 1fr; }
     .colt-core__grid, .colt-products__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .colt-service-row { grid-template-columns: 52px 1fr 42px; }
@@ -2904,6 +3467,36 @@ html.colt-is-traveling body {
     }
     .colt-finale__social em {
         display: none;
+    }
+    .colt-vault-hero__copy,
+    .colt-vault-inside__copy {
+        top: 11%;
+    }
+    .colt-vault-hero__copy h1,
+    .colt-vault-inside__copy h2,
+    .colt-vault-protocol__copy h2,
+    .colt-vault-contact__brand h2 {
+        font-size: clamp(32px, 10vw, 50px);
+    }
+    .colt-vault-hero__copy p:not(.colt-kicker),
+    .colt-vault-inside__copy p:not(.colt-kicker),
+    .colt-vault-protocol__copy p:not(.colt-kicker),
+    .colt-vault-contact__brand p:not(.colt-kicker) {
+        font-size: 15px;
+        line-height: 1.55;
+    }
+    .colt-vault-hero__ledger,
+    .colt-vault-inside__features {
+        grid-template-columns: 1fr;
+    }
+    .colt-vault-hero__ledger span:nth-child(n+3),
+    .colt-vault-feature:nth-child(n+3) {
+        display: none;
+    }
+    .colt-vault-hero__actions a,
+    .colt-vault-contact__panel a {
+        flex: 1 1 100%;
+        min-height: 44px;
     }
     .colt-core__grid, .colt-products__grid { grid-template-columns: 1fr; }
     .colt-core, .colt-deep, .colt-services, .colt-end { padding: 76px 0; }

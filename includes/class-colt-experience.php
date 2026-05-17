@@ -21,6 +21,7 @@ final class Colt_Experience
     private function __construct()
     {
         add_shortcode('colt_home_experience', [$this, 'render_home_experience']);
+        add_shortcode('colt_vault_experience', [$this, 'render_vault_experience']);
     }
 
     public function render_home_experience($atts = [])
@@ -38,6 +39,21 @@ final class Colt_Experience
 
         ob_start();
         include COLT_EXPERIENCE_DIR . 'templates/home-experience.php';
+        return (string) ob_get_clean();
+    }
+
+    public function render_vault_experience($atts = [])
+    {
+        $atts = shortcode_atts([
+            'contact_url' => home_url('/contact/'),
+            'whatsapp' => '',
+            'shop_url' => home_url('/shop/'),
+        ], $atts, 'colt_vault_experience');
+
+        $this->enqueue_assets();
+
+        ob_start();
+        include COLT_EXPERIENCE_DIR . 'templates/vault-experience.php';
         return (string) ob_get_clean();
     }
 
