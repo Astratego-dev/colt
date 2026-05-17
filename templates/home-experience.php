@@ -14,10 +14,41 @@ $support_services = array_values(array_filter($services, static function ($servi
 $products = Colt_Experience::featured_products($product_limit);
 $logo_url = Colt_Experience::logo_url();
 $mark_url = Colt_Experience::asset_url('assets/img/colt-character.png');
+$product_showcase = !empty($products) ? $products : [
+    [
+        'title' => 'Pokemon singles & slabs',
+        'url' => home_url('/shop/'),
+        'image' => Colt_Experience::asset_url('assets/img/hunter-service.jpg'),
+        'price' => '',
+    ],
+    [
+        'title' => 'Graded card vault picks',
+        'url' => home_url('/shop/'),
+        'image' => Colt_Experience::asset_url('assets/img/vault-service.jpg'),
+        'price' => '',
+    ],
+    [
+        'title' => 'Mystery box collector drop',
+        'url' => home_url('/shop/'),
+        'image' => Colt_Experience::asset_url('assets/img/hunter-service.jpg'),
+        'price' => '',
+    ],
+    [
+        'title' => 'Collector accessories',
+        'url' => home_url('/shop/'),
+        'image' => Colt_Experience::asset_url('assets/img/vault-service.jpg'),
+        'price' => '',
+    ],
+];
 $origin_world_url = Colt_Experience::asset_url('assets/scene-01-origin/colt-origin-world-clean.png');
 $origin_frame_base_url = Colt_Experience::asset_url('assets/scene-01-origin/sequence/frame_');
 $origin_frame_poster_url = Colt_Experience::asset_url('assets/scene-01-origin/sequence/frame_0000.webp');
 $orbit_guardian_url = Colt_Experience::asset_url('assets/scene-01-origin/guardian-frame-01.png');
+$orbit_model_urls = [
+    Colt_Experience::asset_url('assets/models/colt-planet-saturnus.glb'),
+    Colt_Experience::asset_url('assets/models/colt-planet-astronomy.glb'),
+    Colt_Experience::asset_url('assets/models/colt-planet-yellow.glb'),
+];
 $product_categories = [
     ['label' => 'Pokemon', 'detail' => 'סינגלים, סלאבים וסטים', 'url' => home_url('/shop/'), 'tone' => 'pokemon'],
     ['label' => 'One Piece', 'detail' => 'קלפים מבוקשים ופתיחות', 'url' => home_url('/shop/'), 'tone' => 'onepiece'],
@@ -55,7 +86,7 @@ $social_links = [
 ];
 ?>
 
-<section class="colt-xp" dir="rtl" data-colt-xp data-version="1.4.0">
+<section class="colt-xp" dir="rtl" data-colt-xp data-version="1.5.0">
     <canvas class="colt-xp__canvas" data-colt-canvas aria-hidden="true"></canvas>
     <div class="colt-xp__noise" aria-hidden="true"></div>
 
@@ -204,6 +235,15 @@ $social_links = [
 
     <section class="colt-orbit" id="colt-services" data-orbit-world data-colt-scene="orbit">
         <div class="colt-orbit__pin">
+            <div
+                class="colt-orbit__three"
+                data-orbit-three
+                data-model-primary="<?php echo esc_url($orbit_model_urls[0]); ?>"
+                data-model-secondary="<?php echo esc_url($orbit_model_urls[1]); ?>"
+                data-model-tertiary="<?php echo esc_url($orbit_model_urls[2]); ?>"
+                aria-hidden="true"
+            ></div>
+
             <div class="colt-orbit__space" aria-hidden="true">
                 <span></span><span></span><span></span><span></span>
             </div>
@@ -251,8 +291,7 @@ $social_links = [
         </div>
     </section>
 
-    <?php if (!empty($products)) : ?>
-        <section class="colt-products" data-product-world data-colt-scene="products">
+    <section class="colt-products" data-product-world data-colt-scene="products">
             <div class="colt-products__pin">
                 <div class="colt-products__sky" aria-hidden="true">
                     <span></span><span></span><span></span><span></span>
@@ -279,7 +318,7 @@ $social_links = [
 
                 <div class="colt-products__viewport" data-product-viewport>
                     <div class="colt-products__track" data-product-track>
-                        <?php foreach ($products as $index => $product) : ?>
+                        <?php foreach ($product_showcase as $index => $product) : ?>
                             <a
                                 class="colt-product-card"
                                 data-product-card
@@ -311,7 +350,6 @@ $social_links = [
                 </div>
             </div>
         </section>
-    <?php endif; ?>
 
     <section class="colt-finale" id="colt-contact" data-finale data-colt-scene="end">
         <div class="colt-finale__pin">

@@ -460,6 +460,9 @@
         const space = scene.querySelectorAll('.colt-orbit__space span');
         const guardianWrap = scene.querySelector('.colt-orbit__guardian-wrap');
         const dockItems = scene.querySelectorAll('.colt-orbit__dock span');
+        const threeMount = scene.querySelector('[data-orbit-three]');
+
+        setupOrbitThree(scene, threeMount, prefersReduced);
 
         const updateStage = (progress) => {
             const focus = smoothstep(0.2, 0.96, progress);
@@ -568,6 +571,123 @@
             .to(planets, { y: -22, stagger: 0.035, duration: 0.28 }, 0.66)
             .to(guardianWrap, { y: -18, scale: 1.07, duration: 0.34 }, 0.7)
             .to(space, { scale: 1.2, xPercent: -7, yPercent: -4, duration: 0.36 }, 0.82);
+    }
+
+    async function setupOrbitThree(orbitScene, mount, prefersReduced) {
+        if (!mount || prefersReduced || !window.WebGLRenderingContext) return;
+
+        const modelUrls = [
+            mount.dataset.modelPrimary,
+            mount.dataset.modelSecondary,
+            mount.dataset.modelTertiary,
+        ].filter(Boolean);
+        if (!modelUrls.length) return;
+
+        try {
+            const [THREE, loaderModule] = await Promise.all([
+                import('https://esm.sh/three@0.160.0'),
+                import('https://esm.sh/three@0.160.0/examples/jsm/loaders/GLTFLoader.js'),
+            ]);
+            if (!document.body.contains(mount)) return;
+
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'high-performance' });
+            renderer.setClearColor(0x000000, 0);
+            renderer.outputColorSpace = THREE.SRGBColorSpace;
+            mount.appendChild(renderer.domElement);
+
+            const world = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 80);
+            camera.position.set(0, 0.1, 6.4);
+
+            world.add(new THREE.AmbientLight(0xffffff, 1.18));
+            const key = new THREE.DirectionalLight(0xfff0c6, 2.1);
+            key.position.set(4, 5, 5);
+            world.add(key);
+            const fill = new THREE.PointLight(0x91f0df, 2.6, 10);
+            fill.position.set(-3.4, 1.4, 2.8);
+            world.add(fill);
+            const rose = new THREE.PointLight(0xff91c8, 1.9, 9);
+            rose.position.set(3.2, -1.5, 2.4);
+            world.add(rose);
+
+            const loader = new loaderModule.GLTFLoader();
+            const specs = [
+                { position: [-2.25, 0.46, -0.3], scale: 1.28, spin: 0.007, drift: 0.9 },
+                { position: [2.1, 0.7, -0.55], scale: 1.02, spin: -0.006, drift: 1.3 },
+                { position: [0.35, -0.72, 0.1], scale: 0.92, spin: 0.008, drift: 1.8 },
+            ];
+
+            const groups = await Promise.all(modelUrls.map((url, index) => loadOrbitModel(loader, THREE, url, specs[index] || specs[0])));
+            groups.forEach((group) => world.add(group));
+            mount.classList.add('is-loaded');
+
+            const resize = () => {
+                const rect = mount.getBoundingClientRect();
+                const width = Math.max(1, rect.width);
+                const height = Math.max(1, rect.height);
+                renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+                renderer.setSize(width, height, false);
+                camera.aspect = width / height;
+                camera.updateProjectionMatrix();
+            };
+
+            const render = (time) => {
+                if (!document.body.contains(mount)) return;
+                const progress = parseFloat(orbitScene.style.getPropertyValue('--orbit-progress')) || 0;
+                const focus = parseFloat(orbitScene.style.getPropertyValue('--orbit-focus')) || 0;
+                groups.forEach((group, index) => {
+                    const spec = group.userData.spec;
+                    group.rotation.y += spec.spin;
+                    group.rotation.x = Math.sin(time * 0.00045 + index) * 0.12;
+                    group.rotation.z = Math.cos(time * 0.00035 + index) * 0.08;
+                    group.position.x = spec.position[0] + Math.sin(time * 0.00035 + spec.drift) * 0.11 + (progress - 0.5) * (index - 1) * 0.42;
+                    group.position.y = spec.position[1] + Math.cos(time * 0.00042 + spec.drift) * 0.08 + focus * (index === 2 ? -0.18 : 0.08);
+                    const pulse = 1 + Math.sin(time * 0.001 + index) * 0.035 + focus * 0.08;
+                    group.scale.setScalar(group.userData.baseScale * pulse);
+                });
+                camera.position.z = 6.4 - focus * 0.76;
+                camera.position.x = (progress - 0.5) * 0.32;
+                camera.lookAt(0, 0.05, 0);
+                renderer.render(world, camera);
+                window.requestAnimationFrame(render);
+            };
+
+            resize();
+            window.addEventListener('resize', resize, { passive: true });
+            window.requestAnimationFrame(render);
+        } catch (error) {
+            mount.classList.add('is-fallback');
+        }
+    }
+
+    function loadOrbitModel(loader, THREE, url, spec) {
+        return new Promise((resolve, reject) => {
+            loader.load(url, (gltf) => {
+                const object = gltf.scene;
+                const box = new THREE.Box3().setFromObject(object);
+                const center = box.getCenter(new THREE.Vector3());
+                const size = box.getSize(new THREE.Vector3());
+                const maxSize = Math.max(size.x, size.y, size.z) || 1;
+                object.position.sub(center);
+                object.traverse((child) => {
+                    if (!child.isMesh) return;
+                    child.frustumCulled = false;
+                    if (child.material) {
+                        child.material = child.material.clone();
+                        child.material.roughness = Math.min(1, (child.material.roughness || 0.55) + 0.12);
+                        child.material.metalness = Math.max(0, (child.material.metalness || 0) * 0.4);
+                    }
+                });
+
+                const group = new THREE.Group();
+                group.add(object);
+                group.position.set(spec.position[0], spec.position[1], spec.position[2]);
+                group.userData.spec = spec;
+                group.userData.baseScale = spec.scale / maxSize;
+                group.scale.setScalar(group.userData.baseScale);
+                resolve(group);
+            }, undefined, reject);
+        });
     }
 
     function setupFinale(root, prefersReduced) {
