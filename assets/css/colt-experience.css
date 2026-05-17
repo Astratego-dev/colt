@@ -1357,6 +1357,351 @@ html.colt-is-traveling body {
     cursor: wait;
 }
 
+.colt-products {
+    --product-progress: 0;
+    position: relative;
+    width: 100vw;
+    max-width: 100vw;
+    height: 460vh;
+    min-height: 100vh;
+    margin-right: calc(50% - 50vw);
+    margin-left: calc(50% - 50vw);
+    padding: 0;
+    overflow: visible;
+    color: #143b3c;
+    background: #f8c2df;
+    direction: rtl;
+}
+
+.colt-products__pin {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    min-height: 680px;
+    overflow: hidden;
+    isolation: isolate;
+    background:
+        radial-gradient(circle at 20% 18%, rgba(255,255,255,.62), transparent 12rem),
+        radial-gradient(circle at 74% 24%, rgba(255, 231, 150, .62), transparent 22rem),
+        radial-gradient(circle at 14% 76%, rgba(111, 212, 198, .5), transparent 24rem),
+        linear-gradient(180deg, #f8c2df 0%, #ffe2a9 42%, #aee8db 100%);
+}
+
+.colt-products__pin::before,
+.colt-products__pin::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.colt-products__pin::before {
+    opacity: .52;
+    background:
+        linear-gradient(90deg, rgba(20,59,60,.2), transparent 22%, transparent 76%, rgba(20,59,60,.14)),
+        radial-gradient(circle at 50% 60%, rgba(255,255,255,.44), transparent 20rem);
+}
+
+.colt-products__pin::after {
+    opacity: .22;
+    background:
+        linear-gradient(rgba(20,59,60,.12) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(20,59,60,.1) 1px, transparent 1px);
+    background-size: 82px 82px;
+    mask-image: linear-gradient(to bottom, transparent 0, #000 16%, #000 86%, transparent 100%);
+}
+
+.colt-products__sky,
+.colt-products__intro,
+.colt-products__categories,
+.colt-products__viewport,
+.colt-products__ticker {
+    position: absolute;
+}
+
+.colt-products__sky {
+    z-index: 1;
+    inset: -8vh -8vw;
+    pointer-events: none;
+}
+
+.colt-products__sky span {
+    position: absolute;
+    display: block;
+    border-radius: 999px;
+    opacity: .72;
+    filter: blur(26px);
+    animation: coltProductGlow 13s ease-in-out infinite;
+}
+
+.colt-products__sky span:nth-child(1) {
+    right: 6%;
+    top: 10%;
+    width: 38vw;
+    height: 18vh;
+    background: rgba(255, 137, 188, .46);
+}
+
+.colt-products__sky span:nth-child(2) {
+    left: 4%;
+    top: 18%;
+    width: 34vw;
+    height: 20vh;
+    background: rgba(255, 229, 154, .5);
+    animation-delay: -4s;
+}
+
+.colt-products__sky span:nth-child(3) {
+    right: 24%;
+    bottom: 4%;
+    width: 48vw;
+    height: 24vh;
+    background: rgba(111, 212, 198, .46);
+    animation-delay: -8s;
+}
+
+.colt-products__sky span:nth-child(4) {
+    left: 22%;
+    bottom: 28%;
+    width: 28vw;
+    height: 18vh;
+    background: rgba(184, 155, 255, .3);
+    animation-delay: -10s;
+}
+
+.colt-products__intro {
+    z-index: 8;
+    right: max(24px, calc((100vw - 1260px) / 2));
+    top: 13%;
+    display: grid;
+    gap: 8px;
+    width: min(560px, calc(100% - 56px));
+    text-shadow: 0 18px 46px rgba(255,255,255,.34);
+}
+
+.colt-products__intro .colt-kicker {
+    color: #0f7772;
+}
+
+.colt-products__intro h2 {
+    color: #143b3c;
+    font-size: clamp(42px, 6vw, 92px);
+}
+
+.colt-products__intro p:not(.colt-kicker) {
+    margin: 0;
+    max-width: 520px;
+    color: rgba(20,59,60,.74);
+    font-size: clamp(17px, 1.4vw, 21px);
+    line-height: 1.65;
+}
+
+.colt-products__categories {
+    z-index: 7;
+    left: max(24px, calc((100vw - 1260px) / 2));
+    top: 14%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(160px, 1fr));
+    gap: 10px;
+    width: min(520px, 38vw);
+}
+
+.colt-products__category {
+    display: grid;
+    gap: 5px;
+    min-height: 78px;
+    padding: 13px 14px;
+    border: 1px solid rgba(20,59,60,.14);
+    border-radius: 8px;
+    background: rgba(255,255,255,.42);
+    box-shadow: 0 18px 56px rgba(20,59,60,.12);
+    backdrop-filter: blur(16px);
+    transition: transform .26s ease, background .26s ease, border-color .26s ease;
+}
+
+.colt-products__category:hover,
+.colt-products__category:focus {
+    border-color: rgba(15,119,114,.36);
+    background: rgba(255,255,255,.66);
+    transform: translateY(-3px);
+}
+
+.colt-products__category span {
+    color: #143b3c;
+    font-size: 20px;
+    font-weight: 900;
+    line-height: 1;
+}
+
+.colt-products__category em {
+    color: rgba(20,59,60,.68);
+    font-size: 13px;
+    font-style: normal;
+    line-height: 1.38;
+}
+
+.colt-products__category--pokemon { background: linear-gradient(135deg, rgba(255,255,255,.58), rgba(255, 232, 99, .34)); }
+.colt-products__category--onepiece { background: linear-gradient(135deg, rgba(255,255,255,.58), rgba(255, 132, 170, .32)); }
+.colt-products__category--sports { background: linear-gradient(135deg, rgba(255,255,255,.58), rgba(111, 212, 198, .34)); }
+.colt-products__category--marvel { background: linear-gradient(135deg, rgba(255,255,255,.58), rgba(255, 158, 117, .36)); }
+.colt-products__category--accessories { background: linear-gradient(135deg, rgba(255,255,255,.58), rgba(184, 155, 255, .3)); }
+.colt-products__category--graded { background: linear-gradient(135deg, rgba(255,255,255,.58), rgba(255,255,255,.36)); }
+
+.colt-products__viewport {
+    z-index: 6;
+    right: 0;
+    left: 0;
+    bottom: 10%;
+    overflow: visible;
+    padding: 36px max(28px, calc((100vw - 1260px) / 2));
+}
+
+.colt-products__track {
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: stretch;
+    gap: 18px;
+    width: max-content;
+    min-width: 100%;
+    will-change: transform;
+}
+
+.colt-product-card {
+    position: relative;
+    display: grid;
+    grid-template-rows: minmax(250px, 1fr) auto;
+    width: clamp(238px, 22vw, 332px);
+    min-height: min(560px, 58vh);
+    overflow: hidden;
+    border: 1px solid rgba(20,59,60,.14);
+    border-radius: 8px;
+    color: #143b3c;
+    background:
+        linear-gradient(135deg, rgba(255,255,255,.82), rgba(255,255,255,.36)),
+        linear-gradient(135deg, rgba(255,145,196,.34), rgba(111,212,198,.3));
+    box-shadow: 0 34px 100px rgba(20,59,60,.18);
+    backdrop-filter: blur(18px);
+    transform-origin: 50% 70%;
+    transition: border-color .28s ease, box-shadow .28s ease, transform .28s ease;
+}
+
+.colt-product-card:nth-child(2n) {
+    margin-top: 34px;
+}
+
+.colt-product-card:nth-child(3n) {
+    margin-top: -18px;
+}
+
+.colt-product-card:hover,
+.colt-product-card:focus,
+.colt-product-card.is-active {
+    border-color: rgba(15,119,114,.42);
+    box-shadow: 0 42px 112px rgba(20,59,60,.22), inset 0 0 0 1px rgba(255,255,255,.34);
+    transform: translateY(-8px);
+}
+
+.colt-product-card__media {
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-height: 0;
+    padding: 24px;
+    background:
+        radial-gradient(circle at 50% 46%, rgba(255,255,255,.8), transparent 34%),
+        linear-gradient(180deg, rgba(255,255,255,.26), rgba(20,59,60,.06));
+}
+
+.colt-product-card__media::before,
+.colt-product-card__media::after {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+}
+
+.colt-product-card__media::before {
+    inset: 28px;
+    border: 1px solid rgba(20,59,60,.12);
+    border-radius: 8px;
+    transform: rotate(-4deg);
+}
+
+.colt-product-card__media::after {
+    right: 50%;
+    bottom: 24px;
+    width: 64%;
+    height: 16px;
+    border-radius: 50%;
+    background: rgba(20,59,60,.16);
+    filter: blur(12px);
+    translate: 50% 0;
+}
+
+.colt-product-card__media img {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+    max-height: 330px;
+    object-fit: contain;
+    padding: 10px;
+    filter: drop-shadow(0 24px 34px rgba(20,59,60,.18));
+    transition: transform .42s ease;
+}
+
+.colt-product-card:hover .colt-product-card__media img,
+.colt-product-card:focus .colt-product-card__media img,
+.colt-product-card.is-active .colt-product-card__media img {
+    transform: scale(1.06) rotate(-1deg);
+}
+
+.colt-product-card__body {
+    display: grid;
+    gap: 9px;
+    padding: 18px;
+}
+
+.colt-product-card__body small {
+    color: #0f7772;
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.colt-product-card__body strong {
+    color: #143b3c;
+    font-size: clamp(20px, 1.5vw, 28px);
+    line-height: 1.12;
+}
+
+.colt-product-card__body em {
+    color: #e55d95;
+    font-style: normal;
+    font-weight: 900;
+}
+
+.colt-products__ticker {
+    z-index: 8;
+    right: max(24px, calc((100vw - 1260px) / 2));
+    bottom: 28px;
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 8px;
+    pointer-events: none;
+}
+
+.colt-products__ticker span {
+    display: block;
+    padding: 8px 10px;
+    border: 1px solid rgba(20,59,60,.14);
+    border-radius: 8px;
+    color: rgba(20,59,60,.68);
+    background: rgba(255,255,255,.34);
+    font-size: 11px;
+    font-weight: 900;
+    backdrop-filter: blur(12px);
+}
+
 .colt-finale {
     --finale-progress: 0;
     position: relative;
@@ -1708,7 +2053,6 @@ html.colt-is-traveling body {
 .colt-core,
 .colt-deep,
 .colt-services,
-.colt-products,
 .colt-end {
     width: min(1220px, calc(100% - 40px));
     margin: 0 auto;
@@ -1940,6 +2284,12 @@ html.colt-is-traveling body {
 @keyframes coltFinaleRiver {
     0%, 100% { opacity: .68; filter: blur(.4px); }
     50% { opacity: .84; filter: blur(1.2px); }
+}
+
+@keyframes coltProductGlow {
+    0%, 100% { translate: 0 0; scale: 1; opacity: .66; }
+    42% { translate: -28px 18px; scale: 1.08; opacity: .82; }
+    76% { translate: 22px -24px; scale: .96; opacity: .58; }
 }
 
 @media (max-width: 980px) {
@@ -2237,6 +2587,78 @@ html.colt-is-traveling body {
         opacity: 1;
         transform: translateY(0);
     }
+    .colt-products {
+        height: 430vh;
+    }
+    .colt-products__pin {
+        height: 100vh;
+        height: 100svh;
+        min-height: 100svh;
+    }
+    .colt-products__intro {
+        right: 16px;
+        left: 16px;
+        top: 9%;
+        width: auto;
+    }
+    .colt-products__intro h2 {
+        font-size: clamp(36px, 10vw, 64px);
+    }
+    .colt-products__intro p:not(.colt-kicker) {
+        max-width: 360px;
+        font-size: 16px;
+    }
+    .colt-products__categories {
+        right: 16px;
+        left: 16px;
+        top: 30%;
+        display: flex;
+        gap: 8px;
+        width: auto;
+        overflow: visible;
+    }
+    .colt-products__category {
+        flex: 0 0 170px;
+        min-height: 68px;
+        padding: 11px 12px;
+    }
+    .colt-products__category span {
+        font-size: 17px;
+    }
+    .colt-products__category em {
+        font-size: 12px;
+    }
+    .colt-products__viewport {
+        bottom: 9%;
+        padding: 30px 16px;
+    }
+    .colt-products__track {
+        gap: 12px;
+    }
+    .colt-product-card {
+        width: min(270px, 72vw);
+        min-height: min(430px, 54vh);
+        grid-template-rows: minmax(190px, 1fr) auto;
+    }
+    .colt-product-card:nth-child(2n),
+    .colt-product-card:nth-child(3n) {
+        margin-top: 0;
+    }
+    .colt-product-card__media {
+        padding: 18px;
+    }
+    .colt-product-card__media img {
+        max-height: 230px;
+    }
+    .colt-product-card__body {
+        padding: 14px;
+    }
+    .colt-products__ticker {
+        right: 16px;
+        left: 16px;
+        bottom: 16px;
+        overflow: hidden;
+    }
     .colt-finale { height: 420vh; }
     .colt-finale__pin {
         height: 100vh;
@@ -2305,7 +2727,7 @@ html.colt-is-traveling body {
 }
 
 @media (max-width: 640px) {
-    .colt-nav, .colt-core, .colt-deep, .colt-services, .colt-products, .colt-end { width: min(100% - 28px, 1220px); }
+    .colt-nav, .colt-core, .colt-deep, .colt-services, .colt-end { width: min(100% - 28px, 1220px); }
     .colt-nav { align-items: flex-start; }
     .colt-nav__links { flex-wrap: wrap; justify-content: flex-end; }
     .colt-nav__links a { padding: 8px 9px; font-size: 12px; }
@@ -2339,7 +2761,7 @@ html.colt-is-traveling body {
         display: none;
     }
     .colt-core__grid, .colt-products__grid { grid-template-columns: 1fr; }
-    .colt-core, .colt-deep, .colt-services, .colt-products, .colt-end { padding: 76px 0; }
+    .colt-core, .colt-deep, .colt-services, .colt-end { padding: 76px 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {

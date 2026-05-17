@@ -18,6 +18,14 @@ $origin_world_url = Colt_Experience::asset_url('assets/scene-01-origin/colt-orig
 $origin_frame_base_url = Colt_Experience::asset_url('assets/scene-01-origin/sequence/frame_');
 $origin_frame_poster_url = Colt_Experience::asset_url('assets/scene-01-origin/sequence/frame_0000.webp');
 $orbit_guardian_url = Colt_Experience::asset_url('assets/scene-01-origin/guardian-frame-01.png');
+$product_categories = [
+    ['label' => 'Pokemon', 'detail' => 'סינגלים, סלאבים וסטים', 'url' => home_url('/shop/'), 'tone' => 'pokemon'],
+    ['label' => 'One Piece', 'detail' => 'קלפים מבוקשים ופתיחות', 'url' => home_url('/shop/'), 'tone' => 'onepiece'],
+    ['label' => 'Sports', 'detail' => 'NBA, NFL, MLB וכדורגל', 'url' => home_url('/shop/'), 'tone' => 'sports'],
+    ['label' => 'Marvel / Disney', 'detail' => 'פריטי תרבות ואייקונים', 'url' => home_url('/shop/'), 'tone' => 'marvel'],
+    ['label' => 'Accessories', 'detail' => 'שמירה, תצוגה ואחסון', 'url' => home_url('/shop/'), 'tone' => 'accessories'],
+    ['label' => 'Graded Cards', 'detail' => 'PSA, BGS וסלאבים', 'url' => home_url('/shop/'), 'tone' => 'graded'],
+];
 $contact_url = !empty($atts['contact_url']) ? (string) $atts['contact_url'] : home_url('/contact/');
 $social_links = [
     [
@@ -47,7 +55,7 @@ $social_links = [
 ];
 ?>
 
-<section class="colt-xp" dir="rtl" data-colt-xp data-version="1.3.0">
+<section class="colt-xp" dir="rtl" data-colt-xp data-version="1.4.0">
     <canvas class="colt-xp__canvas" data-colt-canvas aria-hidden="true"></canvas>
     <div class="colt-xp__noise" aria-hidden="true"></div>
 
@@ -244,22 +252,63 @@ $social_links = [
     </section>
 
     <?php if (!empty($products)) : ?>
-        <section class="colt-products" data-colt-scene="products">
-            <div class="colt-section-head colt-reveal">
-                <p class="colt-kicker">LATEST DROPS</p>
-                <h2>מהחנות אל החוויה.</h2>
-                <p>מוצרים מתוך WooCommerce, עם במה שמתאימה לעולם אספנות יוקרתי.</p>
-            </div>
-            <div class="colt-products__grid">
-                <?php foreach ($products as $product) : ?>
-                    <a class="colt-product colt-reveal" href="<?php echo esc_url($product['url']); ?>">
-                        <span><img src="<?php echo esc_url($product['image']); ?>" alt="<?php echo esc_attr($product['title']); ?>" loading="lazy"></span>
-                        <strong><?php echo esc_html($product['title']); ?></strong>
-                        <?php if (!empty($product['price'])) : ?>
-                            <em><?php echo wp_kses_post($product['price']); ?></em>
-                        <?php endif; ?>
-                    </a>
-                <?php endforeach; ?>
+        <section class="colt-products" data-product-world data-colt-scene="products">
+            <div class="colt-products__pin">
+                <div class="colt-products__sky" aria-hidden="true">
+                    <span></span><span></span><span></span><span></span>
+                </div>
+
+                <div class="colt-products__intro" data-product-intro>
+                    <p class="colt-kicker">LATEST DROPS</p>
+                    <h2>מהחנות אל המסלול.</h2>
+                    <p>מבחר קלפים, סלאבים, אביזרים וקטגוריות אספנות שנעות יחד כמו ויטרינה חיה.</p>
+                </div>
+
+                <div class="colt-products__categories" data-product-categories aria-label="קטגוריות אספנות">
+                    <?php foreach ($product_categories as $index => $category) : ?>
+                        <a
+                            class="colt-products__category colt-products__category--<?php echo esc_attr($category['tone']); ?>"
+                            href="<?php echo esc_url($category['url']); ?>"
+                            style="--i: <?php echo esc_attr((string) $index); ?>"
+                        >
+                            <span><?php echo esc_html($category['label']); ?></span>
+                            <em><?php echo esc_html($category['detail']); ?></em>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
+
+                <div class="colt-products__viewport" data-product-viewport>
+                    <div class="colt-products__track" data-product-track>
+                        <?php foreach ($products as $index => $product) : ?>
+                            <a
+                                class="colt-product-card"
+                                data-product-card
+                                href="<?php echo esc_url($product['url']); ?>"
+                                style="--i: <?php echo esc_attr((string) $index); ?>"
+                            >
+                                <span class="colt-product-card__media">
+                                    <img src="<?php echo esc_url($product['image']); ?>" alt="<?php echo esc_attr($product['title']); ?>" loading="lazy">
+                                </span>
+                                <span class="colt-product-card__body">
+                                    <small>DROP 0<?php echo esc_html((string) ($index + 1)); ?></small>
+                                    <strong><?php echo esc_html($product['title']); ?></strong>
+                                    <?php if (!empty($product['price'])) : ?>
+                                        <em><?php echo wp_kses_post($product['price']); ?></em>
+                                    <?php endif; ?>
+                                </span>
+                            </a>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+
+                <div class="colt-products__ticker" aria-hidden="true">
+                    <span>Pokemon</span>
+                    <span>One Piece</span>
+                    <span>Sports</span>
+                    <span>Marvel</span>
+                    <span>Disney</span>
+                    <span>Slabs</span>
+                </div>
             </div>
         </section>
     <?php endif; ?>

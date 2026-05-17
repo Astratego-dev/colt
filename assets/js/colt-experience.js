@@ -10,6 +10,7 @@
         setupOrigin(root, prefersReduced);
         setupCoreWorld(root, prefersReduced);
         setupOrbitWorld(root, prefersReduced);
+        setupProductWorld(root, prefersReduced);
         setupFinale(root, prefersReduced);
         setupHyperspace(root, prefersReduced);
     });
@@ -627,6 +628,86 @@
             .to(socialLinks, { autoAlpha: 1, y: 0, scale: 1, stagger: 0.04, duration: 0.28 }, 0.5)
             .to(halos, { scale: 1.24, rotate: 44, stagger: 0.04, duration: 0.38 }, 0.68)
             .to(petals, { y: -26, x: -18, stagger: 0.008, duration: 0.32 }, 0.74);
+    }
+
+    function setupProductWorld(root, prefersReduced) {
+        const gsap = window.gsap;
+        const ScrollTrigger = window.ScrollTrigger;
+        const scene = root.querySelector('[data-product-world]');
+        if (!scene) return;
+
+        const pin = scene.querySelector('.colt-products__pin');
+        const intro = scene.querySelector('[data-product-intro]');
+        const categories = scene.querySelectorAll('.colt-products__category');
+        const track = scene.querySelector('[data-product-track]');
+        const cards = scene.querySelectorAll('[data-product-card]');
+        const sky = scene.querySelectorAll('.colt-products__sky span');
+        const tickerItems = scene.querySelectorAll('.colt-products__ticker span');
+
+        if (!track || !cards.length) return;
+
+        const updateStage = (progress) => {
+            const active = Math.max(0, Math.min(cards.length - 1, Math.floor(smoothstep(0.24, 0.92, progress) * cards.length)));
+            scene.style.setProperty('--product-progress', progress.toFixed(3));
+            cards.forEach((card, index) => card.classList.toggle('is-active', index === active));
+        };
+
+        const trackShift = () => {
+            const viewport = scene.querySelector('[data-product-viewport]');
+            if (!viewport) return 0;
+            return Math.min(0, viewport.clientWidth - track.scrollWidth);
+        };
+
+        if (prefersReduced || !gsap || !ScrollTrigger) {
+            updateStage(0.7);
+            [intro, track].forEach((item) => {
+                if (!item) return;
+                item.style.opacity = '1';
+                item.style.transform = 'none';
+                item.style.filter = 'none';
+            });
+            cards.forEach((card) => {
+                card.style.opacity = '1';
+                card.style.transform = 'none';
+                card.style.filter = 'none';
+            });
+            return;
+        }
+
+        gsap.registerPlugin(ScrollTrigger);
+
+        gsap.set(intro, { autoAlpha: 0, y: 34, filter: 'blur(12px)' });
+        gsap.set(categories, { autoAlpha: 0, y: 34, scale: 0.92, filter: 'blur(10px)' });
+        gsap.set(cards, { autoAlpha: 0, y: 70, rotate: 4, scale: 0.86, filter: 'blur(16px)' });
+        gsap.set(tickerItems, { autoAlpha: 0, y: 18 });
+        updateStage(0);
+
+        const compact = isCompactViewport();
+        const tl = gsap.timeline({
+            defaults: { ease: 'power2.inOut' },
+            scrollTrigger: {
+                trigger: scene,
+                start: 'top top',
+                end: 'bottom bottom',
+                scrub: compact ? 0.72 : 0.88,
+                pin,
+                anticipatePin: 1,
+                invalidateOnRefresh: true,
+                onUpdate: (self) => updateStage(self.progress),
+            },
+        });
+
+        tl
+            .to(sky, { scale: compact ? 1.12 : 1.2, xPercent: -5, yPercent: -2, stagger: 0.03, duration: 0.9 }, 0)
+            .to(intro, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.2 }, 0.04)
+            .to(intro, { autoAlpha: compact ? 0.5 : 0.62, y: compact ? -48 : -28, filter: 'blur(5px)', duration: 0.18 }, 0.32)
+            .to(categories, { autoAlpha: 1, y: 0, scale: 1, filter: 'blur(0px)', stagger: 0.035, duration: 0.3 }, 0.18)
+            .to(cards, { autoAlpha: 1, y: 0, rotate: 0, scale: 1, filter: 'blur(0px)', stagger: 0.04, duration: 0.36 }, 0.28)
+            .to(tickerItems, { autoAlpha: 1, y: 0, stagger: 0.035, duration: 0.24 }, 0.42)
+            .to(track, { x: () => trackShift(), duration: 0.68, ease: 'none' }, 0.3)
+            .to(categories, { x: compact ? -26 : -90, stagger: 0.018, duration: 0.54 }, 0.44)
+            .to(cards, { y: (index) => (index % 2 === 0 ? -18 : 18), rotate: (index) => (index % 2 === 0 ? -2 : 2), stagger: 0.012, duration: 0.48 }, 0.5)
+            .to(tickerItems, { x: compact ? -60 : -180, stagger: 0.02, duration: 0.46 }, 0.54);
     }
 
     function setupHyperspace(root, prefersReduced) {
