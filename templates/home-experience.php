@@ -98,7 +98,7 @@ $social_links = [
 ];
 ?>
 
-<section class="colt-xp" dir="rtl" data-colt-xp data-version="1.7.0">
+<section class="colt-xp" dir="rtl" data-colt-xp data-version="1.8.0">
     <canvas class="colt-xp__canvas" data-colt-canvas aria-hidden="true"></canvas>
     <div class="colt-xp__noise" aria-hidden="true"></div>
 

@@ -22,6 +22,12 @@ Vault service page:
 [colt_vault_experience]
 ```
 
+Mystery Box product page:
+
+```text
+[colt_mystery_box_experience]
+```
+
 ## What It Does
 
 - Renders a premium COLT home experience.

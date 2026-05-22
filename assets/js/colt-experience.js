@@ -14,6 +14,7 @@
         setupFinale(root, prefersReduced);
         setupHyperspace(root, prefersReduced);
         setupVaultExperience(root, prefersReduced);
+        setupMysteryBoxExperience(root, prefersReduced);
     });
 
     function setupReveal(root, prefersReduced) {
@@ -1141,5 +1142,183 @@
                 .to(brand, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.42 }, 0)
                 .to(panel, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.42 }, 0.12);
         }
+    }
+
+    function setupMysteryBoxExperience(root, prefersReduced) {
+        const gsap = window.gsap;
+        const ScrollTrigger = window.ScrollTrigger;
+        const mystery = root.matches('[data-mystery-xp]') ? root : root.querySelector('[data-mystery-xp]');
+        if (!mystery) return;
+
+        setupMysteryPicker(mystery);
+
+        const hero = mystery.querySelector('[data-mystery-hero]');
+        const reveal = mystery.querySelector('[data-mystery-reveal]');
+        const options = mystery.querySelector('[data-mystery-options]');
+        const buy = mystery.querySelector('[data-mystery-buy]');
+
+        if (prefersReduced || !gsap || !ScrollTrigger) {
+            mystery.querySelectorAll('[data-mystery-hero-copy], [data-mystery-rail], [data-mystery-reveal-copy], [data-mystery-item], [data-mystery-options-copy], [data-mystery-picker], [data-mystery-summary], [data-mystery-buy-brand], [data-mystery-buy-panel]').forEach((item) => {
+                item.style.opacity = '1';
+                item.style.transform = 'none';
+                item.style.filter = 'none';
+            });
+            return;
+        }
+
+        gsap.registerPlugin(ScrollTrigger);
+
+        if (hero) {
+            const pin = hero.querySelector('.colt-mystery-hero__pin');
+            const bg = hero.querySelector('[data-mystery-hero-bg]');
+            const box = hero.querySelector('[data-mystery-box]');
+            const lid = hero.querySelector('.colt-mystery-box__lid');
+            const copy = hero.querySelector('[data-mystery-hero-copy]');
+            const rail = hero.querySelector('[data-mystery-rail]');
+            const orbit = hero.querySelectorAll('.colt-mystery-orbit span');
+
+            gsap.set(copy, { autoAlpha: 0, y: 34, filter: 'blur(12px)' });
+            gsap.set(rail, { autoAlpha: 0, y: 24, filter: 'blur(8px)' });
+            gsap.set(orbit, { autoAlpha: 0.24, scale: 0.76, rotate: -18 });
+
+            gsap.timeline({
+                defaults: { ease: 'power2.inOut' },
+                scrollTrigger: {
+                    trigger: hero,
+                    start: 'top top',
+                    end: 'bottom bottom',
+                    scrub: 0.86,
+                    pin,
+                    anticipatePin: 1,
+                },
+            })
+                .to(bg, { scale: 1.16, xPercent: isCompactViewport() ? -4 : -2, duration: 0.95 }, 0)
+                .to(orbit, { autoAlpha: 0.74, scale: 1.12, rotate: 24, stagger: 0.04, duration: 0.66 }, 0.05)
+                .to(box, { y: isCompactViewport() ? 22 : -10, scale: isCompactViewport() ? 1.05 : 1.16, rotate: -5, duration: 0.6 }, 0.08)
+                .to(lid, { y: -34, rotate: -16, duration: 0.46 }, 0.34)
+                .to(copy, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.25 }, 0.04)
+                .to(copy, { autoAlpha: isCompactViewport() ? 0.5 : 0.66, y: -34, filter: 'blur(5px)', duration: 0.2 }, 0.48)
+                .to(rail, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.3 }, 0.48)
+                .to(box, { y: isCompactViewport() ? 70 : 34, scale: isCompactViewport() ? 1.18 : 1.32, rotate: 6, filter: 'blur(1px)', duration: 0.34 }, 0.72);
+        }
+
+        if (reveal) {
+            const pin = reveal.querySelector('.colt-mystery-reveal__pin');
+            const bg = reveal.querySelector('[data-mystery-reveal-bg]');
+            const copy = reveal.querySelector('[data-mystery-reveal-copy]');
+            const items = reveal.querySelectorAll('[data-mystery-item]');
+            const burst = reveal.querySelectorAll('.colt-mystery-reveal__burst span');
+
+            gsap.set(copy, { autoAlpha: 0, y: 34, filter: 'blur(12px)' });
+            gsap.set(items, { autoAlpha: 0, y: 54, scale: 0.92, rotate: 4, filter: 'blur(12px)' });
+            gsap.set(burst, { autoAlpha: 0, scale: 0.5, rotate: -22 });
+
+            gsap.timeline({
+                defaults: { ease: 'power2.inOut' },
+                scrollTrigger: {
+                    trigger: reveal,
+                    start: 'top top',
+                    end: 'bottom bottom',
+                    scrub: 0.88,
+                    pin,
+                    anticipatePin: 1,
+                },
+            })
+                .to(bg, { scale: 1.14, xPercent: isCompactViewport() ? 3 : 5, duration: 0.95 }, 0)
+                .to(burst, { autoAlpha: 0.84, scale: 1.18, rotate: 34, stagger: 0.06, duration: 0.5 }, 0.04)
+                .to(copy, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.24 }, 0.08)
+                .to(items, { autoAlpha: 1, y: 0, scale: 1, rotate: 0, filter: 'blur(0px)', stagger: 0.075, duration: 0.4 }, 0.26)
+                .to(items, { y: (index) => (index === 1 ? -26 : 20), rotate: (index) => (index - 1) * -4, stagger: 0.02, duration: 0.48 }, 0.58)
+                .to(copy, { autoAlpha: isCompactViewport() ? 0.46 : 0.62, y: -28, filter: 'blur(4px)', duration: 0.2 }, 0.7);
+        }
+
+        if (options) {
+            const copy = options.querySelector('[data-mystery-options-copy]');
+            const picker = options.querySelector('[data-mystery-picker]');
+            const summary = options.querySelector('[data-mystery-summary]');
+            gsap.set([copy, picker, summary], { autoAlpha: 0, y: 34, filter: 'blur(12px)' });
+
+            gsap.timeline({
+                defaults: { ease: 'power2.out' },
+                scrollTrigger: {
+                    trigger: options,
+                    start: 'top 72%',
+                    end: 'center 48%',
+                    scrub: 0.58,
+                },
+            })
+                .to(copy, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.36 }, 0)
+                .to(picker, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.36 }, 0.12)
+                .to(summary, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.36 }, 0.22);
+        }
+
+        if (buy) {
+            const brand = buy.querySelector('[data-mystery-buy-brand]');
+            const panel = buy.querySelector('[data-mystery-buy-panel]');
+            gsap.set([brand, panel], { autoAlpha: 0, y: 36, filter: 'blur(12px)' });
+
+            gsap.timeline({
+                defaults: { ease: 'power2.out' },
+                scrollTrigger: {
+                    trigger: buy,
+                    start: 'top 76%',
+                    end: 'center 52%',
+                    scrub: 0.58,
+                },
+            })
+                .to(brand, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.42 }, 0)
+                .to(panel, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.42 }, 0.12);
+        }
+    }
+
+    function setupMysteryPicker(root) {
+        const picker = root.querySelector('[data-mystery-picker]');
+        if (!picker) return;
+
+        const state = {
+            world: 'pokemon',
+            language: 'english',
+        };
+        const labels = {
+            pokemon: 'Pokemon',
+            'one-piece': 'One Piece',
+            english: 'English',
+            japanese: 'Japanese',
+        };
+        const checkout = root.querySelector('[data-mystery-checkout]');
+        const worldOutput = root.querySelector('[data-mystery-summary-world]');
+        const languageOutput = root.querySelector('[data-mystery-summary-language]');
+        const baseUrl = picker.dataset.productUrl || (checkout ? checkout.href : window.location.href);
+
+        const update = () => {
+            if (worldOutput) worldOutput.textContent = labels[state.world] || state.world;
+            if (languageOutput) languageOutput.textContent = labels[state.language] || state.language;
+            if (!checkout) return;
+
+            try {
+                const url = new URL(baseUrl, window.location.href);
+                url.searchParams.set('mystery_world', state.world);
+                url.searchParams.set('mystery_language', state.language);
+                checkout.href = url.href;
+            } catch (error) {
+                checkout.href = baseUrl;
+            }
+        };
+
+        picker.querySelectorAll('[data-mystery-choice]').forEach((button) => {
+            button.addEventListener('click', () => {
+                const group = button.dataset.mysteryChoice;
+                const value = button.dataset.value;
+                if (!group || !value) return;
+
+                state[group] = value;
+                picker.querySelectorAll(`[data-mystery-choice="${group}"]`).forEach((item) => {
+                    item.classList.toggle('is-active', item === button);
+                });
+                update();
+            });
+        });
+
+        update();
     }
 })();
