@@ -31,7 +31,7 @@ $languages = [
     dir="rtl"
     data-colt-xp
     data-mystery-xp
-    data-version="1.8.0"
+    data-version="1.8.1"
     style="<?php echo esc_attr('--mystery-closed: url(' . esc_url($closed_url) . '); --mystery-open: url(' . esc_url($open_url) . ');'); ?>"
 >
     <canvas class="colt-xp__canvas" data-colt-canvas aria-hidden="true"></canvas>
@@ -60,6 +60,15 @@ $languages = [
                 <span class="colt-mystery-box__core"></span>
                 <span class="colt-mystery-box__glow"></span>
             </div>
+            <div class="colt-mystery-stream" data-mystery-stream aria-hidden="true">
+                <span class="colt-mystery-stream__slab"><i></i></span>
+                <span class="colt-mystery-stream__booster"><i></i></span>
+                <span class="colt-mystery-stream__single"><i></i></span>
+            </div>
+            <div class="colt-mystery-foil" data-mystery-foil aria-hidden="true">
+                <span></span><span></span><span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span><span></span><span></span>
+            </div>
 
             <div class="colt-mystery-hero__copy" data-mystery-hero-copy>
                 <p class="colt-kicker">COLT MYSTERY BOX</p>
@@ -85,6 +94,23 @@ $languages = [
             <div class="colt-mystery-reveal__backdrop" data-mystery-reveal-bg aria-hidden="true"></div>
             <div class="colt-mystery-reveal__burst" aria-hidden="true">
                 <span></span><span></span><span></span>
+            </div>
+            <div class="colt-mystery-rip" data-mystery-rip aria-hidden="true">
+                <span></span><span></span><span></span><span></span><span></span>
+            </div>
+            <div class="colt-mystery-showcase" data-mystery-showcase aria-hidden="true">
+                <span class="colt-mystery-showcase__slab">
+                    <i></i>
+                    <em>GRADED</em>
+                </span>
+                <span class="colt-mystery-showcase__booster">
+                    <i></i>
+                    <em>BOOSTER</em>
+                </span>
+                <span class="colt-mystery-showcase__single">
+                    <i></i>
+                    <em>SINGLE</em>
+                </span>
             </div>
 
             <div class="colt-mystery-reveal__copy" data-mystery-reveal-copy>

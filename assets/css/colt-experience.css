@@ -2701,9 +2701,13 @@ html.colt-is-traveling body {
 .colt-mystery-reveal__backdrop,
 .colt-mystery-orbit,
 .colt-mystery-box,
+.colt-mystery-stream,
+.colt-mystery-foil,
 .colt-mystery-hero__copy,
 .colt-mystery-hero__rail,
 .colt-mystery-reveal__burst,
+.colt-mystery-rip,
+.colt-mystery-showcase,
 .colt-mystery-reveal__copy,
 .colt-mystery-items {
     position: absolute;
@@ -2717,6 +2721,7 @@ html.colt-is-traveling body {
     background-size: cover;
     filter: saturate(1.08) contrast(1.04);
     transform-origin: 50% 58%;
+    overflow: hidden;
 }
 
 .colt-mystery-hero__backdrop {
@@ -2724,6 +2729,20 @@ html.colt-is-traveling body {
         linear-gradient(90deg, rgba(7,9,20,.8), rgba(7,9,20,.16) 42%, rgba(7,9,20,.78)),
         linear-gradient(0deg, rgba(7,9,20,.88), transparent 34%, rgba(7,9,20,.2)),
         var(--mystery-closed);
+}
+
+.colt-mystery-hero__backdrop::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: var(--mystery-open-alpha, 0);
+    background-image:
+        linear-gradient(90deg, rgba(7,9,20,.8), rgba(7,9,20,.18) 46%, rgba(7,9,20,.78)),
+        linear-gradient(0deg, rgba(7,9,20,.88), transparent 34%, rgba(7,9,20,.2)),
+        var(--mystery-open);
+    background-position: center;
+    background-size: cover;
+    transition: opacity .18s linear;
 }
 
 .colt-mystery-reveal__backdrop {
@@ -2830,6 +2849,95 @@ html.colt-is-traveling body {
     opacity: .76;
 }
 
+.colt-mystery-stream {
+    z-index: 5;
+    right: 50%;
+    top: 53%;
+    width: min(740px, 56vw);
+    height: min(390px, 44vh);
+    translate: 50% -50%;
+    pointer-events: none;
+    perspective: 1200px;
+}
+
+.colt-mystery-stream span {
+    position: absolute;
+    right: 50%;
+    top: 54%;
+    display: block;
+    width: clamp(82px, 7.6vw, 130px);
+    aspect-ratio: 2.5 / 3.5;
+    border: 1px solid rgba(255,242,203,.28);
+    border-radius: 8px;
+    opacity: 0;
+    background:
+        linear-gradient(180deg, rgba(255,255,255,.68), rgba(255,255,255,.18) 20%, transparent 21%),
+        linear-gradient(135deg, rgba(139,241,222,.38), rgba(255,145,198,.32));
+    box-shadow: 0 30px 78px rgba(0,0,0,.36), inset 0 0 0 6px rgba(255,255,255,.07);
+    transform-style: preserve-3d;
+    translate: 50% -50%;
+    will-change: transform, opacity, filter;
+    backface-visibility: hidden;
+}
+
+.colt-mystery-stream span i {
+    position: absolute;
+    inset: 28% 14% 12%;
+    border-radius: 6px;
+    background:
+        radial-gradient(circle at 42% 26%, rgba(255,242,203,.72), transparent 24%),
+        linear-gradient(135deg, rgba(7,9,20,.72), rgba(139,241,222,.34), rgba(255,145,198,.28));
+}
+
+.colt-mystery-stream__slab {
+    border-color: rgba(255,242,203,.42);
+    background:
+        linear-gradient(180deg, rgba(255,255,255,.76), rgba(255,255,255,.2) 21%, transparent 22%),
+        linear-gradient(135deg, rgba(255,242,203,.35), rgba(139,241,222,.3));
+}
+
+.colt-mystery-stream__booster {
+    width: clamp(74px, 6.8vw, 112px);
+    aspect-ratio: 1.45 / 3.3;
+    background:
+        linear-gradient(120deg, transparent 0 18%, rgba(255,255,255,.24) 18% 22%, transparent 22% 40%, rgba(255,145,198,.28) 40% 44%, transparent 44%),
+        linear-gradient(135deg, rgba(139,241,222,.4), rgba(141,121,255,.32), rgba(255,242,203,.22));
+}
+
+.colt-mystery-stream__single {
+    width: clamp(76px, 7vw, 118px);
+    background:
+        linear-gradient(180deg, rgba(255,255,255,.56), rgba(255,255,255,.12) 18%, transparent 19%),
+        linear-gradient(135deg, rgba(255,145,198,.4), rgba(255,242,203,.28));
+}
+
+.colt-mystery-foil {
+    z-index: 5;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.colt-mystery-foil span,
+.colt-mystery-rip span {
+    position: absolute;
+    right: 50%;
+    top: 52%;
+    display: block;
+    width: clamp(34px, 4vw, 70px);
+    height: 8px;
+    border-radius: 999px;
+    opacity: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,242,203,.8), rgba(139,241,222,.46), transparent);
+    box-shadow: 0 0 18px rgba(255,242,203,.24);
+    transform-origin: 50% 50%;
+}
+
+.colt-mystery-foil span:nth-child(3n),
+.colt-mystery-rip span:nth-child(2n) {
+    background: linear-gradient(90deg, transparent, rgba(255,145,198,.72), rgba(139,241,222,.34), transparent);
+}
+
 .colt-mystery-hero__copy {
     z-index: 6;
     right: max(24px, calc((100vw - 1220px) / 2));
@@ -2921,6 +3029,124 @@ html.colt-is-traveling body {
     z-index: 3;
     inset: 0;
     pointer-events: none;
+}
+
+.colt-mystery-rip {
+    z-index: 5;
+    inset: 0;
+    pointer-events: none;
+}
+
+.colt-mystery-rip span {
+    width: clamp(76px, 8vw, 150px);
+    height: 2px;
+    top: 56%;
+}
+
+.colt-mystery-showcase {
+    z-index: 6;
+    right: 50%;
+    top: 55%;
+    width: min(840px, 66vw);
+    height: min(470px, 54vh);
+    translate: 50% -50%;
+    pointer-events: none;
+    perspective: 1400px;
+}
+
+.colt-mystery-showcase span {
+    position: absolute;
+    right: 50%;
+    top: 50%;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    gap: 10px;
+    width: clamp(110px, 10vw, 176px);
+    aspect-ratio: 2.5 / 3.5;
+    padding: 10px;
+    border: 1px solid rgba(255,242,203,.26);
+    border-radius: 8px;
+    opacity: 0;
+    color: #071018;
+    background:
+        linear-gradient(150deg, rgba(255,255,255,.78), rgba(255,255,255,.14) 28%, transparent 29%),
+        linear-gradient(135deg, rgba(139,241,222,.86), rgba(255,145,198,.72) 54%, rgba(255,242,203,.78));
+    box-shadow: 0 38px 94px rgba(0,0,0,.4), inset 0 0 0 1px rgba(255,255,255,.36);
+    transform-style: preserve-3d;
+    translate: 50% -50%;
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+}
+
+.colt-mystery-showcase span::before {
+    content: "";
+    position: absolute;
+    inset: 8px;
+    border-radius: 6px;
+    border: 1px solid rgba(7,9,20,.12);
+    pointer-events: none;
+}
+
+.colt-mystery-showcase span i {
+    display: block;
+    border-radius: 6px;
+    background:
+        radial-gradient(circle at 50% 28%, rgba(255,242,203,.9), transparent 20%),
+        radial-gradient(circle at 30% 70%, rgba(139,241,222,.55), transparent 22%),
+        linear-gradient(135deg, rgba(7,9,20,.76), rgba(24,24,48,.56), rgba(255,145,198,.28));
+}
+
+.colt-mystery-showcase span em {
+    position: relative;
+    z-index: 1;
+    display: block;
+    padding: 7px 8px;
+    border-radius: 6px;
+    background: rgba(255,242,203,.72);
+    color: rgba(7,9,20,.82);
+    font-size: 11px;
+    font-style: normal;
+    font-weight: 900;
+    letter-spacing: 0;
+    text-align: center;
+}
+
+.colt-mystery-showcase__slab {
+    padding-top: 28px;
+    border-width: 5px;
+    background:
+        linear-gradient(180deg, rgba(255,255,255,.84), rgba(255,255,255,.26) 18%, transparent 19%),
+        linear-gradient(135deg, rgba(255,242,203,.82), rgba(139,241,222,.68)) !important;
+}
+
+.colt-mystery-showcase__slab::after {
+    content: "COLT";
+    position: absolute;
+    right: 14px;
+    left: 14px;
+    top: 9px;
+    display: grid;
+    place-items: center;
+    height: 20px;
+    border-radius: 4px;
+    color: rgba(7,9,20,.78);
+    background: rgba(255,255,255,.72);
+    font-size: 10px;
+    font-weight: 900;
+}
+
+.colt-mystery-showcase__booster {
+    width: clamp(92px, 8.3vw, 144px);
+    aspect-ratio: 1.45 / 3.3;
+    background:
+        repeating-linear-gradient(120deg, rgba(255,255,255,.22) 0 8px, transparent 8px 20px),
+        linear-gradient(135deg, rgba(141,121,255,.9), rgba(139,241,222,.7) 48%, rgba(255,242,203,.66)) !important;
+}
+
+.colt-mystery-showcase__single {
+    background:
+        linear-gradient(150deg, rgba(255,255,255,.68), rgba(255,255,255,.16) 24%, transparent 25%),
+        linear-gradient(135deg, rgba(255,145,198,.88), rgba(255,242,203,.74)) !important;
 }
 
 .colt-mystery-reveal__burst span {
@@ -3085,6 +3311,16 @@ html.colt-is-traveling body {
     background: rgba(139,241,222,.13);
     box-shadow: 0 20px 60px rgba(139,241,222,.13);
     transform: translateY(-2px);
+}
+
+.colt-mystery-xp[data-mystery-world="one-piece"] .colt-mystery-summary,
+.colt-mystery-xp[data-mystery-world="one-piece"] .colt-mystery-picker button.is-active {
+    border-color: rgba(255,145,198,.5);
+    box-shadow: 0 22px 68px rgba(255,145,198,.16), inset 0 0 0 1px rgba(255,255,255,.08);
+}
+
+.colt-mystery-xp[data-mystery-language="japanese"] .colt-mystery-summary em {
+    color: var(--mystery-pink);
 }
 
 .colt-mystery-summary {
@@ -3970,6 +4206,24 @@ html.colt-is-traveling body {
         top: 54%;
         width: min(280px, 68vw);
     }
+    .colt-mystery-stream,
+    .colt-mystery-showcase {
+        width: min(540px, 92vw);
+        height: min(390px, 46vh);
+    }
+    .colt-mystery-stream span {
+        width: clamp(68px, 17vw, 98px);
+    }
+    .colt-mystery-showcase span {
+        width: clamp(82px, 18vw, 110px);
+        padding: 8px;
+    }
+    .colt-mystery-showcase__booster {
+        width: clamp(68px, 15vw, 92px);
+    }
+    .colt-mystery-foil span {
+        width: clamp(28px, 10vw, 54px);
+    }
     .colt-mystery-hero__rail {
         right: 16px;
         left: 16px;
@@ -4096,6 +4350,16 @@ html.colt-is-traveling body {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
     .colt-mystery-hero__rail span:nth-child(n+3) {
+        display: none;
+    }
+    .colt-mystery-stream {
+        top: 58%;
+    }
+    .colt-mystery-showcase {
+        top: 57%;
+    }
+    .colt-mystery-foil span:nth-child(n+8),
+    .colt-mystery-rip span:nth-child(n+4) {
         display: none;
     }
     .colt-mystery-items {

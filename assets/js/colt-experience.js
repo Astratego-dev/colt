@@ -33,6 +33,15 @@
         items.forEach((item) => observer.observe(item));
     }
 
+    function ensureSmoothScroll(gsap, ScrollTrigger) {
+        if (isCompactViewport() || !window.Lenis || window.__coltLenis) return;
+
+        window.__coltLenis = new window.Lenis({ duration: 1.18, smoothWheel: true, wheelMultiplier: 0.82 });
+        window.__coltLenis.on('scroll', ScrollTrigger.update);
+        gsap.ticker.add((time) => window.__coltLenis.raf(time * 1000));
+        gsap.ticker.lagSmoothing(0);
+    }
+
     function setupOrigin(root, prefersReduced) {
         const gsap = window.gsap;
         const ScrollTrigger = window.ScrollTrigger;
@@ -111,12 +120,7 @@
             return;
         }
 
-        if (window.Lenis && !window.__coltLenis) {
-            window.__coltLenis = new window.Lenis({ duration: 1.18, smoothWheel: true, wheelMultiplier: 0.82 });
-            window.__coltLenis.on('scroll', ScrollTrigger.update);
-            gsap.ticker.add((time) => window.__coltLenis.raf(time * 1000));
-            gsap.ticker.lagSmoothing(0);
-        }
+        ensureSmoothScroll(gsap, ScrollTrigger);
 
         gsap.set(chapters, { autoAlpha: 0, y: 32, filter: 'blur(10px)' });
         gsap.set(rail, { autoAlpha: 1 });
@@ -1158,7 +1162,7 @@
         const buy = mystery.querySelector('[data-mystery-buy]');
 
         if (prefersReduced || !gsap || !ScrollTrigger) {
-            mystery.querySelectorAll('[data-mystery-hero-copy], [data-mystery-rail], [data-mystery-reveal-copy], [data-mystery-item], [data-mystery-options-copy], [data-mystery-picker], [data-mystery-summary], [data-mystery-buy-brand], [data-mystery-buy-panel]').forEach((item) => {
+            mystery.querySelectorAll('[data-mystery-hero-copy], [data-mystery-rail], [data-mystery-stream] span, [data-mystery-foil] span, [data-mystery-reveal-copy], [data-mystery-rip] span, [data-mystery-showcase] span, [data-mystery-item], [data-mystery-options-copy], [data-mystery-picker], [data-mystery-summary], [data-mystery-buy-brand], [data-mystery-buy-panel]').forEach((item) => {
                 item.style.opacity = '1';
                 item.style.transform = 'none';
                 item.style.filter = 'none';
@@ -1167,6 +1171,7 @@
         }
 
         gsap.registerPlugin(ScrollTrigger);
+        ensureSmoothScroll(gsap, ScrollTrigger);
 
         if (hero) {
             const pin = hero.querySelector('.colt-mystery-hero__pin');
@@ -1176,10 +1181,16 @@
             const copy = hero.querySelector('[data-mystery-hero-copy]');
             const rail = hero.querySelector('[data-mystery-rail]');
             const orbit = hero.querySelectorAll('.colt-mystery-orbit span');
+            const stream = hero.querySelectorAll('[data-mystery-stream] span');
+            const foil = hero.querySelectorAll('[data-mystery-foil] span');
+            const compact = isCompactViewport();
 
-            gsap.set(copy, { autoAlpha: 0, y: 34, filter: 'blur(12px)' });
-            gsap.set(rail, { autoAlpha: 0, y: 24, filter: 'blur(8px)' });
-            gsap.set(orbit, { autoAlpha: 0.24, scale: 0.76, rotate: -18 });
+            gsap.set(copy, { autoAlpha: 0, y: 34, scale: 0.985, filter: 'blur(8px)', force3D: true });
+            gsap.set(rail, { autoAlpha: 0, y: 24, filter: 'blur(6px)', force3D: true });
+            gsap.set(orbit, { autoAlpha: 0.22, scale: 0.72, rotate: -20, force3D: true });
+            gsap.set(bg, { '--mystery-open-alpha': 0 });
+            gsap.set(stream, { autoAlpha: 0, x: 0, y: 0, z: 0, scale: 0.52, rotate: 0, rotateY: 0, filter: 'blur(6px)', force3D: true });
+            gsap.set(foil, { autoAlpha: 0, x: 0, y: 0, scaleX: 0.2, rotate: 0, filter: 'blur(3px)', force3D: true });
 
             gsap.timeline({
                 defaults: { ease: 'power2.inOut' },
@@ -1187,19 +1198,49 @@
                     trigger: hero,
                     start: 'top top',
                     end: 'bottom bottom',
-                    scrub: 0.86,
+                    scrub: 1.28,
                     pin,
                     anticipatePin: 1,
                 },
             })
-                .to(bg, { scale: 1.16, xPercent: isCompactViewport() ? -4 : -2, duration: 0.95 }, 0)
-                .to(orbit, { autoAlpha: 0.74, scale: 1.12, rotate: 24, stagger: 0.04, duration: 0.66 }, 0.05)
-                .to(box, { y: isCompactViewport() ? 22 : -10, scale: isCompactViewport() ? 1.05 : 1.16, rotate: -5, duration: 0.6 }, 0.08)
-                .to(lid, { y: -34, rotate: -16, duration: 0.46 }, 0.34)
-                .to(copy, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.25 }, 0.04)
-                .to(copy, { autoAlpha: isCompactViewport() ? 0.5 : 0.66, y: -34, filter: 'blur(5px)', duration: 0.2 }, 0.48)
-                .to(rail, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.3 }, 0.48)
-                .to(box, { y: isCompactViewport() ? 70 : 34, scale: isCompactViewport() ? 1.18 : 1.32, rotate: 6, filter: 'blur(1px)', duration: 0.34 }, 0.72);
+                .to(bg, { scale: compact ? 1.1 : 1.14, xPercent: compact ? -4 : -2, duration: 1.18 }, 0)
+                .to(bg, { '--mystery-open-alpha': 0.9, duration: 0.82 }, 0.18)
+                .to(orbit, { autoAlpha: 0.82, scale: 1.24, rotate: 38, stagger: 0.05, duration: 0.96 }, 0.04)
+                .to(box, { y: compact ? 14 : -16, scale: compact ? 1.04 : 1.16, rotate: -4, duration: 0.72 }, 0.06)
+                .to(lid, { y: compact ? -50 : -72, rotate: -29, rotateX: -22, duration: 0.62 }, 0.28)
+                .to(foil, {
+                    autoAlpha: 0.9,
+                    x: (index) => (compact ? [-120, -64, -22, 28, 70, 118, -92, -38, 36, 88, -128, 128][index] : [-260, -180, -96, -30, 42, 118, 190, 268, -224, -132, 156, 232][index]),
+                    y: (index) => (compact ? [-86, -46, -18, -72, -24, -58, 34, 56, 22, 70, -4, 12][index] : [-132, -82, -34, -118, -46, -98, 58, 96, 34, 122, -8, 18][index]),
+                    rotate: (index) => (index % 2 === 0 ? -28 : 32) + index * 5,
+                    scaleX: 1,
+                    filter: 'blur(0px)',
+                    stagger: 0.018,
+                    duration: 0.48,
+                }, 0.3)
+                .to(stream, {
+                    autoAlpha: 1,
+                    x: (index) => (compact ? [0, -86, 86][index] : [0, -196, 196][index]),
+                    y: (index) => (compact ? [-70, 4, 20][index] : [-118, 2, 26][index]),
+                    scale: (index) => (index === 0 ? 1.08 : 0.96),
+                    rotate: (index) => [-2, 8, -10][index],
+                    rotateY: (index) => [0, -12, 12][index],
+                    filter: 'blur(0px)',
+                    stagger: 0.06,
+                    duration: 0.62,
+                }, 0.34)
+                .to(copy, { autoAlpha: 1, y: 0, scale: 1, filter: 'blur(0px)', duration: 0.3 }, 0.04)
+                .to(copy, { autoAlpha: compact ? 0.54 : 0.68, y: -30, filter: 'blur(3px)', duration: 0.3 }, 0.56)
+                .to(rail, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.42 }, 0.52)
+                .to(stream, {
+                    y: (index) => (compact ? [-98, -8, -12][index] : [-154, -18, -22][index]),
+                    rotate: (index) => [-7, 14, -16][index],
+                    scale: (index) => (index === 0 ? 1.2 : 1.06),
+                    stagger: 0.025,
+                    duration: 0.48,
+                }, 0.68)
+                .to(box, { y: compact ? 72 : 34, scale: compact ? 1.16 : 1.28, rotate: 5, filter: 'blur(1px)', duration: 0.42 }, 0.76)
+                .to(foil, { autoAlpha: 0.16, y: '+=34', filter: 'blur(4px)', duration: 0.28 }, 0.78);
         }
 
         if (reveal) {
@@ -1208,10 +1249,15 @@
             const copy = reveal.querySelector('[data-mystery-reveal-copy]');
             const items = reveal.querySelectorAll('[data-mystery-item]');
             const burst = reveal.querySelectorAll('.colt-mystery-reveal__burst span');
+            const rip = reveal.querySelectorAll('[data-mystery-rip] span');
+            const showcase = reveal.querySelectorAll('[data-mystery-showcase] span');
+            const compact = isCompactViewport();
 
-            gsap.set(copy, { autoAlpha: 0, y: 34, filter: 'blur(12px)' });
-            gsap.set(items, { autoAlpha: 0, y: 54, scale: 0.92, rotate: 4, filter: 'blur(12px)' });
-            gsap.set(burst, { autoAlpha: 0, scale: 0.5, rotate: -22 });
+            gsap.set(copy, { autoAlpha: 0, y: 34, scale: 0.985, filter: 'blur(8px)', force3D: true });
+            gsap.set(items, { autoAlpha: 0, y: 48, scale: 0.94, rotate: 3, filter: 'blur(8px)', force3D: true });
+            gsap.set(burst, { autoAlpha: 0, scale: 0.48, rotate: -22, force3D: true });
+            gsap.set(rip, { autoAlpha: 0, x: 0, y: 0, scaleX: 0.2, rotate: 0, filter: 'blur(4px)', force3D: true });
+            gsap.set(showcase, { autoAlpha: 0, x: 0, y: compact ? 80 : 120, z: -160, scale: 0.64, rotate: 0, rotateY: 0, filter: 'blur(6px)', force3D: true });
 
             gsap.timeline({
                 defaults: { ease: 'power2.inOut' },
@@ -1219,17 +1265,47 @@
                     trigger: reveal,
                     start: 'top top',
                     end: 'bottom bottom',
-                    scrub: 0.88,
+                    scrub: 1.22,
                     pin,
                     anticipatePin: 1,
                 },
             })
-                .to(bg, { scale: 1.14, xPercent: isCompactViewport() ? 3 : 5, duration: 0.95 }, 0)
-                .to(burst, { autoAlpha: 0.84, scale: 1.18, rotate: 34, stagger: 0.06, duration: 0.5 }, 0.04)
-                .to(copy, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.24 }, 0.08)
-                .to(items, { autoAlpha: 1, y: 0, scale: 1, rotate: 0, filter: 'blur(0px)', stagger: 0.075, duration: 0.4 }, 0.26)
-                .to(items, { y: (index) => (index === 1 ? -26 : 20), rotate: (index) => (index - 1) * -4, stagger: 0.02, duration: 0.48 }, 0.58)
-                .to(copy, { autoAlpha: isCompactViewport() ? 0.46 : 0.62, y: -28, filter: 'blur(4px)', duration: 0.2 }, 0.7);
+                .to(bg, { scale: 1.14, xPercent: compact ? 1 : 3, duration: 1.05 }, 0)
+                .to(burst, { autoAlpha: 0.86, scale: 1.28, rotate: 44, stagger: 0.07, duration: 0.66 }, 0.04)
+                .to(rip, {
+                    autoAlpha: 0.82,
+                    x: (index) => (compact ? [-128, -54, 0, 58, 126][index] : [-270, -116, 0, 118, 270][index]),
+                    y: (index) => (compact ? [-38, -16, 8, -10, 36][index] : [-68, -28, 14, -18, 66][index]),
+                    rotate: (index) => [-15, 10, -4, 8, -12][index],
+                    scaleX: 1,
+                    filter: 'blur(0px)',
+                    stagger: 0.035,
+                    duration: 0.42,
+                }, 0.12)
+                .to(showcase, {
+                    autoAlpha: 1,
+                    x: (index) => (compact ? [0, -86, 86][index] : [0, -210, 210][index]),
+                    y: (index) => (compact ? [-30, 28, 26][index] : [-66, 24, 22][index]),
+                    z: 0,
+                    scale: (index) => (index === 0 ? 1.08 : 0.98),
+                    rotate: (index) => [-4, 10, -10][index],
+                    rotateY: (index) => [0, -16, 16][index],
+                    filter: 'blur(0px)',
+                    stagger: 0.075,
+                    duration: 0.56,
+                }, 0.18)
+                .to(copy, { autoAlpha: 1, y: 0, scale: 1, filter: 'blur(0px)', duration: 0.3 }, 0.12)
+                .to(items, { autoAlpha: 1, y: 0, scale: 1, rotate: 0, filter: 'blur(0px)', stagger: 0.09, duration: 0.52 }, 0.32)
+                .to(showcase, {
+                    y: (index) => (compact ? [-52, 8, 10][index] : [-94, -10, -8][index]),
+                    rotate: (index) => [-8, 16, -16][index],
+                    scale: (index) => (index === 0 ? 1.16 : 1.05),
+                    stagger: 0.025,
+                    duration: 0.56,
+                }, 0.62)
+                .to(items, { y: (index) => (index === 1 ? -24 : 18), rotate: (index) => (index - 1) * -4, stagger: 0.025, duration: 0.56 }, 0.62)
+                .to(rip, { autoAlpha: 0.18, y: '+=28', filter: 'blur(3px)', duration: 0.28 }, 0.72)
+                .to(copy, { autoAlpha: compact ? 0.5 : 0.66, y: -24, filter: 'blur(3px)', duration: 0.28 }, 0.74);
         }
 
         if (options) {
@@ -1291,6 +1367,8 @@
         const baseUrl = picker.dataset.productUrl || (checkout ? checkout.href : window.location.href);
 
         const update = () => {
+            root.dataset.mysteryWorld = state.world;
+            root.dataset.mysteryLanguage = state.language;
             if (worldOutput) worldOutput.textContent = labels[state.world] || state.world;
             if (languageOutput) languageOutput.textContent = labels[state.language] || state.language;
             if (!checkout) return;
