@@ -5,8 +5,6 @@ if (!defined('ABSPATH')) {
 
 $logo_url = Colt_Experience::logo_url();
 $mark_url = Colt_Experience::asset_url('assets/img/colt-character.png');
-$closed_url = Colt_Experience::asset_url('assets/mystery/mystery-box-closed.jpg');
-$open_url = Colt_Experience::asset_url('assets/mystery/mystery-box-open.jpg');
 $product_url = !empty($atts['product_url']) ? (string) $atts['product_url'] : home_url('/shop/');
 $contact_url = !empty($atts['contact_url']) ? (string) $atts['contact_url'] : home_url('/contact/');
 $whatsapp_url = !empty($atts['whatsapp']) ? (string) $atts['whatsapp'] : $contact_url;
@@ -31,8 +29,7 @@ $languages = [
     dir="rtl"
     data-colt-xp
     data-mystery-xp
-    data-version="1.8.1"
-    style="<?php echo esc_attr('--mystery-closed: url(' . esc_url($closed_url) . '); --mystery-open: url(' . esc_url($open_url) . ');'); ?>"
+    data-version="1.8.2"
 >
     <canvas class="colt-xp__canvas" data-colt-canvas aria-hidden="true"></canvas>
     <div class="colt-xp__noise" aria-hidden="true"></div>
@@ -56,14 +53,17 @@ $languages = [
                 <span></span><span></span><span></span><span></span>
             </div>
             <div class="colt-mystery-box" data-mystery-box aria-hidden="true">
+                <span class="colt-mystery-box__shadow"></span>
+                <span class="colt-mystery-box__tray"></span>
                 <span class="colt-mystery-box__lid"></span>
                 <span class="colt-mystery-box__core"></span>
+                <span class="colt-mystery-box__seal"></span>
                 <span class="colt-mystery-box__glow"></span>
             </div>
             <div class="colt-mystery-stream" data-mystery-stream aria-hidden="true">
-                <span class="colt-mystery-stream__slab"><i></i></span>
-                <span class="colt-mystery-stream__booster"><i></i></span>
-                <span class="colt-mystery-stream__single"><i></i></span>
+                <span class="colt-mystery-stream__slab"><i></i><em>Graded</em></span>
+                <span class="colt-mystery-stream__booster"><i></i><em>Booster</em></span>
+                <span class="colt-mystery-stream__single"><i></i><em>Single</em></span>
             </div>
             <div class="colt-mystery-foil" data-mystery-foil aria-hidden="true">
                 <span></span><span></span><span></span><span></span><span></span><span></span>

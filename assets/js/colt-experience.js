@@ -1177,7 +1177,11 @@
             const pin = hero.querySelector('.colt-mystery-hero__pin');
             const bg = hero.querySelector('[data-mystery-hero-bg]');
             const box = hero.querySelector('[data-mystery-box]');
+            const core = hero.querySelector('.colt-mystery-box__core');
+            const tray = hero.querySelector('.colt-mystery-box__tray');
             const lid = hero.querySelector('.colt-mystery-box__lid');
+            const seal = hero.querySelector('.colt-mystery-box__seal');
+            const glow = hero.querySelector('.colt-mystery-box__glow');
             const copy = hero.querySelector('[data-mystery-hero-copy]');
             const rail = hero.querySelector('[data-mystery-rail]');
             const orbit = hero.querySelectorAll('.colt-mystery-orbit span');
@@ -1189,6 +1193,9 @@
             gsap.set(rail, { autoAlpha: 0, y: 24, filter: 'blur(6px)', force3D: true });
             gsap.set(orbit, { autoAlpha: 0.22, scale: 0.72, rotate: -20, force3D: true });
             gsap.set(bg, { '--mystery-open-alpha': 0 });
+            gsap.set([core, tray, lid, seal, glow], { force3D: true });
+            gsap.set(tray, { autoAlpha: 0.74, y: 0 });
+            gsap.set(glow, { autoAlpha: 0.58, scale: 0.82 });
             gsap.set(stream, { autoAlpha: 0, x: 0, y: 0, z: 0, scale: 0.52, rotate: 0, rotateY: 0, filter: 'blur(6px)', force3D: true });
             gsap.set(foil, { autoAlpha: 0, x: 0, y: 0, scaleX: 0.2, rotate: 0, filter: 'blur(3px)', force3D: true });
 
@@ -1207,7 +1214,11 @@
                 .to(bg, { '--mystery-open-alpha': 0.9, duration: 0.82 }, 0.18)
                 .to(orbit, { autoAlpha: 0.82, scale: 1.24, rotate: 38, stagger: 0.05, duration: 0.96 }, 0.04)
                 .to(box, { y: compact ? 14 : -16, scale: compact ? 1.04 : 1.16, rotate: -4, duration: 0.72 }, 0.06)
-                .to(lid, { y: compact ? -50 : -72, rotate: -29, rotateX: -22, duration: 0.62 }, 0.28)
+                .to(seal, { autoAlpha: 0, y: compact ? -24 : -34, scaleX: 0.08, filter: 'blur(4px)', duration: 0.24 }, 0.22)
+                .to(lid, { y: compact ? -58 : -86, x: compact ? -10 : -18, rotate: -32, rotateX: -26, duration: 0.68 }, 0.28)
+                .to(core, { y: compact ? 12 : 18, scale: 1.04, rotate: -2, duration: 0.56 }, 0.3)
+                .to(tray, { autoAlpha: 1, y: compact ? -14 : -22, scale: 1.08, duration: 0.56 }, 0.32)
+                .to(glow, { autoAlpha: 0.94, scale: 1.52, filter: 'blur(24px)', duration: 0.56 }, 0.3)
                 .to(foil, {
                     autoAlpha: 0.9,
                     x: (index) => (compact ? [-120, -64, -22, 28, 70, 118, -92, -38, 36, 88, -128, 128][index] : [-260, -180, -96, -30, 42, 118, 190, 268, -224, -132, 156, 232][index]),
@@ -1239,6 +1250,7 @@
                     stagger: 0.025,
                     duration: 0.48,
                 }, 0.68)
+                .to(glow, { autoAlpha: 0.56, scale: 1.18, duration: 0.34 }, 0.72)
                 .to(box, { y: compact ? 72 : 34, scale: compact ? 1.16 : 1.28, rotate: 5, filter: 'blur(1px)', duration: 0.42 }, 0.76)
                 .to(foil, { autoAlpha: 0.16, y: '+=34', filter: 'blur(4px)', duration: 0.28 }, 0.78);
         }

@@ -29,7 +29,7 @@ $vault_steps = [
     dir="rtl"
     data-colt-xp
     data-vault-xp
-    data-version="1.8.1"
+    data-version="1.8.2"
     style="<?php echo esc_attr('--vault-entrance: url(' . esc_url($vault_entrance_url) . '); --vault-interior: url(' . esc_url($vault_interior_url) . ');'); ?>"
 >
     <canvas class="colt-xp__canvas" data-colt-canvas aria-hidden="true"></canvas>

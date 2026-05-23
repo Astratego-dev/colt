@@ -2726,9 +2726,25 @@ html.colt-is-traveling body {
 
 .colt-mystery-hero__backdrop {
     background-image:
-        linear-gradient(90deg, rgba(7,9,20,.8), rgba(7,9,20,.16) 42%, rgba(7,9,20,.78)),
-        linear-gradient(0deg, rgba(7,9,20,.88), transparent 34%, rgba(7,9,20,.2)),
-        var(--mystery-closed);
+        radial-gradient(circle at 50% 52%, rgba(255,242,203,.18), transparent 19rem),
+        radial-gradient(circle at 24% 22%, rgba(255,145,198,.2), transparent 27rem),
+        radial-gradient(circle at 78% 18%, rgba(139,241,222,.16), transparent 26rem),
+        linear-gradient(135deg, #060812, #14122a 52%, #071522);
+}
+
+.colt-mystery-hero__backdrop::before,
+.colt-mystery-reveal__backdrop::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+        linear-gradient(115deg, transparent 0 30%, rgba(255,242,203,.1) 31%, transparent 34% 100%),
+        linear-gradient(rgba(255,242,203,.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,242,203,.035) 1px, transparent 1px);
+    background-size: auto, 88px 88px, 88px 88px;
+    opacity: .34;
+    mask-image: radial-gradient(circle at 50% 56%, #000 0 34%, transparent 70%);
 }
 
 .colt-mystery-hero__backdrop::after {
@@ -2737,19 +2753,21 @@ html.colt-is-traveling body {
     inset: 0;
     opacity: var(--mystery-open-alpha, 0);
     background-image:
-        linear-gradient(90deg, rgba(7,9,20,.8), rgba(7,9,20,.18) 46%, rgba(7,9,20,.78)),
-        linear-gradient(0deg, rgba(7,9,20,.88), transparent 34%, rgba(7,9,20,.2)),
-        var(--mystery-open);
+        radial-gradient(circle at 50% 55%, rgba(255,242,203,.72), transparent 9rem),
+        radial-gradient(circle at 50% 55%, rgba(139,241,222,.35), transparent 18rem),
+        conic-gradient(from 12deg at 50% 55%, transparent, rgba(255,145,198,.18), transparent 28%, rgba(139,241,222,.16), transparent 58%, rgba(255,242,203,.14), transparent);
     background-position: center;
     background-size: cover;
     transition: opacity .18s linear;
+    mix-blend-mode: screen;
 }
 
 .colt-mystery-reveal__backdrop {
     background-image:
-        linear-gradient(90deg, rgba(7,9,20,.82), rgba(7,9,20,.18) 50%, rgba(7,9,20,.8)),
-        linear-gradient(0deg, rgba(7,9,20,.86), transparent 32%, rgba(7,9,20,.16)),
-        var(--mystery-open);
+        radial-gradient(circle at 48% 46%, rgba(255,242,203,.22), transparent 20rem),
+        radial-gradient(circle at 18% 80%, rgba(139,241,222,.22), transparent 28rem),
+        radial-gradient(circle at 86% 22%, rgba(255,145,198,.18), transparent 25rem),
+        linear-gradient(140deg, #060812, #15132b 48%, #08202a);
 }
 
 .colt-mystery-hero__pin::after,
@@ -2793,60 +2811,99 @@ html.colt-is-traveling body {
 .colt-mystery-box {
     z-index: 4;
     right: 50%;
-    top: 54%;
+    top: 55%;
     display: grid;
     place-items: center;
-    width: min(360px, 28vw);
+    width: min(420px, 32vw);
     aspect-ratio: 1;
     translate: 50% -50%;
     transform-style: preserve-3d;
     pointer-events: none;
-    filter: drop-shadow(0 34px 76px rgba(0,0,0,.46));
+    filter: drop-shadow(0 42px 90px rgba(0,0,0,.52));
 }
 
+.colt-mystery-box__shadow,
+.colt-mystery-box__tray,
 .colt-mystery-box__core,
 .colt-mystery-box__lid,
+.colt-mystery-box__seal,
 .colt-mystery-box__glow {
     grid-area: 1 / 1;
     display: block;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+}
+
+.colt-mystery-box__shadow {
+    width: 92%;
+    height: 18%;
+    align-self: end;
+    border-radius: 50%;
+    background: radial-gradient(ellipse, rgba(0,0,0,.48), transparent 68%);
+    filter: blur(16px);
+    transform: translateY(18%) rotateZ(-6deg);
+}
+
+.colt-mystery-box__tray {
+    width: 70%;
+    height: 26%;
+    border: 1px solid rgba(255,242,203,.24);
+    border-radius: 8px;
+    background:
+        linear-gradient(90deg, rgba(255,242,203,.2), transparent 22%, rgba(139,241,222,.2) 78%, rgba(255,242,203,.14)),
+        linear-gradient(180deg, #1e2132, #090b14);
+    box-shadow: inset 0 0 0 9px rgba(255,255,255,.035), 0 24px 58px rgba(0,0,0,.38);
+    transform: translateY(22%) perspective(900px) rotateX(62deg) rotateZ(-6deg);
 }
 
 .colt-mystery-box__core {
-    width: 74%;
-    height: 58%;
+    width: 76%;
+    height: 52%;
     border: 1px solid rgba(255,242,203,.32);
     border-radius: 8px;
     background:
-        linear-gradient(135deg, rgba(255,242,203,.22), transparent 36%),
-        linear-gradient(135deg, #111424, #0a0c16 54%, #2a1832);
+        linear-gradient(135deg, rgba(255,242,203,.3), transparent 34%),
+        linear-gradient(90deg, rgba(139,241,222,.18), transparent 48%, rgba(255,145,198,.16)),
+        linear-gradient(135deg, #15182a, #080a14 54%, #38213d);
     box-shadow:
-        inset 0 0 0 12px rgba(255,255,255,.04),
-        inset 0 -34px 54px rgba(0,0,0,.34),
-        0 0 42px rgba(139,241,222,.16);
-    transform: perspective(800px) rotateX(52deg) rotateZ(-6deg);
+        inset 0 0 0 14px rgba(255,255,255,.045),
+        inset 0 -34px 54px rgba(0,0,0,.36),
+        0 0 52px rgba(139,241,222,.18);
+    transform: translateY(7%) perspective(900px) rotateX(57deg) rotateZ(-6deg);
 }
 
 .colt-mystery-box__lid {
-    width: 78%;
-    height: 34%;
+    width: 82%;
+    height: 36%;
     border: 1px solid rgba(255,242,203,.34);
     border-radius: 8px;
     background:
-        linear-gradient(135deg, rgba(139,241,222,.28), transparent 34%),
-        linear-gradient(135deg, #171a2d, #0b0d18 64%, #48233f);
-    box-shadow: 0 22px 60px rgba(0,0,0,.34), inset 0 0 0 8px rgba(255,255,255,.04);
-    transform: translateY(-48%) perspective(800px) rotateX(58deg) rotateZ(-6deg);
+        linear-gradient(120deg, rgba(255,242,203,.32), transparent 28%, rgba(139,241,222,.18) 74%, transparent),
+        linear-gradient(135deg, #20233a, #0b0d18 62%, #55304d);
+    box-shadow: 0 28px 70px rgba(0,0,0,.38), inset 0 0 0 9px rgba(255,255,255,.045);
+    transform: translateY(-48%) perspective(900px) rotateX(60deg) rotateZ(-6deg);
     transform-origin: 50% 100%;
 }
 
+.colt-mystery-box__seal {
+    width: 30%;
+    height: 9%;
+    border-radius: 999px;
+    background:
+        linear-gradient(90deg, rgba(255,242,203,.92), rgba(139,241,222,.64), rgba(255,145,198,.72));
+    box-shadow: 0 0 24px rgba(255,242,203,.28);
+    transform: translateY(-46%) rotateZ(-6deg);
+}
+
 .colt-mystery-box__glow {
-    width: 58%;
+    width: 62%;
     aspect-ratio: 1;
     border-radius: 50%;
     background:
         radial-gradient(circle, rgba(255,242,203,.72), rgba(139,241,222,.26) 38%, rgba(255,145,198,.08) 62%, transparent 72%);
-    filter: blur(18px);
-    opacity: .76;
+    filter: blur(20px);
+    opacity: .62;
+    transform: translateY(2%);
 }
 
 .colt-mystery-stream {
@@ -2864,9 +2921,12 @@ html.colt-is-traveling body {
     position: absolute;
     right: 50%;
     top: 54%;
-    display: block;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    gap: 8px;
     width: clamp(82px, 7.6vw, 130px);
     aspect-ratio: 2.5 / 3.5;
+    padding: 8px;
     border: 1px solid rgba(255,242,203,.28);
     border-radius: 8px;
     opacity: 0;
@@ -2881,19 +2941,50 @@ html.colt-is-traveling body {
 }
 
 .colt-mystery-stream span i {
-    position: absolute;
-    inset: 28% 14% 12%;
+    display: block;
     border-radius: 6px;
     background:
         radial-gradient(circle at 42% 26%, rgba(255,242,203,.72), transparent 24%),
         linear-gradient(135deg, rgba(7,9,20,.72), rgba(139,241,222,.34), rgba(255,145,198,.28));
 }
 
+.colt-mystery-stream span em {
+    display: block;
+    padding: 6px 7px;
+    border-radius: 6px;
+    color: rgba(7,9,20,.84);
+    background: rgba(255,242,203,.7);
+    font-size: 10px;
+    font-style: normal;
+    font-weight: 900;
+    letter-spacing: 0;
+    text-align: center;
+    text-transform: uppercase;
+}
+
 .colt-mystery-stream__slab {
+    padding-top: 24px !important;
+    border-width: 4px !important;
     border-color: rgba(255,242,203,.42);
     background:
-        linear-gradient(180deg, rgba(255,255,255,.76), rgba(255,255,255,.2) 21%, transparent 22%),
+        linear-gradient(180deg, rgba(255,255,255,.8), rgba(255,255,255,.22) 18%, transparent 19%),
         linear-gradient(135deg, rgba(255,242,203,.35), rgba(139,241,222,.3));
+}
+
+.colt-mystery-stream__slab::before {
+    content: "COLT";
+    position: absolute;
+    right: 10px;
+    left: 10px;
+    top: 8px;
+    display: grid;
+    place-items: center;
+    height: 17px;
+    border-radius: 4px;
+    color: rgba(7,9,20,.82);
+    background: rgba(255,255,255,.74);
+    font-size: 9px;
+    font-weight: 900;
 }
 
 .colt-mystery-stream__booster {
