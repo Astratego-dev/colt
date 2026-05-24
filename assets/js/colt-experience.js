@@ -15,6 +15,7 @@
         setupHyperspace(root, prefersReduced);
         setupVaultExperience(root, prefersReduced);
         setupMysteryBoxExperience(root, prefersReduced);
+        setupServiceExperience(root, prefersReduced);
     });
 
     function setupReveal(root, prefersReduced) {
@@ -1357,6 +1358,93 @@
                 .to(brand, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.42 }, 0)
                 .to(panel, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.42 }, 0.12);
         }
+    }
+
+    function setupServiceExperience(root, prefersReduced) {
+        const gsap = window.gsap;
+        const ScrollTrigger = window.ScrollTrigger;
+        const page = root.matches('[data-service-page]') ? root : root.querySelector('[data-service-page]');
+        if (!page) return;
+
+        const revealItems = page.querySelectorAll('[data-service-reveal]');
+        const hero = page.querySelector('[data-service-hero]');
+        const heroCopy = page.querySelector('[data-service-hero-copy]');
+        const guardian = page.querySelector('[data-service-guardian]');
+        const cards = page.querySelectorAll('[data-service-cards] span');
+        const metrics = page.querySelector('[data-service-metrics]');
+
+        if (prefersReduced || !gsap || !ScrollTrigger) {
+            [heroCopy, guardian, metrics, ...cards, ...revealItems].forEach((item) => {
+                if (!item) return;
+                item.style.opacity = '1';
+                item.style.transform = 'none';
+                item.style.filter = 'none';
+            });
+            return;
+        }
+
+        gsap.registerPlugin(ScrollTrigger);
+        ensureSmoothScroll(gsap, ScrollTrigger);
+
+        const compact = isCompactViewport();
+        gsap.set(heroCopy, { autoAlpha: 0, y: 38, scale: 0.985, filter: 'blur(10px)' });
+        gsap.set(guardian, { autoAlpha: 0, y: compact ? 38 : 70, scale: 0.92, filter: 'blur(12px)' });
+        gsap.set(cards, { autoAlpha: 0, y: 80, z: -120, rotateY: 18, filter: 'blur(12px)' });
+        gsap.set(metrics, { autoAlpha: 0, x: compact ? 0 : -44, y: compact ? 24 : 0, filter: 'blur(8px)' });
+
+        if (hero) {
+            gsap.timeline({
+                defaults: { ease: 'power2.out' },
+                scrollTrigger: {
+                    trigger: hero,
+                    start: 'top 72%',
+                    end: 'bottom 42%',
+                    scrub: 0.75,
+                },
+            })
+                .to(heroCopy, { autoAlpha: 1, y: 0, scale: 1, filter: 'blur(0px)', duration: 0.46 }, 0)
+                .to(guardian, { autoAlpha: 1, y: 0, scale: 1, filter: 'blur(0px)', duration: 0.58 }, 0.08)
+                .to(cards, {
+                    autoAlpha: (index) => (index % 2 ? 0.72 : 0.95),
+                    y: (index) => [-18, 24, -8, 34, -28, 16][index] || 0,
+                    z: 0,
+                    rotateY: (index) => [-12, 10, 14, -8, 8, -14][index] || 0,
+                    filter: 'blur(0px)',
+                    stagger: 0.045,
+                    duration: 0.58,
+                }, 0.12)
+                .to(metrics, { autoAlpha: 1, x: 0, y: 0, filter: 'blur(0px)', duration: 0.42 }, 0.18);
+
+            gsap.to(cards, {
+                y: (index) => (index % 2 ? '-=34' : '+=28'),
+                rotate: (index) => (index % 2 ? '+=8' : '-=7'),
+                ease: 'sine.inOut',
+                scrollTrigger: {
+                    trigger: hero,
+                    start: 'top top',
+                    end: 'bottom top',
+                    scrub: 1.05,
+                },
+            });
+        }
+
+        revealItems.forEach((item, index) => {
+            gsap.to(item, {
+                autoAlpha: 1,
+                y: 0,
+                scale: 1,
+                filter: 'blur(0px)',
+                duration: 0.58,
+                ease: 'power2.out',
+                scrollTrigger: {
+                    trigger: item,
+                    start: 'top 82%',
+                    end: 'top 58%',
+                    scrub: 0.42,
+                },
+                delay: (index % 4) * 0.02,
+            });
+        });
     }
 
     function setupMysteryPicker(root) {
