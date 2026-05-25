@@ -1368,13 +1368,16 @@
 
         const revealItems = page.querySelectorAll('[data-service-reveal]');
         const hero = page.querySelector('[data-service-hero]');
+        const scene = page.querySelector('[data-service-scene]');
         const heroCopy = page.querySelector('[data-service-hero-copy]');
         const guardian = page.querySelector('[data-service-guardian]');
         const cards = page.querySelectorAll('[data-service-cards] span');
+        const apparatus = page.querySelectorAll('[data-service-apparatus] span');
         const metrics = page.querySelector('[data-service-metrics]');
+        const motion = page.dataset.serviceMotion || 'cascade';
 
         if (prefersReduced || !gsap || !ScrollTrigger) {
-            [heroCopy, guardian, metrics, ...cards, ...revealItems].forEach((item) => {
+            [scene, heroCopy, guardian, metrics, ...cards, ...apparatus, ...revealItems].forEach((item) => {
                 if (!item) return;
                 item.style.opacity = '1';
                 item.style.transform = 'none';
@@ -1387,9 +1390,21 @@
         ensureSmoothScroll(gsap, ScrollTrigger);
 
         const compact = isCompactViewport();
+        const cardMotion = {
+            cascade: { y: [-24, 22, -10, 34, -30, 18], rotateY: [-14, 10, 14, -8, 8, -14], drift: 34 },
+            orbit: { y: [-42, 12, -28, 20, -34, 8], rotateY: [24, -22, 18, -18, 14, -14], drift: 42 },
+            target: { y: [-8, -8, -8, 20, 20, 20], rotateY: [0, 0, 0, -10, 10, -10], drift: 22 },
+            map: { y: [-16, 28, 4, 36, -20, 18], rotateY: [-8, 14, -12, 10, -14, 8], drift: 46 },
+            scan: { y: [-6, 6, -6, 6, -6, 6], rotateY: [4, -4, 4, -4, 4, -4], drift: 18 },
+            spotlight: { y: [-54, 10, -38, 26, -20, 12], rotateY: [-18, 16, -12, 20, -14, 10], drift: 58 },
+            strategy: { y: [-12, 18, -22, 16, -8, 20], rotateY: [10, -16, 14, -12, 8, -10], drift: 28 },
+        }[motion] || { y: [-18, 24, -8, 34, -28, 16], rotateY: [-12, 10, 14, -8, 8, -14], drift: 34 };
+
+        gsap.set(scene, { autoAlpha: 0.95, scale: compact ? 1.08 : 1.04, xPercent: compact ? 0 : -1, filter: 'saturate(1.02) contrast(1.02)' });
         gsap.set(heroCopy, { autoAlpha: 0, y: 38, scale: 0.985, filter: 'blur(10px)' });
         gsap.set(guardian, { autoAlpha: 0, y: compact ? 38 : 70, scale: 0.92, filter: 'blur(12px)' });
         gsap.set(cards, { autoAlpha: 0, y: 80, z: -120, rotateY: 18, filter: 'blur(12px)' });
+        gsap.set(apparatus, { autoAlpha: 0, x: compact ? 0 : -34, y: compact ? 24 : 0, filter: 'blur(8px)' });
         gsap.set(metrics, { autoAlpha: 0, x: compact ? 0 : -44, y: compact ? 24 : 0, filter: 'blur(8px)' });
 
         if (hero) {
@@ -1402,28 +1417,56 @@
                     scrub: 0.75,
                 },
             })
+                .to(scene, { autoAlpha: 1, scale: compact ? 1.02 : 1, xPercent: 0, filter: 'saturate(1.08) contrast(1.04)', duration: 0.6 }, 0)
                 .to(heroCopy, { autoAlpha: 1, y: 0, scale: 1, filter: 'blur(0px)', duration: 0.46 }, 0)
                 .to(guardian, { autoAlpha: 1, y: 0, scale: 1, filter: 'blur(0px)', duration: 0.58 }, 0.08)
                 .to(cards, {
                     autoAlpha: (index) => (index % 2 ? 0.72 : 0.95),
-                    y: (index) => [-18, 24, -8, 34, -28, 16][index] || 0,
+                    y: (index) => cardMotion.y[index] || 0,
                     z: 0,
-                    rotateY: (index) => [-12, 10, 14, -8, 8, -14][index] || 0,
+                    rotateY: (index) => cardMotion.rotateY[index] || 0,
                     filter: 'blur(0px)',
                     stagger: 0.045,
                     duration: 0.58,
                 }, 0.12)
+                .to(apparatus, { autoAlpha: 1, x: 0, y: 0, filter: 'blur(0px)', stagger: 0.045, duration: 0.42 }, 0.16)
                 .to(metrics, { autoAlpha: 1, x: 0, y: 0, filter: 'blur(0px)', duration: 0.42 }, 0.18);
 
+            gsap.to(scene, {
+                scale: compact ? 1.14 : 1.1,
+                xPercent: motion === 'target' || motion === 'map' ? 2 : -2,
+                yPercent: motion === 'scan' ? -2 : 0,
+                ease: 'none',
+                scrollTrigger: {
+                    trigger: hero,
+                    start: 'top top',
+                    end: 'bottom top',
+                    scrub: 1.15,
+                },
+            });
+
             gsap.to(cards, {
-                y: (index) => (index % 2 ? '-=34' : '+=28'),
-                rotate: (index) => (index % 2 ? '+=8' : '-=7'),
+                y: (index) => (index % 2 ? `-=${cardMotion.drift}` : `+=${Math.round(cardMotion.drift * 0.82)}`),
+                rotate: (index) => (index % 2 ? '+=10' : '-=8'),
                 ease: 'sine.inOut',
                 scrollTrigger: {
                     trigger: hero,
                     start: 'top top',
                     end: 'bottom top',
                     scrub: 1.05,
+                },
+            });
+
+            gsap.to(apparatus, {
+                y: (index) => (index % 2 ? '-=22' : '+=18'),
+                x: motion === 'map' ? (index) => [24, -18, 12][index] || 0 : 0,
+                rotate: motion === 'orbit' || motion === 'spotlight' ? (index) => (index % 2 ? 4 : -4) : 0,
+                ease: 'sine.inOut',
+                scrollTrigger: {
+                    trigger: hero,
+                    start: 'top top',
+                    end: 'bottom top',
+                    scrub: 0.9,
                 },
             });
         }

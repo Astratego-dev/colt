@@ -8,6 +8,10 @@ $mark_url = Colt_Experience::asset_url('assets/img/colt-character.png');
 $service_key = sanitize_html_class($service_page['key'] ?? 'singles');
 $service_title = (string) ($service_page['title'] ?? '');
 $service_nav_label = (string) ($service_page['nav_label'] ?? $service_title);
+$service_layout = sanitize_html_class($service_page['layout'] ?? 'gallery');
+$service_motion = sanitize_html_class($service_page['motion'] ?? 'cascade');
+$service_scene = (string) ($service_page['scene'] ?? '');
+$artifact_labels = $service_page['artifact_labels'] ?? ['Artifact', 'Signal', 'Route'];
 $hero_id = 'service-' . $service_key . '-hero';
 $brief_id = 'service-' . $service_key . '-brief';
 $process_id = 'service-' . $service_key . '-process';
@@ -16,12 +20,14 @@ $contact_id = 'service-' . $service_key . '-contact';
 ?>
 
 <section
-    class="colt-xp colt-service-page colt-service-page--<?php echo esc_attr($service_key); ?>"
+    class="colt-xp colt-service-page colt-service-page--<?php echo esc_attr($service_key); ?> colt-service-page--<?php echo esc_attr($service_layout); ?>"
     dir="rtl"
     data-colt-xp
     data-service-page
     data-service-key="<?php echo esc_attr($service_key); ?>"
-    data-version="1.9.0"
+    data-service-motion="<?php echo esc_attr($service_motion); ?>"
+    data-version="1.9.1"
+    style="<?php echo esc_attr($service_scene ? '--service-scene: url(' . esc_url($service_scene) . ');' : ''); ?>"
 >
     <canvas class="colt-xp__canvas" data-colt-canvas aria-hidden="true"></canvas>
     <div class="colt-xp__noise" aria-hidden="true"></div>
@@ -39,6 +45,7 @@ $contact_id = 'service-' . $service_key . '-contact';
     </nav>
 
     <section class="colt-service-page__hero" id="<?php echo esc_attr($hero_id); ?>" data-service-hero>
+        <div class="colt-service-page__scene" data-service-scene aria-hidden="true"></div>
         <div class="colt-service-page__aura" aria-hidden="true">
             <span></span><span></span><span></span>
         </div>
@@ -47,6 +54,11 @@ $contact_id = 'service-' . $service_key . '-contact';
         </div>
         <div class="colt-service-page__guardian" aria-hidden="true" data-service-guardian>
             <img src="<?php echo esc_url($mark_url); ?>" alt="" loading="eager">
+        </div>
+        <div class="colt-service-page__apparatus" data-service-apparatus aria-hidden="true">
+            <?php foreach (array_slice($artifact_labels, 0, 3) as $label) : ?>
+                <span><i></i><em><?php echo esc_html($label); ?></em></span>
+            <?php endforeach; ?>
         </div>
 
         <div class="colt-service-page__hero-copy" data-service-hero-copy>
