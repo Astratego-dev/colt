@@ -4,6 +4,8 @@ if (!defined('ABSPATH')) {
 }
 
 $product_limit = isset($atts['products']) ? (int) $atts['products'] : 12;
+$home_content = Colt_Experience::home_page();
+$home_nav_links = $home_content['nav_links'] ?? [];
 $services = Colt_Experience::services();
 $core_services = array_values(array_filter($services, static function ($service) {
     return isset($service['group']) && $service['group'] === 'core';
@@ -14,44 +16,7 @@ $support_services = array_values(array_filter($services, static function ($servi
 $products = Colt_Experience::featured_products($product_limit);
 $logo_url = Colt_Experience::logo_url();
 $mark_url = Colt_Experience::asset_url('assets/img/colt-character.png');
-$product_showcase = !empty($products) ? $products : [
-    [
-        'title' => 'Pokemon singles & slabs',
-        'url' => home_url('/shop/'),
-        'image' => Colt_Experience::asset_url('assets/img/hunter-service.jpg'),
-        'price' => '',
-    ],
-    [
-        'title' => 'Graded card vault picks',
-        'url' => home_url('/shop/'),
-        'image' => Colt_Experience::asset_url('assets/img/vault-service.jpg'),
-        'price' => '',
-    ],
-    [
-        'title' => 'Mystery box collector drop',
-        'url' => home_url('/shop/'),
-        'image' => Colt_Experience::asset_url('assets/img/hunter-service.jpg'),
-        'price' => '',
-    ],
-    [
-        'title' => 'Collector accessories',
-        'url' => home_url('/shop/'),
-        'image' => Colt_Experience::asset_url('assets/img/vault-service.jpg'),
-        'price' => '',
-    ],
-    [
-        'title' => 'Sports cards showcase',
-        'url' => home_url('/shop/'),
-        'image' => Colt_Experience::asset_url('assets/img/hunter-service.jpg'),
-        'price' => '',
-    ],
-    [
-        'title' => 'Marvel / Disney collectibles',
-        'url' => home_url('/shop/'),
-        'image' => Colt_Experience::asset_url('assets/img/vault-service.jpg'),
-        'price' => '',
-    ],
-];
+$product_showcase = !empty($products) ? $products : ($home_content['fallback_products'] ?? []);
 $origin_world_url = Colt_Experience::asset_url('assets/scene-01-origin/colt-origin-world-clean.png');
 $origin_frame_base_url = Colt_Experience::asset_url('assets/scene-01-origin/sequence/frame_');
 $origin_frame_poster_url = Colt_Experience::asset_url('assets/scene-01-origin/sequence/frame_0000.webp');
@@ -61,44 +26,28 @@ $orbit_model_urls = [
     Colt_Experience::asset_url('assets/models/colt-planet-astronomy.glb'),
     Colt_Experience::asset_url('assets/models/colt-planet-yellow.glb'),
 ];
-$product_categories = [
-    ['label' => 'Pokemon', 'detail' => 'סינגלים, סלאבים וסטים', 'url' => home_url('/shop/'), 'tone' => 'pokemon'],
-    ['label' => 'One Piece', 'detail' => 'קלפים מבוקשים ופתיחות', 'url' => home_url('/shop/'), 'tone' => 'onepiece'],
-    ['label' => 'Sports', 'detail' => 'NBA, NFL, MLB וכדורגל', 'url' => home_url('/shop/'), 'tone' => 'sports'],
-    ['label' => 'Marvel / Disney', 'detail' => 'פריטי תרבות ואייקונים', 'url' => home_url('/shop/'), 'tone' => 'marvel'],
-    ['label' => 'Accessories', 'detail' => 'שמירה, תצוגה ואחסון', 'url' => home_url('/shop/'), 'tone' => 'accessories'],
-    ['label' => 'Graded Cards', 'detail' => 'PSA, BGS וסלאבים', 'url' => home_url('/shop/'), 'tone' => 'graded'],
-];
 $contact_url = !empty($atts['contact_url']) ? (string) $atts['contact_url'] : home_url('/contact/');
-$social_links = [
-    [
-        'label' => 'Instagram',
-        'detail' => 'דרופים, סטוריז ופריטים חדשים',
-        'url' => !empty($atts['instagram']) ? (string) $atts['instagram'] : '#colt-contact',
-        'tone' => 'instagram',
-    ],
-    [
-        'label' => 'TikTok',
-        'detail' => 'פתיחות, רגעים והיילייטים',
-        'url' => !empty($atts['tiktok']) ? (string) $atts['tiktok'] : '#colt-contact',
-        'tone' => 'tiktok',
-    ],
-    [
-        'label' => 'Whatnot',
-        'detail' => 'לייבים ומכירות בזמן אמת',
-        'url' => !empty($atts['whatnot']) ? (string) $atts['whatnot'] : '#colt-contact',
-        'tone' => 'whatnot',
-    ],
-    [
-        'label' => 'WhatsApp',
-        'detail' => 'שאלות, איתור ושירות אישי',
-        'url' => !empty($atts['whatsapp']) ? (string) $atts['whatsapp'] : $contact_url,
-        'tone' => 'whatsapp',
-    ],
+$product_categories = $home_content['product_categories'] ?? [];
+$product_ticker = $home_content['product_ticker'] ?? [];
+$origin_rail = $home_content['origin_rail'] ?? [];
+$origin_chapters = array_values($home_content['origin_chapters'] ?? []);
+$origin_metrics = $home_content['origin_metrics'] ?? [];
+$social_links = $home_content['social_links'] ?? [];
+$social_overrides = [
+    'instagram' => !empty($atts['instagram']) ? (string) $atts['instagram'] : '',
+    'tiktok' => !empty($atts['tiktok']) ? (string) $atts['tiktok'] : '',
+    'whatnot' => !empty($atts['whatnot']) ? (string) $atts['whatnot'] : '',
+    'whatsapp' => !empty($atts['whatsapp']) ? (string) $atts['whatsapp'] : '',
 ];
+foreach ($social_links as $index => $social) {
+    $tone = isset($social['tone']) ? (string) $social['tone'] : '';
+    if ($tone !== '' && !empty($social_overrides[$tone])) {
+        $social_links[$index]['url'] = $social_overrides[$tone];
+    }
+}
 ?>
 
-<section class="colt-xp" dir="rtl" data-colt-xp data-version="1.9.1">
+<section class="colt-xp" dir="rtl" data-colt-xp data-version="1.9.3">
     <canvas class="colt-xp__canvas" data-colt-canvas aria-hidden="true"></canvas>
     <div class="colt-xp__noise" aria-hidden="true"></div>
 
@@ -107,10 +56,9 @@ $social_links = [
             <img src="<?php echo esc_url($logo_url); ?>" alt="COLT" loading="eager">
         </a>
         <div class="colt-nav__links">
-            <a href="#colt-core">חוויות מרכזיות</a>
-            <a href="#colt-services">שירותים</a>
-            <a href="#colt-contact">יצירת קשר</a>
-            <a href="<?php echo esc_url(home_url('/shop/')); ?>">חנות</a>
+            <?php foreach ($home_nav_links as $link) : ?>
+                <a href="<?php echo esc_url($link['url'] ?? '#'); ?>"><?php echo esc_html($link['label'] ?? ''); ?></a>
+            <?php endforeach; ?>
         </div>
     </nav>
 
@@ -152,42 +100,49 @@ $social_links = [
             </div>
 
             <div class="colt-origin__rail" aria-label="ניווט פתיחת COLT">
-                <p>[ COLT ORIGIN ]</p>
-                <a href="#colt-core" data-origin-step="0">כניסה לעולם</a>
-                <a href="#colt-core" data-origin-step="1">ערך ונדירות</a>
-                <a href="<?php echo esc_url(home_url('/shop/')); ?>" data-origin-step="2">התחלה</a>
+                <p><?php echo esc_html($home_content['origin_rail_title'] ?? ''); ?></p>
+                <?php foreach ($origin_rail as $item) : ?>
+                    <a href="<?php echo esc_url($item['url'] ?? '#'); ?>" data-origin-step="<?php echo esc_attr($item['step'] ?? '0'); ?>"><?php echo esc_html($item['label'] ?? ''); ?></a>
+                <?php endforeach; ?>
             </div>
 
-            <a class="colt-origin__service-tab" href="#colt-core">לגלות</a>
+            <a class="colt-origin__service-tab" href="#colt-core"><?php echo esc_html($home_content['origin_tab_label'] ?? ''); ?></a>
 
             <div class="colt-origin__copy">
-                <div class="colt-origin__chapter" data-origin-chapter="0">
-                    <p class="colt-kicker">COLT COLLECTORS CLUB</p>
-                    <h1>נכנסים לעולם שבו אוסף הופך לנכס.</h1>
-                    <p>קלפים נדירים, סלאבים ופריטי אספנות מקבלים כאן במה שנבנית סביב ערך, נדירות וסיפור אישי.</p>
-                </div>
-                <div class="colt-origin__chapter" data-origin-chapter="1">
-                    <p class="colt-kicker">CURATED VALUE</p>
-                    <h2>לא רק קונים פריט. בונים אסטרטגיית אספנות.</h2>
-                    <div class="colt-origin__metrics" aria-label="שירותי COLT מרכזיים">
-                        <span><b>01</b>סינגלים וסלאבים</span>
-                        <span><b>02</b>THE VAULT</span>
-                        <span><b>03</b>תכשיטי אספנים</span>
-                        <span><b>04</b>Mystery Box</span>
+                <?php foreach ($origin_chapters as $index => $chapter) : ?>
+                    <div class="colt-origin__chapter" data-origin-chapter="<?php echo esc_attr((string) $index); ?>">
+                        <p class="colt-kicker"><?php echo esc_html($chapter['kicker'] ?? ''); ?></p>
+                        <?php if ($index === 0) : ?>
+                            <h1><?php echo esc_html($chapter['title'] ?? ''); ?></h1>
+                        <?php else : ?>
+                            <h2><?php echo esc_html($chapter['title'] ?? ''); ?></h2>
+                        <?php endif; ?>
+                        <?php if (!empty($chapter['text'])) : ?>
+                            <p><?php echo esc_html($chapter['text']); ?></p>
+                        <?php endif; ?>
+                        <?php if ($index === 1 && !empty($origin_metrics)) : ?>
+                            <div class="colt-origin__metrics" aria-label="<?php echo esc_attr($home_content['core_aria_label'] ?? 'שירותי COLT מרכזיים'); ?>">
+                                <?php foreach ($origin_metrics as $metric) : ?>
+                                    <span><b><?php echo esc_html($metric['value'] ?? ''); ?></b><?php echo esc_html($metric['label'] ?? ''); ?></span>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
+                        <?php if (!empty($chapter['primary_label']) || !empty($chapter['secondary_label'])) : ?>
+                            <div class="colt-origin__actions">
+                                <?php if (!empty($chapter['primary_label'])) : ?>
+                                    <a href="<?php echo esc_url($chapter['primary_url'] ?? '#'); ?>"><?php echo esc_html($chapter['primary_label']); ?></a>
+                                <?php endif; ?>
+                                <?php if (!empty($chapter['secondary_label'])) : ?>
+                                    <a href="<?php echo esc_url($chapter['secondary_url'] ?? '#'); ?>"><?php echo esc_html($chapter['secondary_label']); ?></a>
+                                <?php endif; ?>
+                            </div>
+                        <?php endif; ?>
                     </div>
-                </div>
-                <div class="colt-origin__chapter" data-origin-chapter="2">
-                    <p class="colt-kicker">ENTER COLT</p>
-                    <h2>מצא, שמור, דרג ובנה את הצעד הבא שלך.</h2>
-                    <div class="colt-origin__actions">
-                        <a href="#colt-core">להתחיל את המסע</a>
-                        <a href="<?php echo esc_url(home_url('/shop/')); ?>">כניסה לחנות</a>
-                    </div>
-                </div>
+                <?php endforeach; ?>
             </div>
 
             <div class="colt-origin__label" aria-hidden="true">
-                <span>גלול כדי להתקרב</span>
+                <span><?php echo esc_html($home_content['origin_scroll_label'] ?? ''); ?></span>
                 <b></b>
             </div>
         </div>
@@ -211,12 +166,12 @@ $social_links = [
             </div>
 
             <div class="colt-core-world__copy" data-core-copy>
-                <p class="colt-kicker">MAIN EXPERIENCES</p>
-                <h2>עולם השירותים המרכזיים של COLT.</h2>
-                <p>ארבע כניסות שונות לאותו מסע אספנות: קנייה מדויקת, שמירת ערך, אובייקט אישי וחוויית פתיחה.</p>
+                <p class="colt-kicker"><?php echo esc_html($home_content['core_kicker'] ?? ''); ?></p>
+                <h2><?php echo esc_html($home_content['core_title'] ?? ''); ?></h2>
+                <p><?php echo esc_html($home_content['core_text'] ?? ''); ?></p>
             </div>
 
-            <div class="colt-core-world__services" aria-label="שירותי COLT מרכזיים">
+            <div class="colt-core-world__services" aria-label="<?php echo esc_attr($home_content['core_aria_label'] ?? ''); ?>">
                 <?php foreach ($core_services as $index => $service) : ?>
                     <a
                         class="colt-core-world__card colt-core-world__card--<?php echo esc_attr($service['tone']); ?>"
@@ -229,7 +184,7 @@ $social_links = [
                         <small><?php echo esc_html($service['eyebrow']); ?></small>
                         <strong><?php echo esc_html($service['title']); ?></strong>
                         <em><?php echo esc_html($service['text']); ?></em>
-                        <span class="colt-core-world__cta">לעמוד השירות</span>
+                        <span class="colt-core-world__cta"><?php echo esc_html($home_content['core_cta_label'] ?? ''); ?></span>
                     </a>
                 <?php endforeach; ?>
             </div>
@@ -261,12 +216,12 @@ $social_links = [
             </div>
 
             <div class="colt-orbit__copy" data-orbit-copy>
-                <p class="colt-kicker">COLLECTOR UNIVERSE</p>
-                <h2>שירותים שמקיפים את האוסף שלך מכל כיוון.</h2>
-                <p>איתור, דירוג, מכירה חיה, פריטים מבוקשים ותיק אספנות פיננסי, כולם נפתחים מתוך מערכת אחת.</p>
+                <p class="colt-kicker"><?php echo esc_html($home_content['orbit_kicker'] ?? ''); ?></p>
+                <h2><?php echo esc_html($home_content['orbit_title'] ?? ''); ?></h2>
+                <p><?php echo esc_html($home_content['orbit_text'] ?? ''); ?></p>
             </div>
 
-            <div class="colt-orbit__system" aria-label="שירותי אספנים נוספים">
+            <div class="colt-orbit__system" aria-label="<?php echo esc_attr($home_content['orbit_aria_label'] ?? ''); ?>">
                 <div class="colt-orbit__rings" aria-hidden="true">
                     <span></span><span></span><span></span><span></span>
                 </div>
@@ -295,10 +250,9 @@ $social_links = [
             </div>
 
             <div class="colt-orbit__dock" aria-hidden="true">
-                <span>SEARCH</span>
-                <span>GRADE</span>
-                <span>SELL</span>
-                <span>BUILD</span>
+                <?php foreach (($home_content['orbit_dock'] ?? []) as $dock_item) : ?>
+                    <span><?php echo esc_html(is_array($dock_item) ? ($dock_item['label'] ?? '') : $dock_item); ?></span>
+                <?php endforeach; ?>
             </div>
         </div>
     </section>
@@ -310,12 +264,12 @@ $social_links = [
                 </div>
 
                 <div class="colt-products__intro" data-product-intro>
-                    <p class="colt-kicker">LATEST DROPS</p>
-                    <h2>מהחנות אל המסלול.</h2>
-                    <p>מבחר קלפים, סלאבים, אביזרים וקטגוריות אספנות שנעות יחד כמו ויטרינה חיה.</p>
+                    <p class="colt-kicker"><?php echo esc_html($home_content['products_kicker'] ?? ''); ?></p>
+                    <h2><?php echo esc_html($home_content['products_title'] ?? ''); ?></h2>
+                    <p><?php echo esc_html($home_content['products_text'] ?? ''); ?></p>
                 </div>
 
-                <div class="colt-products__categories" data-product-categories aria-label="קטגוריות אספנות">
+                <div class="colt-products__categories" data-product-categories aria-label="<?php echo esc_attr($home_content['products_aria_label'] ?? ''); ?>">
                     <?php foreach ($product_categories as $index => $category) : ?>
                         <a
                             class="colt-products__category colt-products__category--<?php echo esc_attr($category['tone']); ?>"
@@ -341,7 +295,7 @@ $social_links = [
                                     <img src="<?php echo esc_url($product['image']); ?>" alt="<?php echo esc_attr($product['title']); ?>" loading="lazy">
                                 </span>
                                 <span class="colt-product-card__body">
-                                    <small>DROP 0<?php echo esc_html((string) ($index + 1)); ?></small>
+                                    <small><?php echo esc_html($home_content['product_drop_prefix'] ?? 'DROP'); ?> 0<?php echo esc_html((string) ($index + 1)); ?></small>
                                     <strong><?php echo esc_html($product['title']); ?></strong>
                                     <?php if (!empty($product['price'])) : ?>
                                         <em><?php echo wp_kses_post($product['price']); ?></em>
@@ -353,12 +307,9 @@ $social_links = [
                 </div>
 
                 <div class="colt-products__ticker" aria-hidden="true">
-                    <span>Pokemon</span>
-                    <span>One Piece</span>
-                    <span>Sports</span>
-                    <span>Marvel</span>
-                    <span>Disney</span>
-                    <span>Slabs</span>
+                    <?php foreach ($product_ticker as $ticker_item) : ?>
+                        <span><?php echo esc_html(is_array($ticker_item) ? ($ticker_item['label'] ?? '') : $ticker_item); ?></span>
+                    <?php endforeach; ?>
                 </div>
             </div>
         </section>
@@ -383,25 +334,25 @@ $social_links = [
 
             <div class="colt-finale__brand" data-finale-brand>
                 <img src="<?php echo esc_url($mark_url); ?>" alt="" loading="lazy">
-                <p class="colt-kicker">COLT COLLECTORS CLUB</p>
-                <h2>המקום שבו אספנות מקבלת בית.</h2>
-                <p>אנחנו מחברים בין קלפים, פריטים נדירים, שירותי שמירה, איתור, דירוג ומכירה, כדי שכל אספן יוכל להתקדם בביטחון ובסטייל.</p>
+                <p class="colt-kicker"><?php echo esc_html($home_content['finale_kicker'] ?? ''); ?></p>
+                <h2><?php echo esc_html($home_content['finale_title'] ?? ''); ?></h2>
+                <p><?php echo esc_html($home_content['finale_text'] ?? ''); ?></p>
             </div>
 
             <div class="colt-finale__contact" data-finale-contact>
                 <div>
-                    <p class="colt-kicker">START A CONVERSATION</p>
-                    <h3>יש פריט למכור, קלף לחפש או אוסף לבנות?</h3>
-                    <p>שלחו לנו הודעה ונבין יחד מה הצעד הנכון: קנייה, מכירה, דירוג, כספת או בניית תיק אספנות.</p>
+                    <p class="colt-kicker"><?php echo esc_html($home_content['finale_contact_kicker'] ?? ''); ?></p>
+                    <h3><?php echo esc_html($home_content['finale_contact_title'] ?? ''); ?></h3>
+                    <p><?php echo esc_html($home_content['finale_contact_text'] ?? ''); ?></p>
                 </div>
                 <div class="colt-finale__actions">
-                    <a href="<?php echo esc_url($contact_url); ?>">יצירת קשר</a>
-                    <a href="<?php echo esc_url(home_url('/shop/')); ?>">לחנות</a>
+                    <a href="<?php echo esc_url($contact_url); ?>"><?php echo esc_html($home_content['finale_contact_primary'] ?? ''); ?></a>
+                    <a href="<?php echo esc_url(home_url('/shop/')); ?>"><?php echo esc_html($home_content['finale_contact_secondary'] ?? ''); ?></a>
                 </div>
             </div>
 
-            <div class="colt-finale__socials" data-finale-socials aria-label="עקבו אחרינו">
-                <p class="colt-kicker">FOLLOW THE DROP</p>
+            <div class="colt-finale__socials" data-finale-socials aria-label="<?php echo esc_attr($home_content['finale_social_aria_label'] ?? ''); ?>">
+                <p class="colt-kicker"><?php echo esc_html($home_content['finale_social_kicker'] ?? ''); ?></p>
                 <?php foreach ($social_links as $index => $social) : ?>
                     <a
                         class="colt-finale__social colt-finale__social--<?php echo esc_attr($social['tone']); ?>"

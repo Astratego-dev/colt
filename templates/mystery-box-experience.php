@@ -8,20 +8,14 @@ $mark_url = Colt_Experience::asset_url('assets/img/colt-character.png');
 $product_url = !empty($atts['product_url']) ? (string) $atts['product_url'] : home_url('/shop/');
 $contact_url = !empty($atts['contact_url']) ? (string) $atts['contact_url'] : home_url('/contact/');
 $whatsapp_url = !empty($atts['whatsapp']) ? (string) $atts['whatsapp'] : $contact_url;
-$price = '250 ש"ח';
-$contents = [
-    ['title' => 'קלף מדורג', 'text' => 'סלאב אחד שמייצר את רגע ה־showcase של הקופסה.', 'meta' => 'Graded'],
-    ['title' => 'חפיסת בוסטר', 'text' => 'חבילת פתיחה אחת מתוך העולם שבחרת.', 'meta' => 'Booster'],
-    ['title' => 'קלף סינגל', 'text' => 'קלף נוסף להשלמת החוויה ולבניית האוסף.', 'meta' => 'Single'],
-];
-$worlds = [
-    ['value' => 'pokemon', 'label' => 'Pokemon', 'text' => 'מפלצות, סטים, להיטים ונוסטלגיה'],
-    ['value' => 'one-piece', 'label' => 'One Piece', 'text' => 'פיראטים, דמויות ופתיחות באנרגיה גבוהה'],
-];
-$languages = [
-    ['value' => 'english', 'label' => 'English', 'text' => 'מוצרים באנגלית בלבד'],
-    ['value' => 'japanese', 'label' => 'Japanese', 'text' => 'מוצרים ביפנית בלבד'],
-];
+$mystery_content = Colt_Experience::special_page('mystery');
+$price = $mystery_content['price'] ?? '250 ש"ח';
+$contents = $mystery_content['contents'] ?? [];
+$worlds = $mystery_content['worlds'] ?? [];
+$languages = $mystery_content['languages'] ?? [];
+$rail_items = $mystery_content['rail'] ?? [];
+$stream_labels = array_values($mystery_content['stream_labels'] ?? []);
+$showcase_labels = array_values($mystery_content['showcase_labels'] ?? []);
 ?>
 
 <section
@@ -29,20 +23,20 @@ $languages = [
     dir="rtl"
     data-colt-xp
     data-mystery-xp
-    data-version="1.9.1"
+    data-version="1.9.3"
 >
     <canvas class="colt-xp__canvas" data-colt-canvas aria-hidden="true"></canvas>
     <div class="colt-xp__noise" aria-hidden="true"></div>
 
-    <nav class="colt-nav colt-mystery-nav" aria-label="COLT Mystery Box">
+    <nav class="colt-nav colt-mystery-nav" aria-label="<?php echo esc_attr($mystery_content['nav_label'] ?? 'COLT Mystery Box'); ?>">
         <a class="colt-nav__brand" href="<?php echo esc_url(home_url('/')); ?>" aria-label="COLT">
             <img src="<?php echo esc_url($logo_url); ?>" alt="COLT" loading="eager">
         </a>
         <div class="colt-nav__links">
-            <a href="#mystery-open">הפתיחה</a>
-            <a href="#mystery-contents">מה בפנים</a>
-            <a href="#mystery-options">בחירה</a>
-            <a href="#mystery-buy">רכישה</a>
+            <a href="#mystery-open"><?php echo esc_html($mystery_content['nav_open_label'] ?? 'הפתיחה'); ?></a>
+            <a href="#mystery-contents"><?php echo esc_html($mystery_content['nav_contents_label'] ?? 'מה בפנים'); ?></a>
+            <a href="#mystery-options"><?php echo esc_html($mystery_content['nav_options_label'] ?? 'בחירה'); ?></a>
+            <a href="#mystery-buy"><?php echo esc_html($mystery_content['nav_buy_label'] ?? 'רכישה'); ?></a>
         </div>
     </nav>
 
@@ -61,9 +55,9 @@ $languages = [
                 <span class="colt-mystery-box__glow"></span>
             </div>
             <div class="colt-mystery-stream" data-mystery-stream aria-hidden="true">
-                <span class="colt-mystery-stream__slab"><i></i><em>Graded</em></span>
-                <span class="colt-mystery-stream__booster"><i></i><em>Booster</em></span>
-                <span class="colt-mystery-stream__single"><i></i><em>Single</em></span>
+                <span class="colt-mystery-stream__slab"><i></i><em><?php echo esc_html($stream_labels[0]['label'] ?? 'Graded'); ?></em></span>
+                <span class="colt-mystery-stream__booster"><i></i><em><?php echo esc_html($stream_labels[1]['label'] ?? 'Booster'); ?></em></span>
+                <span class="colt-mystery-stream__single"><i></i><em><?php echo esc_html($stream_labels[2]['label'] ?? 'Single'); ?></em></span>
             </div>
             <div class="colt-mystery-foil" data-mystery-foil aria-hidden="true">
                 <span></span><span></span><span></span><span></span><span></span><span></span>
@@ -71,20 +65,19 @@ $languages = [
             </div>
 
             <div class="colt-mystery-hero__copy" data-mystery-hero-copy>
-                <p class="colt-kicker">COLT MYSTERY BOX</p>
-                <h1>פותחים קופסה אחת. מקבלים שלושה רגעי אספנות.</h1>
-                <p>בכל מיסטרי בוקס מחכה קלף מדורג, חפיסת בוסטר וקלף סינגל. בוחרים עולם, בוחרים שפה, ונותנים לפתיחה לעשות את שלה.</p>
+                <p class="colt-kicker"><?php echo esc_html($mystery_content['hero_kicker'] ?? ''); ?></p>
+                <h1><?php echo esc_html($mystery_content['hero_title'] ?? ''); ?></h1>
+                <p><?php echo esc_html($mystery_content['hero_text'] ?? ''); ?></p>
                 <div class="colt-mystery-price">
                     <span><?php echo esc_html($price); ?></span>
-                    <small>Pokemon או One Piece · English או Japanese</small>
+                    <small><?php echo esc_html($mystery_content['hero_meta'] ?? ''); ?></small>
                 </div>
             </div>
 
             <div class="colt-mystery-hero__rail" data-mystery-rail aria-hidden="true">
-                <span>sealed</span>
-                <span>crack</span>
-                <span>reveal</span>
-                <span>choose</span>
+                <?php foreach ($rail_items as $item) : ?>
+                    <span><?php echo esc_html($item['label'] ?? ''); ?></span>
+                <?php endforeach; ?>
             </div>
         </div>
     </section>
@@ -101,22 +94,22 @@ $languages = [
             <div class="colt-mystery-showcase" data-mystery-showcase aria-hidden="true">
                 <span class="colt-mystery-showcase__slab">
                     <i></i>
-                    <em>GRADED</em>
+                    <em><?php echo esc_html($showcase_labels[0]['label'] ?? 'GRADED'); ?></em>
                 </span>
                 <span class="colt-mystery-showcase__booster">
                     <i></i>
-                    <em>BOOSTER</em>
+                    <em><?php echo esc_html($showcase_labels[1]['label'] ?? 'BOOSTER'); ?></em>
                 </span>
                 <span class="colt-mystery-showcase__single">
                     <i></i>
-                    <em>SINGLE</em>
+                    <em><?php echo esc_html($showcase_labels[2]['label'] ?? 'SINGLE'); ?></em>
                 </span>
             </div>
 
             <div class="colt-mystery-reveal__copy" data-mystery-reveal-copy>
-                <p class="colt-kicker">WHAT IS INSIDE</p>
-                <h2>הפתיחה בנויה כמו דרופ קטן.</h2>
-                <p>כל רכיב בקופסה מקבל תפקיד: סלאב שנותן ערך מרכזי, בוסטר שנותן מתח של פתיחה, וסינגל שמוסיף עוד שכבת אספנות.</p>
+                <p class="colt-kicker"><?php echo esc_html($mystery_content['reveal_kicker'] ?? ''); ?></p>
+                <h2><?php echo esc_html($mystery_content['reveal_title'] ?? ''); ?></h2>
+                <p><?php echo esc_html($mystery_content['reveal_text'] ?? ''); ?></p>
             </div>
 
             <div class="colt-mystery-items" aria-label="תכולת המיסטרי בוקס">
@@ -134,14 +127,14 @@ $languages = [
     <section class="colt-mystery-options" id="mystery-options" data-mystery-options>
         <div class="colt-mystery-options__shell">
             <div class="colt-mystery-options__copy" data-mystery-options-copy>
-                <p class="colt-kicker">PICK YOUR DROP</p>
-                <h2>ארבע אפשרויות, מחיר אחד.</h2>
-                <p>הקופסה זמינה רק בשילובים האלה: Pokemon או One Piece, ובתוך כל עולם English או Japanese. המחיר קבוע: <?php echo esc_html($price); ?>.</p>
+                <p class="colt-kicker"><?php echo esc_html($mystery_content['options_kicker'] ?? ''); ?></p>
+                <h2><?php echo esc_html($mystery_content['options_title'] ?? ''); ?></h2>
+                <p><?php echo esc_html($mystery_content['options_text'] ?? ''); ?></p>
             </div>
 
             <div class="colt-mystery-picker" data-mystery-picker data-product-url="<?php echo esc_url($product_url); ?>">
                 <div class="colt-mystery-picker__group" aria-label="בחירת עולם">
-                    <small>עולם</small>
+                    <small><?php echo esc_html($mystery_content['world_group_label'] ?? 'עולם'); ?></small>
                     <?php foreach ($worlds as $index => $world) : ?>
                         <button type="button" data-mystery-choice="world" data-value="<?php echo esc_attr($world['value']); ?>" class="<?php echo $index === 0 ? 'is-active' : ''; ?>">
                             <span><?php echo esc_html($world['label']); ?></span>
@@ -151,7 +144,7 @@ $languages = [
                 </div>
 
                 <div class="colt-mystery-picker__group" aria-label="בחירת שפה">
-                    <small>שפה</small>
+                    <small><?php echo esc_html($mystery_content['language_group_label'] ?? 'שפה'); ?></small>
                     <?php foreach ($languages as $index => $language) : ?>
                         <button type="button" data-mystery-choice="language" data-value="<?php echo esc_attr($language['value']); ?>" class="<?php echo $index === 0 ? 'is-active' : ''; ?>">
                             <span><?php echo esc_html($language['label']); ?></span>
@@ -162,8 +155,8 @@ $languages = [
             </div>
 
             <div class="colt-mystery-summary" data-mystery-summary>
-                <small>הבחירה שלך</small>
-                <strong><span data-mystery-summary-world>Pokemon</span> · <span data-mystery-summary-language>English</span></strong>
+                <small><?php echo esc_html($mystery_content['summary_label'] ?? ''); ?></small>
+                <strong><span data-mystery-summary-world><?php echo esc_html($mystery_content['summary_world_default'] ?? 'Pokemon'); ?></span> · <span data-mystery-summary-language><?php echo esc_html($mystery_content['summary_language_default'] ?? 'English'); ?></span></strong>
                 <em><?php echo esc_html($price); ?></em>
             </div>
         </div>
@@ -174,16 +167,16 @@ $languages = [
             <div class="colt-mystery-buy__brand" data-mystery-buy-brand>
                 <img src="<?php echo esc_url($mark_url); ?>" alt="" loading="lazy">
                 <div>
-                    <p class="colt-kicker">READY TO OPEN</p>
-                    <h2>בחרת שילוב? עכשיו נשאר לפתוח.</h2>
-                    <p>הקופסה מיועדת לאספנים שרוצים חוויית פתיחה מוגדרת וברורה: עולם אחד, שפה אחת, שלושה פריטים, מחיר אחד.</p>
+                    <p class="colt-kicker"><?php echo esc_html($mystery_content['buy_kicker'] ?? ''); ?></p>
+                    <h2><?php echo esc_html($mystery_content['buy_title'] ?? ''); ?></h2>
+                    <p><?php echo esc_html($mystery_content['buy_text'] ?? ''); ?></p>
                 </div>
             </div>
 
             <div class="colt-mystery-buy__panel" data-mystery-buy-panel>
-                <a href="<?php echo esc_url($product_url); ?>" data-mystery-checkout>רכישת Mystery Box</a>
-                <a href="<?php echo esc_url($whatsapp_url); ?>">שאלה לפני רכישה</a>
-                <a href="<?php echo esc_url($contact_url); ?>">יצירת קשר</a>
+                <a href="<?php echo esc_url($product_url); ?>" data-mystery-checkout><?php echo esc_html($mystery_content['buy_primary'] ?? ''); ?></a>
+                <a href="<?php echo esc_url($whatsapp_url); ?>"><?php echo esc_html($mystery_content['buy_secondary'] ?? ''); ?></a>
+                <a href="<?php echo esc_url($contact_url); ?>"><?php echo esc_html($mystery_content['buy_third'] ?? ''); ?></a>
             </div>
         </div>
     </section>

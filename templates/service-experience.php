@@ -26,7 +26,7 @@ $contact_id = 'service-' . $service_key . '-contact';
     data-service-page
     data-service-key="<?php echo esc_attr($service_key); ?>"
     data-service-motion="<?php echo esc_attr($service_motion); ?>"
-    data-version="1.9.1"
+    data-version="1.9.3"
     style="<?php echo esc_attr($service_scene ? '--service-scene: url(' . esc_url($service_scene) . ');' : ''); ?>"
 >
     <canvas class="colt-xp__canvas" data-colt-canvas aria-hidden="true"></canvas>
@@ -37,10 +37,10 @@ $contact_id = 'service-' . $service_key . '-contact';
             <img src="<?php echo esc_url($logo_url); ?>" alt="COLT" loading="eager">
         </a>
         <div class="colt-nav__links">
-            <a href="#<?php echo esc_attr($hero_id); ?>">התחלה</a>
-            <a href="#<?php echo esc_attr($brief_id); ?>">מה מקבלים</a>
-            <a href="#<?php echo esc_attr($process_id); ?>">תהליך</a>
-            <a href="#<?php echo esc_attr($contact_id); ?>">פנייה</a>
+            <a href="#<?php echo esc_attr($hero_id); ?>"><?php echo esc_html($service_page['nav_start_label'] ?? 'התחלה'); ?></a>
+            <a href="#<?php echo esc_attr($brief_id); ?>"><?php echo esc_html($service_page['nav_brief_label'] ?? 'מה מקבלים'); ?></a>
+            <a href="#<?php echo esc_attr($process_id); ?>"><?php echo esc_html($service_page['nav_process_label'] ?? 'תהליך'); ?></a>
+            <a href="#<?php echo esc_attr($contact_id); ?>"><?php echo esc_html($service_page['nav_contact_label'] ?? 'פנייה'); ?></a>
         </div>
     </nav>
 
@@ -83,7 +83,7 @@ $contact_id = 'service-' . $service_key . '-contact';
 
     <section class="colt-service-page__brief" id="<?php echo esc_attr($brief_id); ?>">
         <div class="colt-service-page__section-head" data-service-reveal>
-            <p class="colt-kicker">SERVICE DESIGN</p>
+            <p class="colt-kicker"><?php echo esc_html($service_page['brief_kicker'] ?? 'SERVICE DESIGN'); ?></p>
             <h2><?php echo esc_html($service_page['intro_title']); ?></h2>
             <p><?php echo esc_html($service_page['intro_text']); ?></p>
         </div>
@@ -104,9 +104,9 @@ $contact_id = 'service-' . $service_key . '-contact';
             <span></span><span></span><span></span>
         </div>
         <div class="colt-service-page__section-head" data-service-reveal>
-            <p class="colt-kicker">THE FLOW</p>
-            <h2>מהרגע הראשון ועד הפעולה הבאה.</h2>
-            <p>כל שירות מקבל מסלול ברור, כדי שהלקוח יבין מה שולחים, מה מקבלים, מה קורה אחרי הפנייה ואיפה הערך האמיתי של COLT נכנס לתמונה.</p>
+            <p class="colt-kicker"><?php echo esc_html($service_page['process_kicker'] ?? 'THE FLOW'); ?></p>
+            <h2><?php echo esc_html($service_page['process_title'] ?? ''); ?></h2>
+            <p><?php echo esc_html($service_page['process_text'] ?? ''); ?></p>
         </div>
 
         <div class="colt-service-page__steps">
@@ -122,8 +122,8 @@ $contact_id = 'service-' . $service_key . '-contact';
 
     <section class="colt-service-page__detail" id="<?php echo esc_attr($detail_id); ?>">
         <div class="colt-service-page__detail-panel" data-service-reveal>
-            <p class="colt-kicker">DETAILS</p>
-            <h2>הדברים הקטנים שמייצרים אמון.</h2>
+            <p class="colt-kicker"><?php echo esc_html($service_page['details_kicker'] ?? 'DETAILS'); ?></p>
+            <h2><?php echo esc_html($service_page['details_title'] ?? ''); ?></h2>
             <ul>
                 <?php foreach ($service_page['details'] as $detail) : ?>
                     <li><?php echo esc_html($detail); ?></li>
@@ -132,8 +132,8 @@ $contact_id = 'service-' . $service_key . '-contact';
         </div>
 
         <div class="colt-service-page__fit" data-service-reveal>
-            <p class="colt-kicker">BEST FIT</p>
-            <h3>למי זה מתאים?</h3>
+            <p class="colt-kicker"><?php echo esc_html($service_page['fit_kicker'] ?? 'BEST FIT'); ?></p>
+            <h3><?php echo esc_html($service_page['fit_title'] ?? ''); ?></h3>
             <?php foreach ($service_page['fit'] as $fit_item) : ?>
                 <span><?php echo esc_html($fit_item); ?></span>
             <?php endforeach; ?>
@@ -145,9 +145,9 @@ $contact_id = 'service-' . $service_key . '-contact';
         <div class="colt-service-page__contact-card" data-service-reveal>
             <img src="<?php echo esc_url($mark_url); ?>" alt="" loading="lazy">
             <div>
-                <p class="colt-kicker">START WITH COLT</p>
-                <h2><?php echo esc_html($service_page['primary_label']); ?></h2>
-                <p>שלח לנו כמה פרטים, תמונות או כיוון כללי. משם נבנה לך את הצעד הבא בצורה מסודרת, נקייה ועם תשומת לב לפרטים הקטנים.</p>
+                <p class="colt-kicker"><?php echo esc_html($service_page['contact_kicker'] ?? 'START WITH COLT'); ?></p>
+                <h2><?php echo esc_html($service_page['contact_title'] ?? $service_page['primary_label']); ?></h2>
+                <p><?php echo esc_html($service_page['contact_text'] ?? ''); ?></p>
             </div>
             <div class="colt-service-page__contact-actions">
                 <a href="<?php echo esc_url($service_page['primary_url']); ?>"><?php echo esc_html($service_page['primary_label']); ?></a>
