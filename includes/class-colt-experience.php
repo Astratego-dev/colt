@@ -23,6 +23,7 @@ final class Colt_Experience
         add_shortcode('colt_home_experience', [$this, 'render_home_experience']);
         add_shortcode('colt_vault_experience', [$this, 'render_vault_experience']);
         add_shortcode('colt_mystery_box_experience', [$this, 'render_mystery_box_experience']);
+        add_shortcode('colt_mystery_box_product', [$this, 'render_mystery_box_product']);
         add_shortcode('colt_service_experience', [$this, 'render_service_experience']);
 
         foreach (self::service_shortcode_map() as $shortcode => $service_key) {
@@ -85,6 +86,21 @@ final class Colt_Experience
         return (string) ob_get_clean();
     }
 
+    public function render_mystery_box_product($atts = [])
+    {
+        $atts = shortcode_atts([
+            'product_url' => home_url('/shop/'),
+            'contact_url' => home_url('/contact/'),
+            'whatsapp' => '',
+        ], $atts, 'colt_mystery_box_product');
+
+        $this->enqueue_assets();
+
+        ob_start();
+        include COLT_EXPERIENCE_DIR . 'templates/mystery-box-product.php';
+        return (string) ob_get_clean();
+    }
+
     public function render_service_experience($atts = [])
     {
         $atts = shortcode_atts([
@@ -108,6 +124,8 @@ final class Colt_Experience
             'search' => 'personal-search',
             'mystery_box' => 'mystery',
             'mystery-box' => 'mystery',
+            'mystery_product' => 'mystery-product',
+            'mystery-product' => 'mystery-product',
             'the-vault' => 'vault',
         ];
         $service_key = $service_aliases[$service_key] ?? $service_key;
@@ -118,6 +136,10 @@ final class Colt_Experience
 
         if ($service_key === 'mystery') {
             return $this->render_mystery_box_experience($atts);
+        }
+
+        if ($service_key === 'mystery-product') {
+            return $this->render_mystery_box_product($atts);
         }
 
         $atts = shortcode_atts([
@@ -446,6 +468,7 @@ final class Colt_Experience
             'home' => '[colt_home_experience]',
             'vault' => '[colt_vault_experience]',
             'mystery' => '[colt_mystery_box_experience]',
+            'mystery-product' => '[colt_mystery_box_product]',
             'singles' => '[colt_singles_experience]',
             'jewelry' => '[colt_jewelry_experience]',
             'most-wanted' => '[colt_most_wanted_experience]',
@@ -745,6 +768,63 @@ final class Colt_Experience
                 'languages' => [
                     ['value' => 'english', 'label' => 'English', 'text' => 'מוצרים באנגלית בלבד'],
                     ['value' => 'japanese', 'label' => 'Japanese', 'text' => 'מוצרים ביפנית בלבד'],
+                ],
+            ],
+            'mystery-product' => [
+                'nav_label' => 'Mystery Box - עמוד מוצר',
+                'nav_open_label' => 'המוצר',
+                'nav_contents_label' => 'מה מקבלים',
+                'nav_options_label' => 'מקוריות ועולמות',
+                'nav_buy_label' => 'הזמנה',
+                'price' => '299 ש"ח',
+                'hero_kicker' => 'COLT MYSTERY BOX',
+                'hero_title' => 'מיסטרי בוקס אספנים עם שלושה פריטים בכל קופסה.',
+                'hero_text' => 'קופסת Mystery רגילה, נקייה וברורה: קלף מדורג, חבילה סגורה וקלף סינגל אחד עם סיכוי לקלף חתום, ממוספר או נדיר במיוחד.',
+                'hero_meta' => 'Pokemon · One Piece · Marvel · Disney · Sports',
+                'hero_primary' => 'הזמנה ב-299 ש"ח',
+                'hero_secondary' => 'שאלה לפני רכישה',
+                'inside_kicker' => 'INSIDE EVERY BOX',
+                'inside_title' => 'שלושה פריטים, רגע פתיחה אחד.',
+                'inside_text' => 'בכל קופסה יש שילוב שנבנה לאספנים: פריט מדורג שנותן עוגן, חבילה סגורה לפתיחה, וסינגל שיכול להיות גם קלף חתימה, קלף ממוספר או פריט chase.',
+                'reveal_kicker' => 'AUTHENTICITY PROMISE',
+                'reveal_title' => 'מתחייבים למקוריות ולשקיפות מלאה.',
+                'reveal_text' => 'כל פריט שנכנס לקופסה נבדק לפני האריזה. אנחנו לא מכניסים זיופים, רפליקות או פריטים שמקוריותם לא ברורה, ומציגים מראש מה סוגי הפריטים שאפשר לקבל.',
+                'options_kicker' => 'COLLECTOR WORLDS',
+                'options_title' => 'עולמות אספנות רחבים, לא קופסה של תחום אחד בלבד.',
+                'options_text' => 'הקופסאות יכולות לכלול פריטים מפוקימון, וואן פיס, מארוול, דיסני וספורט, עם דגש על פריטים שמתאימים לאספנים שרוצים גם ערך וגם חוויית פתיחה.',
+                'buy_kicker' => 'READY TO OPEN',
+                'buy_title' => 'המחיר: 299 ש"ח לקופסה.',
+                'buy_text' => 'רוצה קופסה אחת או כמה קופסאות לדרופ? אפשר להזמין ישירות, לשאול על מלאי זמין או להתייעץ אם זה מתאים לאוסף שלך.',
+                'buy_primary' => 'רכישה עכשיו',
+                'buy_secondary' => 'שאלה בוואטסאפ',
+                'buy_third' => 'יצירת קשר',
+                'ledger' => [
+                    ['value' => '299', 'label' => 'ש"ח לקופסה'],
+                    ['value' => '3', 'label' => 'פריטים בפנים'],
+                    ['value' => '100%', 'label' => 'התחייבות מקוריות'],
+                    ['value' => '5', 'label' => 'עולמות אספנות'],
+                ],
+                'contents' => [
+                    ['title' => 'קלף מדורג', 'text' => 'סלאב אחד שמייצר את פריט ה-showcase של הקופסה.', 'meta' => 'Graded card'],
+                    ['title' => 'חבילה סגורה', 'text' => 'בוסטר או חבילה אטומה לפתיחה מתוך אחד מעולמות האספנות.', 'meta' => 'Sealed pack'],
+                    ['title' => 'קלף סינגל', 'text' => 'קלף נוסף שיכול להיות רגיל, חתום, ממוספר או chase לפי המלאי והדרופ.', 'meta' => 'Single card'],
+                ],
+                'features' => [
+                    ['title' => 'אפשרות לקלף חתום', 'text' => 'בחלק מהקופסאות עשויים להיכנס קלפי חתימה או פריטים עם ערך מיוחד.', 'meta' => 'Auto'],
+                    ['title' => 'אפשרות לקלף ממוספר', 'text' => 'יש סיכוי לפריטים ממוספרים, כולל 1 מתוך כמה, בהתאם למלאי הדרופ.', 'meta' => 'Numbered'],
+                    ['title' => 'מתאים לכמה תחומים', 'text' => 'פוקימון, וואן פיס, מארוול, דיסני וספורט יכולים להופיע בדרופים שונים.', 'meta' => 'Multi-world'],
+                ],
+                'worlds' => [
+                    ['value' => 'pokemon', 'label' => 'Pokemon', 'text' => 'קלפים, חבילות, סלאבים ודמויות מבוקשות.'],
+                    ['value' => 'one-piece', 'label' => 'One Piece', 'text' => 'פריטים מעולם וואן פיס, פתיחות וקלפי chase.'],
+                    ['value' => 'marvel', 'label' => 'Marvel', 'text' => 'דמויות אייקוניות, קלפי אספנות ופריטי תרבות.'],
+                    ['value' => 'disney', 'label' => 'Disney', 'text' => 'קלאסיקות, דמויות, סטים ופריטים עם ערך רגשי.'],
+                    ['value' => 'sports', 'label' => 'Sports', 'text' => 'כדורסל, פוטבול, בייסבול וכדורגל לפי מלאי זמין.'],
+                ],
+                'steps' => [
+                    ['step' => '01', 'title' => 'בוחרים קופסה', 'text' => 'המחיר קבוע וברור: 299 ש"ח לקופסה.'],
+                    ['step' => '02', 'title' => 'אנחנו אורזים', 'text' => 'כל קופסה מקבלת שילוב של מדורג, סגור וסינגל.'],
+                    ['step' => '03', 'title' => 'פותחים', 'text' => 'מקבלים חוויית פתיחה עם סיכוי לפריט חתום, ממוספר או נדיר.'],
                 ],
             ],
         ];
