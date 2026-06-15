@@ -16,7 +16,7 @@ $worlds = $content['worlds'] ?? [];
 $steps = $content['steps'] ?? [];
 ?>
 
-<section class="colt-xp colt-mystery-product" dir="rtl" data-colt-xp data-version="1.9.6">
+<section class="colt-xp colt-mystery-product" dir="rtl" data-colt-xp data-version="1.9.7">
     <canvas class="colt-xp__canvas" data-colt-canvas aria-hidden="true"></canvas>
     <div class="colt-xp__noise" aria-hidden="true"></div>
 

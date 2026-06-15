@@ -132,7 +132,7 @@ $station_layouts = [
 ];
 ?>
 
-<section class="astratego-tower" dir="rtl" data-colt-xp data-astratego-tower data-version="1.9.6">
+<section class="astratego-tower" dir="rtl" data-colt-xp data-astratego-tower data-version="1.9.7">
     <canvas class="colt-xp__canvas stratego-tower__canvas" data-colt-canvas aria-hidden="true"></canvas>
 
     <header class="astratego-tower__nav">
@@ -181,8 +181,32 @@ $station_layouts = [
                     </div>
 
                     <div class="astratego-floor__depth" data-floor-stage>
+                        <div class="astratego-room" aria-hidden="true">
+                            <span class="astratego-room__wall stratego-room__wall--left"></span>
+                            <span class="astratego-room__wall stratego-room__wall--right"></span>
+                            <span class="astratego-room__floor"></span>
+                            <span class="astratego-room__ceiling"></span>
+                            <span class="astratego-room__column stratego-room__column--left"></span>
+                            <span class="astratego-room__column stratego-room__column--right"></span>
+                            <span class="astratego-room__lamp stratego-room__lamp--one"></span>
+                            <span class="astratego-room__lamp stratego-room__lamp--two"></span>
+                            <span class="astratego-room__lamp stratego-room__lamp--three"></span>
+                        </div>
+
                         <div class="astratego-floor__backwall" aria-hidden="true">
                             <span></span><span></span><span></span>
+                        </div>
+
+                        <div class="astratego-room__headline">
+                            <small><?php echo esc_html($floor['number']); ?></small>
+                            <h3><?php echo esc_html($floor['title']); ?></h3>
+                            <p><?php echo esc_html($floor['text']); ?></p>
+                            <a href="<?php echo esc_url($portfolio_url); ?>">לפרטים נוספים</a>
+                        </div>
+
+                        <div class="astratego-room__elevator" aria-hidden="true">
+                            <b><?php echo esc_html($floor['number']); ?></b>
+                            <i></i>
                         </div>
 
                         <div class="astratego-floor__screen" data-floor-screen>

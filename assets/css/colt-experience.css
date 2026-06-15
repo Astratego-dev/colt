@@ -4210,10 +4210,7 @@ html.colt-is-traveling body {
 
 .astratego-floor__shell {
     position: relative;
-    display: grid;
-    grid-template-columns: minmax(260px, .34fr) minmax(0, 1fr);
-    gap: clamp(22px, 4vw, 56px);
-    align-items: stretch;
+    display: block;
     width: min(1240px, calc(100% - 44px));
     min-height: calc(100vh - 68px);
     margin: 0 auto;
@@ -4221,7 +4218,7 @@ html.colt-is-traveling body {
 }
 
 .astratego-floor__copy {
-    display: grid;
+    display: none;
     align-content: center;
     justify-items: start;
     gap: 14px;
@@ -4270,18 +4267,20 @@ html.colt-is-traveling body {
 
 .astratego-floor__workspace {
     position: relative;
-    min-height: 680px;
+    min-height: min(760px, calc(100vh - 96px));
     border: 1px solid color-mix(in srgb, var(--floor-glow) 22%, transparent);
     border-radius: 8px;
     overflow: hidden;
     isolation: isolate;
-    perspective: 980px;
-    perspective-origin: 50% 56%;
+    perspective: 1280px;
+    perspective-origin: 50% 52%;
     transform-style: preserve-3d;
     background:
-        radial-gradient(circle at 50% 20%, color-mix(in srgb, var(--floor-glow) 16%, transparent), transparent 28rem),
-        linear-gradient(180deg, rgba(255,255,255,.055), transparent 38%),
-        rgba(5,10,16,.42);
+        radial-gradient(circle at 52% 18%, color-mix(in srgb, var(--floor-glow) 20%, transparent), transparent 30rem),
+        radial-gradient(circle at 12% 84%, color-mix(in srgb, var(--floor-glow) 16%, transparent), transparent 22rem),
+        linear-gradient(180deg, rgba(255,255,255,.065), transparent 38%),
+        linear-gradient(135deg, rgba(0,0,0,.16), rgba(255,255,255,.035) 48%, rgba(0,0,0,.28)),
+        rgba(5,10,16,.54);
     box-shadow:
         inset 0 0 0 1px rgba(255,255,255,.045),
         0 34px 110px rgba(0,0,0,.34);
@@ -4290,17 +4289,18 @@ html.colt-is-traveling body {
 .astratego-floor__workspace::before {
     content: "";
     position: absolute;
-    inset: 40% -10% -18%;
+    inset: 43% -8% -20%;
     z-index: 0;
     pointer-events: none;
     background:
-        radial-gradient(ellipse at 50% 20%, color-mix(in srgb, var(--floor-glow) 24%, transparent), transparent 28rem),
-        linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
-    background-size: auto, 68px 68px, 68px 68px;
-    transform: rotateX(64deg) translateZ(-96px);
+        radial-gradient(ellipse at 50% 18%, color-mix(in srgb, var(--floor-glow) 32%, transparent), transparent 30rem),
+        linear-gradient(rgba(255,255,255,.055) 2px, transparent 2px),
+        linear-gradient(90deg, rgba(255,255,255,.045) 2px, transparent 2px),
+        linear-gradient(180deg, rgba(255,255,255,.08), rgba(0,0,0,.35));
+    background-size: auto, 86px 86px, 86px 86px, auto;
+    transform: rotateX(66deg) translateZ(-120px);
     transform-origin: 50% 0;
-    opacity: .86;
+    opacity: .92;
 }
 
 .astratego-floor.is-active-floor .astratego-floor__workspace {
@@ -4320,22 +4320,116 @@ html.colt-is-traveling body {
     transition: transform .86s cubic-bezier(.2, .8, .2, 1), filter .5s ease;
 }
 
+.astratego-room,
+.astratego-room span {
+    position: absolute;
+    display: block;
+    pointer-events: none;
+}
+
+.astratego-room {
+    inset: 0;
+    z-index: 0;
+    transform-style: preserve-3d;
+}
+
+.astratego-room__wall {
+    top: 6%;
+    bottom: 11%;
+    width: 24%;
+    border: 1px solid color-mix(in srgb, var(--floor-glow) 14%, transparent);
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--floor-glow) 10%, transparent), transparent 34%),
+        linear-gradient(90deg, rgba(255,255,255,.045), rgba(0,0,0,.24));
+    box-shadow: inset 0 0 70px rgba(0,0,0,.18);
+    opacity: .86;
+}
+
+.stratego-room__wall--left {
+    right: -4%;
+    transform: rotateY(-48deg) translateZ(-120px);
+    transform-origin: right center;
+}
+
+.stratego-room__wall--right {
+    left: -4%;
+    transform: rotateY(48deg) translateZ(-120px);
+    transform-origin: left center;
+}
+
+.astratego-room__floor {
+    inset: auto -6% -10%;
+    height: 48%;
+    background:
+        linear-gradient(rgba(255,255,255,.04) 2px, transparent 2px),
+        linear-gradient(90deg, rgba(255,255,255,.035) 2px, transparent 2px),
+        radial-gradient(ellipse at 50% 0, color-mix(in srgb, var(--floor-glow) 18%, transparent), transparent 36rem),
+        linear-gradient(180deg, rgba(255,255,255,.08), rgba(0,0,0,.42));
+    background-size: 84px 84px, 84px 84px, auto, auto;
+    transform: rotateX(72deg) translateZ(-152px);
+    transform-origin: top;
+    opacity: .96;
+}
+
+.astratego-room__ceiling {
+    inset: -10% -5% auto;
+    height: 29%;
+    background:
+        linear-gradient(90deg, transparent, color-mix(in srgb, var(--floor-glow) 18%, transparent), transparent),
+        linear-gradient(180deg, rgba(255,255,255,.11), rgba(0,0,0,.18));
+    transform: rotateX(-62deg) translateZ(-120px);
+    transform-origin: bottom;
+    opacity: .72;
+}
+
+.astratego-room__column {
+    top: 9%;
+    bottom: 10%;
+    width: 44px;
+    border: 1px solid color-mix(in srgb, var(--floor-glow) 18%, transparent);
+    border-radius: 8px;
+    background:
+        linear-gradient(90deg, rgba(255,255,255,.12), rgba(0,0,0,.26)),
+        color-mix(in srgb, var(--floor-glow) 8%, rgba(6,12,18,.78));
+    box-shadow: inset 0 0 28px rgba(0,0,0,.22), 0 0 24px color-mix(in srgb, var(--floor-glow) 8%, transparent);
+}
+
+.stratego-room__column--left { right: 5.5%; }
+.stratego-room__column--right { left: 5.5%; }
+
+.astratego-room__lamp {
+    top: 8%;
+    width: 11%;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--floor-glow);
+    box-shadow: 0 0 34px var(--floor-glow), 0 46px 120px color-mix(in srgb, var(--floor-glow) 34%, transparent);
+    opacity: .88;
+}
+
+.stratego-room__lamp--one { right: 22%; }
+.stratego-room__lamp--two { right: 46%; }
+.stratego-room__lamp--three { left: 18%; }
+
 .astratego-floor.is-station-focused .astratego-floor__depth {
     filter: saturate(1.08) contrast(1.04);
 }
 
 .astratego-floor__backwall {
     position: absolute;
-    inset: 8% 7% auto;
+    inset: 9% 10% auto;
     z-index: 0;
-    height: 56%;
-    border: 1px solid color-mix(in srgb, var(--floor-glow) 15%, transparent);
+    height: 54%;
+    border: 1px solid color-mix(in srgb, var(--floor-glow) 18%, transparent);
     border-radius: 8px;
     background:
-        linear-gradient(90deg, color-mix(in srgb, var(--floor-glow) 10%, transparent), transparent 38% 62%, color-mix(in srgb, var(--floor-glow) 8%, transparent)),
-        linear-gradient(180deg, rgba(255,255,255,.055), rgba(0,0,0,.18));
-    box-shadow: inset 0 0 80px rgba(0,0,0,.22);
-    transform: translateZ(-220px);
+        linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px),
+        linear-gradient(90deg, color-mix(in srgb, var(--floor-glow) 13%, transparent), transparent 38% 62%, color-mix(in srgb, var(--floor-glow) 10%, transparent)),
+        linear-gradient(180deg, rgba(255,255,255,.07), rgba(0,0,0,.2));
+    background-size: 64px 64px, 64px 64px, auto, auto;
+    box-shadow: inset 0 0 90px rgba(0,0,0,.24), 0 0 42px color-mix(in srgb, var(--floor-glow) 8%, transparent);
+    transform: translateZ(-260px);
     pointer-events: none;
 }
 
@@ -4369,6 +4463,93 @@ html.colt-is-traveling body {
     height: 23%;
 }
 
+.astratego-room__headline {
+    position: absolute;
+    z-index: 5;
+    right: 6%;
+    top: 18%;
+    display: grid;
+    justify-items: start;
+    gap: 10px;
+    width: min(330px, 30%);
+    transform: translateZ(40px);
+    text-shadow: 0 18px 44px rgba(0,0,0,.45);
+}
+
+.astratego-room__headline small {
+    color: var(--floor-glow);
+    font-size: clamp(56px, 6.4vw, 104px);
+    font-weight: 900;
+    line-height: .78;
+}
+
+.astratego-room__headline h3 {
+    margin: 0;
+    color: var(--floor-glow);
+    font-size: clamp(30px, 4.4vw, 60px);
+    line-height: .92;
+    text-transform: uppercase;
+}
+
+.astratego-room__headline p {
+    margin: 0;
+    color: rgba(255,255,255,.82);
+    font-size: clamp(15px, 1.35vw, 20px);
+    font-weight: 650;
+    line-height: 1.55;
+}
+
+.astratego-room__headline a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    margin-top: 6px;
+    padding: 11px 18px;
+    border-radius: 999px;
+    color: #07101a;
+    background: var(--floor-glow);
+    font-size: 14px;
+    font-weight: 900;
+    box-shadow: 0 18px 50px color-mix(in srgb, var(--floor-glow) 22%, transparent);
+}
+
+.astratego-room__elevator {
+    position: absolute;
+    z-index: 4;
+    left: 6%;
+    top: 18%;
+    display: grid;
+    justify-items: center;
+    gap: 8px;
+    width: 98px;
+    height: 230px;
+    padding-top: 16px;
+    border: 1px solid color-mix(in srgb, var(--floor-glow) 22%, transparent);
+    border-radius: 8px 8px 0 0;
+    color: var(--floor-glow);
+    background:
+        linear-gradient(90deg, transparent 48%, rgba(255,255,255,.1) 49% 51%, transparent 52%),
+        linear-gradient(180deg, color-mix(in srgb, var(--floor-glow) 12%, transparent), rgba(0,0,0,.22)),
+        rgba(0,0,0,.22);
+    box-shadow:
+        inset 0 24px 34px color-mix(in srgb, var(--floor-glow) 14%, transparent),
+        0 0 36px color-mix(in srgb, var(--floor-glow) 12%, transparent);
+    transform: translateZ(-40px);
+}
+
+.astratego-room__elevator b {
+    font-size: 44px;
+    line-height: 1;
+}
+
+.astratego-room__elevator i {
+    width: 56%;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--floor-glow);
+    box-shadow: 0 0 20px var(--floor-glow);
+}
+
 .astratego-floor__ceiling {
     position: absolute;
     z-index: 4;
@@ -4397,15 +4578,15 @@ html.colt-is-traveling body {
 
 .astratego-floor__screen {
     position: absolute;
-    z-index: 4;
-    right: 14%;
-    top: 16%;
+    z-index: 5;
+    right: 36%;
+    top: 15%;
     display: grid;
     grid-template-columns: minmax(0, .78fr) minmax(210px, .62fr);
     gap: 18px;
     align-items: center;
-    width: min(620px, 58%);
-    min-height: 220px;
+    width: min(570px, 45%);
+    min-height: 238px;
     padding: 24px;
     border: 1px solid color-mix(in srgb, var(--floor-glow) 42%, transparent);
     border-radius: 8px;
@@ -4418,6 +4599,7 @@ html.colt-is-traveling body {
         inset 0 0 54px rgba(0,0,0,.34);
     backdrop-filter: blur(16px);
     transform-style: preserve-3d;
+    transform: translateZ(-20px);
     transition: opacity .36s ease, filter .36s ease;
 }
 
@@ -4451,12 +4633,120 @@ html.colt-is-traveling body {
 }
 
 .astratego-floor__screen-grid span {
+    position: relative;
+    overflow: hidden;
     min-height: 70px;
     border: 1px solid color-mix(in srgb, var(--floor-glow) 18%, transparent);
     border-radius: 8px;
     background:
         linear-gradient(140deg, transparent 0 50%, color-mix(in srgb, var(--floor-glow) 18%, transparent)),
         rgba(255,255,255,.045);
+}
+
+.astratego-floor__screen-grid span::before,
+.astratego-floor__screen-grid span::after {
+    content: "";
+    position: absolute;
+    display: block;
+    pointer-events: none;
+}
+
+.astratego-floor__screen-grid span::before {
+    inset: 16px 14px auto;
+    height: 4px;
+    border-radius: 999px;
+    background: var(--floor-glow);
+    box-shadow: 0 14px 0 color-mix(in srgb, var(--floor-glow) 42%, transparent), 0 28px 0 color-mix(in srgb, var(--floor-glow) 28%, transparent);
+    opacity: .72;
+}
+
+.astratego-floor__screen-grid span::after {
+    inset: auto 14px 12px;
+    height: 18px;
+    border-radius: 8px 8px 2px 2px;
+    background: linear-gradient(90deg, var(--floor-glow) 0 18%, transparent 18% 30%, var(--floor-glow) 30% 54%, transparent 54% 66%, var(--floor-glow) 66%);
+    opacity: .46;
+}
+
+.stratego-floor--green .astratego-floor__screen-grid span::after {
+    height: 32px;
+    background:
+        linear-gradient(135deg, transparent 0 30%, var(--floor-glow) 31% 35%, transparent 36% 54%, var(--floor-glow) 55% 59%, transparent 60%),
+        radial-gradient(circle at 86% 16%, var(--floor-glow) 0 4px, transparent 5px);
+}
+
+.stratego-floor--purple .astratego-floor__screen-grid span::before {
+    inset: 18px auto auto 50%;
+    width: 34px;
+    height: 34px;
+    border: 2px solid var(--floor-glow);
+    border-radius: 50%;
+    background: transparent;
+    translate: -50% 0;
+    box-shadow: 0 0 20px color-mix(in srgb, var(--floor-glow) 24%, transparent);
+}
+
+.stratego-floor--purple .astratego-floor__screen-grid span::after {
+    inset: auto 20% 14px;
+    height: 2px;
+    background: var(--floor-glow);
+    box-shadow: -24px -20px 0 color-mix(in srgb, var(--floor-glow) 50%, transparent), 24px -20px 0 color-mix(in srgb, var(--floor-glow) 50%, transparent);
+}
+
+.stratego-floor--blue .astratego-floor__screen-grid span::before {
+    inset: 12px 14px auto;
+    height: 28px;
+    border-radius: 8px;
+    background:
+        radial-gradient(circle at 22% 42%, rgba(255,255,255,.44), transparent 7px),
+        linear-gradient(90deg, color-mix(in srgb, var(--floor-glow) 42%, transparent), rgba(255,255,255,.08));
+    box-shadow: none;
+}
+
+.stratego-floor--blue .astratego-floor__screen-grid span::after {
+    height: 5px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--floor-glow) 68%, transparent);
+    box-shadow: 0 -12px 0 color-mix(in srgb, var(--floor-glow) 34%, transparent);
+}
+
+.stratego-floor--orange .astratego-floor__screen-grid span::before {
+    inset: 14px 18px;
+    height: auto;
+    border: 1px dashed color-mix(in srgb, var(--floor-glow) 58%, transparent);
+    border-radius: 8px;
+    background: transparent;
+    box-shadow: inset 0 0 22px color-mix(in srgb, var(--floor-glow) 12%, transparent);
+}
+
+.stratego-floor--orange .astratego-floor__screen-grid span::after {
+    inset: 50% auto auto 50%;
+    width: 34px;
+    height: 34px;
+    border: 2px solid var(--floor-glow);
+    border-radius: 8px;
+    background: transparent;
+    rotate: 45deg;
+    translate: -50% -50%;
+}
+
+.stratego-floor--pink .astratego-floor__screen-grid span::before {
+    inset: 12px;
+    height: auto;
+    border-radius: 8px;
+    background:
+        linear-gradient(90deg, var(--floor-glow) 0 48%, transparent 48% 52%, var(--floor-glow) 52%),
+        linear-gradient(180deg, color-mix(in srgb, var(--floor-glow) 20%, transparent), transparent);
+    box-shadow: none;
+    opacity: .44;
+}
+
+.stratego-floor--pink .astratego-floor__screen-grid span::after {
+    inset: auto 20px 18px;
+    height: 4px;
+    border-radius: 999px;
+    background: var(--floor-glow);
+    box-shadow: 0 -18px 0 color-mix(in srgb, var(--floor-glow) 48%, transparent);
 }
 
 .astratego-floor__stations {
@@ -4473,12 +4763,12 @@ html.colt-is-traveling body {
     right: var(--station-x, 50%);
     top: var(--station-y, 64%);
     z-index: calc(10 + var(--station, 0));
-    width: clamp(138px, 13vw, 190px);
+    width: clamp(152px, 14vw, 212px);
     display: grid;
     justify-items: center;
     gap: 5px;
-    min-height: 190px;
-    padding: 12px 10px 14px;
+    min-height: 206px;
+    padding: 12px 12px 16px;
     border: 1px solid rgba(255,255,255,.1);
     border-radius: 8px;
     color: #fff;
@@ -4509,21 +4799,35 @@ html.colt-is-traveling body {
     animation-delay: var(--station-delay, 0s);
 }
 
+.astratego-station::before {
+    content: "";
+    position: absolute;
+    inset: auto 10% 18px;
+    z-index: 0;
+    height: 54px;
+    border: 1px solid color-mix(in srgb, var(--floor-glow) 20%, transparent);
+    border-radius: 8px;
+    background:
+        linear-gradient(180deg, rgba(255,255,255,.1), rgba(0,0,0,.24)),
+        rgba(255,255,255,.045);
+    box-shadow: inset 0 0 22px rgba(0,0,0,.2);
+}
+
 .astratego-station::after {
     content: "";
     position: absolute;
-    inset: auto 16% 10px;
-    height: 9px;
+    inset: auto 12% 3px;
+    height: 16px;
     border-radius: 999px;
-    background: radial-gradient(ellipse, rgba(0,0,0,.48), transparent 68%);
-    filter: blur(6px);
+    background: radial-gradient(ellipse, rgba(0,0,0,.58), transparent 70%);
+    filter: blur(8px);
 }
 
 .astratego-station__surface {
     position: absolute;
-    inset: auto 4% 10px;
+    inset: auto 0 30px;
     z-index: 1;
-    height: 58px;
+    height: 72px;
     border: 1px solid color-mix(in srgb, var(--floor-glow) 22%, transparent);
     border-radius: 50% 50% 8px 8px;
     background:
@@ -4532,7 +4836,7 @@ html.colt-is-traveling body {
     box-shadow:
         inset 0 0 20px rgba(255,255,255,.04),
         0 20px 38px rgba(0,0,0,.2);
-    transform: rotateX(64deg) translateZ(-24px);
+    transform: rotateX(64deg) translateZ(-12px);
     transform-origin: bottom;
 }
 
@@ -4569,10 +4873,10 @@ html.colt-is-traveling body {
 .astratego-station__terminal {
     position: absolute;
     z-index: 2;
-    right: 13%;
-    bottom: 48px;
-    width: 48px;
-    height: 38px;
+    right: 11%;
+    bottom: 68px;
+    width: 58px;
+    height: 48px;
     border: 1px solid color-mix(in srgb, var(--floor-glow) 28%, transparent);
     border-radius: 8px;
     background: rgba(3,9,14,.68);
@@ -4605,7 +4909,7 @@ html.colt-is-traveling body {
 .astratego-station strong {
     position: relative;
     z-index: 4;
-    margin-top: 4px;
+    margin-top: 8px;
     font-size: 18px;
     font-weight: 900;
     text-shadow: 0 8px 22px rgba(0,0,0,.32);
@@ -4842,10 +5146,10 @@ html.colt-is-traveling body {
 }
 
 .astratego-floor__decor .plant {
-    right: 3%;
-    bottom: 8%;
-    width: 70px;
-    height: 120px;
+    right: 3.5%;
+    bottom: 13%;
+    width: 76px;
+    height: 138px;
     border-radius: 0 0 8px 8px;
     background:
         radial-gradient(ellipse at 50% 20%, var(--floor-glow) 0 8px, transparent 9px),
@@ -4853,47 +5157,38 @@ html.colt-is-traveling body {
         radial-gradient(ellipse at 72% 34%, color-mix(in srgb, var(--floor-glow) 70%, #fff 8%) 0 18px, transparent 19px),
         linear-gradient(90deg, transparent 42%, color-mix(in srgb, var(--floor-glow) 68%, #061018) 43% 57%, transparent 58%),
         linear-gradient(180deg, transparent 65%, rgba(255,255,255,.08) 66%);
+    transform: translateZ(70px);
 }
 
 .astratego-floor__decor .desk {
-    right: 42%;
-    bottom: 9%;
-    width: 170px;
-    height: 64px;
+    right: 50%;
+    bottom: 10%;
+    width: 210px;
+    height: 82px;
     border-radius: 8px;
     background:
         linear-gradient(180deg, rgba(255,255,255,.13), transparent 28%),
         rgba(255,255,255,.06);
     box-shadow: 0 18px 34px rgba(0,0,0,.25);
+    transform: translateX(50%) translateZ(110px) rotateX(58deg);
+    transform-origin: bottom;
 }
 
 .astratego-floor__decor .stairs {
     right: 4%;
-    top: 62%;
-    width: 160px;
-    height: 90px;
+    top: 66%;
+    width: 210px;
+    height: 120px;
     background:
-        repeating-linear-gradient(135deg, transparent 0 17px, color-mix(in srgb, var(--floor-glow) 40%, transparent) 18px 21px),
-        linear-gradient(135deg, transparent 0 52%, rgba(255,255,255,.08) 53%);
-    opacity: .72;
+        repeating-linear-gradient(135deg, transparent 0 16px, color-mix(in srgb, var(--floor-glow) 44%, transparent) 17px 21px),
+        linear-gradient(135deg, transparent 0 48%, rgba(255,255,255,.1) 49% 54%, transparent 55%),
+        linear-gradient(180deg, color-mix(in srgb, var(--floor-glow) 10%, transparent), rgba(0,0,0,.08));
+    opacity: .82;
+    transform: translateZ(60px) rotateY(-10deg);
 }
 
 .astratego-floor__decor .elevator {
-    left: 4%;
-    top: 34%;
-    display: grid;
-    place-items: center;
-    width: 82px;
-    height: 150px;
-    border: 1px solid color-mix(in srgb, var(--floor-glow) 30%, transparent);
-    border-radius: 8px 8px 0 0;
-    color: var(--floor-glow);
-    background:
-        linear-gradient(90deg, transparent 49%, rgba(255,255,255,.08) 50%, transparent 51%),
-        rgba(0,0,0,.26);
-    font-size: 34px;
-    font-weight: 900;
-    box-shadow: inset 0 24px 34px color-mix(in srgb, var(--floor-glow) 12%, transparent);
+    display: none;
 }
 
 .astratego-tower__footer {
@@ -6914,6 +7209,7 @@ html.colt-is-traveling body {
         gap: 16px;
     }
     .astratego-floor__copy {
+        display: grid;
         min-height: auto;
         gap: 10px;
     }
@@ -6930,7 +7226,10 @@ html.colt-is-traveling body {
         perspective: none;
     }
     .astratego-floor__workspace::before,
-    .astratego-floor__backwall {
+    .astratego-floor__backwall,
+    .astratego-room,
+    .astratego-room__headline,
+    .astratego-room__elevator {
         display: none;
     }
     .astratego-floor__depth {
