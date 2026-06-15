@@ -90,39 +90,39 @@ $floors = [
 
 $station_layouts = [
     [
-        'x' => '18%',
-        'y' => '58%',
-        'z' => '-170px',
-        'scale' => '.78',
+        'x' => '22%',
+        'y' => '61%',
+        'z' => '-135px',
+        'scale' => '.82',
         'delay' => '-.6s',
-        'camera_x' => '12%',
+        'camera_x' => '10%',
         'camera_y' => '-5%',
         'camera_scale' => '1.18',
     ],
     [
         'x' => '47%',
-        'y' => '67%',
-        'z' => '10px',
-        'scale' => '1',
+        'y' => '72%',
+        'z' => '70px',
+        'scale' => '1.04',
         'delay' => '-1.4s',
         'camera_x' => '-2%',
-        'camera_y' => '-10%',
+        'camera_y' => '-13%',
         'camera_scale' => '1.26',
     ],
     [
-        'x' => '72%',
-        'y' => '56%',
-        'z' => '-80px',
-        'scale' => '.88',
+        'x' => '70%',
+        'y' => '62%',
+        'z' => '-110px',
+        'scale' => '.84',
         'delay' => '-2.1s',
-        'camera_x' => '-15%',
-        'camera_y' => '-4%',
+        'camera_x' => '-14%',
+        'camera_y' => '-6%',
         'camera_scale' => '1.2',
     ],
     [
-        'x' => '35%',
-        'y' => '80%',
-        'z' => '160px',
+        'x' => '36%',
+        'y' => '82%',
+        'z' => '190px',
         'scale' => '1.15',
         'delay' => '-3s',
         'camera_x' => '6%',
@@ -132,7 +132,7 @@ $station_layouts = [
 ];
 ?>
 
-<section class="astratego-tower" dir="rtl" data-colt-xp data-astratego-tower data-version="1.9.7">
+<section class="astratego-tower" dir="rtl" data-colt-xp data-astratego-tower data-version="1.9.8">
     <canvas class="colt-xp__canvas stratego-tower__canvas" data-colt-canvas aria-hidden="true"></canvas>
 
     <header class="astratego-tower__nav">

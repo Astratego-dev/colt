@@ -4466,12 +4466,13 @@ html.colt-is-traveling body {
 .astratego-room__headline {
     position: absolute;
     z-index: 5;
-    right: 6%;
-    top: 18%;
+    left: 5.5%;
+    top: 17%;
     display: grid;
-    justify-items: start;
+    justify-items: end;
     gap: 10px;
-    width: min(330px, 30%);
+    width: min(340px, 28%);
+    text-align: right;
     transform: translateZ(40px);
     text-shadow: 0 18px 44px rgba(0,0,0,.45);
 }
@@ -4516,7 +4517,7 @@ html.colt-is-traveling body {
 .astratego-room__elevator {
     position: absolute;
     z-index: 4;
-    left: 6%;
+    right: 5.5%;
     top: 18%;
     display: grid;
     justify-items: center;
@@ -4579,13 +4580,13 @@ html.colt-is-traveling body {
 .astratego-floor__screen {
     position: absolute;
     z-index: 5;
-    right: 36%;
-    top: 15%;
+    right: 27%;
+    top: 14%;
     display: grid;
     grid-template-columns: minmax(0, .78fr) minmax(210px, .62fr);
     gap: 18px;
     align-items: center;
-    width: min(570px, 45%);
+    width: min(610px, 42%);
     min-height: 238px;
     padding: 24px;
     border: 1px solid color-mix(in srgb, var(--floor-glow) 42%, transparent);
@@ -4769,12 +4770,10 @@ html.colt-is-traveling body {
     gap: 5px;
     min-height: 206px;
     padding: 12px 12px 16px;
-    border: 1px solid rgba(255,255,255,.1);
+    border: 1px solid transparent;
     border-radius: 8px;
     color: #fff;
-    background:
-        linear-gradient(180deg, color-mix(in srgb, var(--floor-glow) 8%, transparent), transparent 44%),
-        rgba(255,255,255,.045);
+    background: transparent;
     font: inherit;
     cursor: pointer;
     pointer-events: auto;
@@ -4909,16 +4908,24 @@ html.colt-is-traveling body {
 .astratego-station strong {
     position: relative;
     z-index: 4;
-    margin-top: 8px;
+    margin-top: 6px;
+    padding: 5px 10px 4px;
+    border: 1px solid color-mix(in srgb, var(--floor-glow) 18%, transparent);
+    border-radius: 999px;
+    background: rgba(4,10,16,.62);
     font-size: 18px;
     font-weight: 900;
     text-shadow: 0 8px 22px rgba(0,0,0,.32);
+    backdrop-filter: blur(10px);
 }
 
 .astratego-station small {
     position: relative;
     z-index: 4;
-    color: rgba(255,255,255,.64);
+    padding: 2px 8px;
+    border-radius: 999px;
+    color: rgba(255,255,255,.72);
+    background: rgba(4,10,16,.38);
     font-size: 12px;
     font-weight: 700;
 }
@@ -5085,7 +5092,9 @@ html.colt-is-traveling body {
     background: rgba(4,10,16,.72);
     box-shadow: 0 20px 70px rgba(0,0,0,.32);
     backdrop-filter: blur(16px);
-    transform: translateZ(180px);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateZ(180px) translateY(22px) scale(.94);
     transform-style: preserve-3d;
     transition:
         transform .72s cubic-bezier(.2, .8, .2, 1),
@@ -5097,6 +5106,8 @@ html.colt-is-traveling body {
 .astratego-floor.is-station-focused .astratego-floor__focus {
     z-index: 45;
     width: min(470px, 42%);
+    opacity: 1;
+    pointer-events: auto;
     transform: translateZ(420px) translateY(12px) scale(1.06);
     box-shadow:
         0 34px 120px rgba(0,0,0,.44),
@@ -7150,9 +7161,16 @@ html.colt-is-traveling body {
     .astratego-floor__workspace {
         min-height: 710px;
     }
+    .astratego-room__headline {
+        left: 4%;
+        width: 28%;
+    }
+    .astratego-room__elevator {
+        right: 4%;
+    }
     .astratego-floor__screen {
-        right: 5%;
-        width: 64%;
+        right: 24%;
+        width: 49%;
     }
     .astratego-floor__focus {
         left: 4%;

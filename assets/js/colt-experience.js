@@ -1663,7 +1663,8 @@
 
             gsap.set(copy, { autoAlpha: 0, x: compact ? 0 : 34, y: compact ? 26 : 0, filter: 'blur(12px)' });
             gsap.set(workspace, { autoAlpha: 0.72, y: 54, scale: compact ? 0.985 : 0.96, filter: 'saturate(.78) brightness(.82)' });
-            gsap.set([screen, focus, metric], { autoAlpha: 0, y: 32, filter: 'blur(12px)' });
+            gsap.set([screen, metric], { autoAlpha: 0, y: 32, filter: 'blur(12px)' });
+            gsap.set(focus, { autoAlpha: 0, y: 34, scale: 0.94, filter: 'blur(12px)' });
             gsap.set(stations, { autoAlpha: 0, filter: 'blur(10px)' });
             gsap.set(decor, { autoAlpha: 0, y: 26, filter: 'blur(8px)' });
             gsap.set(ceiling, { scaleX: 0.25, transformOrigin: '50% 50%' });
@@ -1684,8 +1685,7 @@
                 .to(ceiling, { scaleX: 1, stagger: 0.06, duration: 0.42 }, 0.08)
                 .to(screen, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.48 }, 0.16)
                 .to(stations, { autoAlpha: 1, filter: 'blur(0px)', stagger: 0.055, duration: 0.58 }, 0.22)
-                .to(focus, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.46 }, 0.31)
-                .to(metric, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.42 }, 0.34)
+                .to(metric, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.42 }, 0.32)
                 .to(decor, { autoAlpha: 1, y: 0, filter: 'blur(0px)', stagger: 0.055, duration: 0.48 }, 0.38);
 
             gsap.to(workspace, {
