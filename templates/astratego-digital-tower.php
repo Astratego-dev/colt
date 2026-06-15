@@ -87,9 +87,52 @@ $floors = [
         ],
     ],
 ];
+
+$station_layouts = [
+    [
+        'x' => '18%',
+        'y' => '58%',
+        'z' => '-170px',
+        'scale' => '.78',
+        'delay' => '-.6s',
+        'camera_x' => '12%',
+        'camera_y' => '-5%',
+        'camera_scale' => '1.18',
+    ],
+    [
+        'x' => '47%',
+        'y' => '67%',
+        'z' => '10px',
+        'scale' => '1',
+        'delay' => '-1.4s',
+        'camera_x' => '-2%',
+        'camera_y' => '-10%',
+        'camera_scale' => '1.26',
+    ],
+    [
+        'x' => '72%',
+        'y' => '56%',
+        'z' => '-80px',
+        'scale' => '.88',
+        'delay' => '-2.1s',
+        'camera_x' => '-15%',
+        'camera_y' => '-4%',
+        'camera_scale' => '1.2',
+    ],
+    [
+        'x' => '35%',
+        'y' => '80%',
+        'z' => '160px',
+        'scale' => '1.15',
+        'delay' => '-3s',
+        'camera_x' => '6%',
+        'camera_y' => '-18%',
+        'camera_scale' => '1.34',
+    ],
+];
 ?>
 
-<section class="astratego-tower" dir="rtl" data-colt-xp data-astratego-tower data-version="1.9.5">
+<section class="astratego-tower" dir="rtl" data-colt-xp data-astratego-tower data-version="1.9.6">
     <canvas class="colt-xp__canvas stratego-tower__canvas" data-colt-canvas aria-hidden="true"></canvas>
 
     <header class="astratego-tower__nav">
@@ -132,65 +175,88 @@ $floors = [
                     <a href="<?php echo esc_url($portfolio_url); ?>">לפרטים נוספים</a>
                 </aside>
 
-                <div class="astratego-floor__workspace">
+                <div class="astratego-floor__workspace" data-floor-workspace>
                     <div class="astratego-floor__ceiling" aria-hidden="true">
                         <span></span><span></span><span></span>
                     </div>
 
-                    <div class="astratego-floor__screen" data-floor-screen>
-                        <div>
-                            <small data-floor-station-label><?php echo esc_html($floor['stations'][0]['label']); ?></small>
-                            <h3 data-floor-station-title><?php echo esc_html($floor['stations'][0]['title']); ?></h3>
-                            <p data-floor-station-text><?php echo esc_html($floor['stations'][0]['text']); ?></p>
+                    <div class="astratego-floor__depth" data-floor-stage>
+                        <div class="astratego-floor__backwall" aria-hidden="true">
+                            <span></span><span></span><span></span>
                         </div>
-                        <div class="astratego-floor__screen-grid" aria-hidden="true">
-                            <span></span><span></span><span></span><span></span>
+
+                        <div class="astratego-floor__screen" data-floor-screen>
+                            <div>
+                                <small data-floor-station-label><?php echo esc_html($floor['stations'][0]['label']); ?></small>
+                                <h3 data-floor-station-title><?php echo esc_html($floor['stations'][0]['title']); ?></h3>
+                                <p data-floor-station-text><?php echo esc_html($floor['stations'][0]['text']); ?></p>
+                            </div>
+                            <div class="astratego-floor__screen-grid" aria-hidden="true">
+                                <span></span><span></span><span></span><span></span>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="astratego-floor__stations" aria-label="<?php echo esc_attr($floor['title']); ?>">
-                        <?php foreach ($floor['stations'] as $station_index => $station) : ?>
-                            <button
-                                class="astratego-station <?php echo $station_index === 0 ? 'is-active' : ''; ?>"
-                                type="button"
-                                data-astratego-station
-                                data-station-title="<?php echo esc_attr($station['title']); ?>"
-                                data-station-label="<?php echo esc_attr($station['label']); ?>"
-                                data-station-text="<?php echo esc_attr($station['text']); ?>"
-                                data-station-task="<?php echo esc_attr($station['task']); ?>"
-                                data-station-stat="<?php echo esc_attr($station['stat']); ?>"
-                                style="--station: <?php echo esc_attr((string) $station_index); ?>"
-                            >
-                                <span class="astratego-bot" aria-hidden="true">
-                                    <i></i><b></b><em></em>
-                                </span>
-                                <strong><?php echo esc_html($station['title']); ?></strong>
-                                <small><?php echo esc_html($station['label']); ?></small>
-                            </button>
-                        <?php endforeach; ?>
-                    </div>
-
-                    <div class="astratego-floor__focus" data-floor-focus>
-                        <span class="astratego-bot stratego-bot--hero" aria-hidden="true">
-                            <i></i><b></b><em></em>
-                        </span>
-                        <div>
-                            <small>BOT FOCUS</small>
-                            <strong data-floor-task-title><?php echo esc_html($floor['stations'][0]['stat']); ?></strong>
-                            <p data-floor-task-text><?php echo esc_html($floor['stations'][0]['task']); ?></p>
+                        <div class="astratego-floor__stations" aria-label="<?php echo esc_attr($floor['title']); ?>">
+                            <?php foreach ($floor['stations'] as $station_index => $station) : ?>
+                                <?php $station_layout = $station_layouts[$station_index] ?? $station_layouts[0]; ?>
+                                <button
+                                    class="astratego-station <?php echo $station_index === 0 ? 'is-active' : ''; ?>"
+                                    type="button"
+                                    data-astratego-station
+                                    data-station-title="<?php echo esc_attr($station['title']); ?>"
+                                    data-station-label="<?php echo esc_attr($station['label']); ?>"
+                                    data-station-text="<?php echo esc_attr($station['text']); ?>"
+                                    data-station-task="<?php echo esc_attr($station['task']); ?>"
+                                    data-station-stat="<?php echo esc_attr($station['stat']); ?>"
+                                    data-camera-x="<?php echo esc_attr($station_layout['camera_x']); ?>"
+                                    data-camera-y="<?php echo esc_attr($station_layout['camera_y']); ?>"
+                                    data-camera-scale="<?php echo esc_attr($station_layout['camera_scale']); ?>"
+                                    style="
+                                        --station: <?php echo esc_attr((string) $station_index); ?>;
+                                        --station-x: <?php echo esc_attr($station_layout['x']); ?>;
+                                        --station-y: <?php echo esc_attr($station_layout['y']); ?>;
+                                        --station-z: <?php echo esc_attr($station_layout['z']); ?>;
+                                        --station-scale: <?php echo esc_attr($station_layout['scale']); ?>;
+                                        --station-delay: <?php echo esc_attr($station_layout['delay']); ?>;
+                                    "
+                                >
+                                    <span class="astratego-station__surface" aria-hidden="true">
+                                        <i></i><b></b><em></em>
+                                    </span>
+                                    <span class="astratego-bot" aria-hidden="true">
+                                        <i></i><b></b><em></em>
+                                    </span>
+                                    <span class="astratego-station__terminal" aria-hidden="true">
+                                        <i></i><b></b>
+                                    </span>
+                                    <strong><?php echo esc_html($station['title']); ?></strong>
+                                    <small><?php echo esc_html($station['label']); ?></small>
+                                </button>
+                            <?php endforeach; ?>
                         </div>
-                    </div>
 
-                    <div class="astratego-floor__metric">
-                        <strong><?php echo esc_html($floor['metric']); ?></strong>
-                        <span><?php echo esc_html($floor['metric_label']); ?></span>
-                    </div>
+                        <div class="astratego-floor__focus" data-floor-focus>
+                            <span class="astratego-bot stratego-bot--hero" aria-hidden="true">
+                                <i></i><b></b><em></em>
+                            </span>
+                            <div>
+                                <small>WORKSTATION FOCUS</small>
+                                <strong data-floor-task-title><?php echo esc_html($floor['stations'][0]['stat']); ?></strong>
+                                <p data-floor-task-text><?php echo esc_html($floor['stations'][0]['task']); ?></p>
+                            </div>
+                        </div>
 
-                    <div class="astratego-floor__decor" aria-hidden="true">
-                        <span class="plant"></span>
-                        <span class="desk"></span>
-                        <span class="stairs"></span>
-                        <span class="elevator"><?php echo esc_html($floor['number']); ?></span>
+                        <div class="astratego-floor__metric">
+                            <strong><?php echo esc_html($floor['metric']); ?></strong>
+                            <span><?php echo esc_html($floor['metric_label']); ?></span>
+                        </div>
+
+                        <div class="astratego-floor__decor" aria-hidden="true">
+                            <span class="plant"></span>
+                            <span class="desk"></span>
+                            <span class="stairs"></span>
+                            <span class="elevator"><?php echo esc_html($floor['number']); ?></span>
+                        </div>
                     </div>
                 </div>
             </div>

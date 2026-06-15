@@ -1512,6 +1512,8 @@
 
         floors.forEach((floor) => {
             const stations = Array.from(floor.querySelectorAll('[data-astratego-station]'));
+            const workspace = floor.querySelector('[data-floor-workspace]');
+            const stage = floor.querySelector('[data-floor-stage]');
             const screen = floor.querySelector('[data-floor-screen]');
             const focus = floor.querySelector('[data-floor-focus]');
             const heroBot = floor.querySelector('.stratego-bot--hero');
@@ -1530,6 +1532,27 @@
                 });
 
                 floor.style.setProperty('--active-station', index);
+                floor.dataset.activeStation = String(index);
+
+                if (animate) {
+                    floor.classList.add('is-station-focused');
+                } else {
+                    floor.classList.remove('is-station-focused');
+                }
+
+                if (stage && animate) {
+                    stage.style.setProperty('--camera-x', button.dataset.cameraX || '0');
+                    stage.style.setProperty('--camera-y', button.dataset.cameraY || '0');
+                    stage.style.setProperty('--camera-scale', button.dataset.cameraScale || '1.18');
+                } else if (stage) {
+                    stage.style.removeProperty('--camera-x');
+                    stage.style.removeProperty('--camera-y');
+                    stage.style.removeProperty('--camera-scale');
+                }
+                if (workspace) {
+                    workspace.dataset.focusStation = String(index);
+                }
+
                 if (label) label.textContent = button.dataset.stationLabel || '';
                 if (title) title.textContent = button.dataset.stationTitle || '';
                 if (text) text.textContent = button.dataset.stationText || '';
@@ -1539,7 +1562,7 @@
                 if (!animate || prefersReduced || !gsap) return;
 
                 const bot = button.querySelector('.astratego-bot');
-                gsap.killTweensOf([screen, focus, button, bot, heroBot]);
+                gsap.killTweensOf([screen, focus, bot, heroBot]);
                 gsap.timeline({ defaults: { ease: 'power2.out' } })
                     .fromTo([screen, focus], {
                         autoAlpha: 0.62,
@@ -1553,16 +1576,6 @@
                         filter: 'blur(0px)',
                         duration: 0.42,
                         stagger: 0.045,
-                    }, 0)
-                    .fromTo(button, {
-                        y: 8,
-                        scale: 0.96,
-                        rotateX: -5,
-                    }, {
-                        y: -10,
-                        scale: 1,
-                        rotateX: 3,
-                        duration: 0.38,
                     }, 0)
                     .fromTo(bot, {
                         y: 16,
@@ -1590,6 +1603,22 @@
                 button.addEventListener('click', () => activateStation(button));
             });
             activateStation(stations[0], false);
+
+            if (!prefersReduced && gsap) {
+                stations.forEach((button, index) => {
+                    const travelDuration = gsap.utils.random(3.8, 6.4);
+                    gsap.to(button, {
+                        '--worker-x': () => `${gsap.utils.random(-12, 12, 1)}px`,
+                        '--worker-y': () => `${gsap.utils.random(-10, 10, 1)}px`,
+                        duration: travelDuration,
+                        delay: index * 0.18,
+                        repeat: -1,
+                        yoyo: true,
+                        repeatRefresh: true,
+                        ease: 'sine.inOut',
+                    });
+                });
+            }
         });
 
         if (prefersReduced || !gsap || !ScrollTrigger) {
@@ -1635,7 +1664,7 @@
             gsap.set(copy, { autoAlpha: 0, x: compact ? 0 : 34, y: compact ? 26 : 0, filter: 'blur(12px)' });
             gsap.set(workspace, { autoAlpha: 0.72, y: 54, scale: compact ? 0.985 : 0.96, filter: 'saturate(.78) brightness(.82)' });
             gsap.set([screen, focus, metric], { autoAlpha: 0, y: 32, filter: 'blur(12px)' });
-            gsap.set(stations, { autoAlpha: 0, y: 74, rotateX: 16, filter: 'blur(10px)' });
+            gsap.set(stations, { autoAlpha: 0, filter: 'blur(10px)' });
             gsap.set(decor, { autoAlpha: 0, y: 26, filter: 'blur(8px)' });
             gsap.set(ceiling, { scaleX: 0.25, transformOrigin: '50% 50%' });
 
@@ -1654,7 +1683,7 @@
                 .to(copy, { autoAlpha: 1, x: 0, y: 0, filter: 'blur(0px)', duration: 0.52 }, 0.06)
                 .to(ceiling, { scaleX: 1, stagger: 0.06, duration: 0.42 }, 0.08)
                 .to(screen, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.48 }, 0.16)
-                .to(stations, { autoAlpha: 1, y: 0, rotateX: 0, filter: 'blur(0px)', stagger: 0.055, duration: 0.58 }, 0.22)
+                .to(stations, { autoAlpha: 1, filter: 'blur(0px)', stagger: 0.055, duration: 0.58 }, 0.22)
                 .to(focus, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.46 }, 0.31)
                 .to(metric, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.42 }, 0.34)
                 .to(decor, { autoAlpha: 1, y: 0, filter: 'blur(0px)', stagger: 0.055, duration: 0.48 }, 0.38);
@@ -1684,8 +1713,7 @@
             });
 
             gsap.to(stations, {
-                y: (stationIndex) => (stationIndex % 2 === 0 ? -18 : -32),
-                rotateY: (stationIndex) => (stationIndex % 2 === 0 ? -4 : 4),
+                '--worker-scroll-y': (stationIndex) => (stationIndex % 2 === 0 ? '-18px' : '-32px'),
                 ease: 'none',
                 scrollTrigger: {
                     trigger: floor,
