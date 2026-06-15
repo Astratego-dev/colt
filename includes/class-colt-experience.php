@@ -24,6 +24,7 @@ final class Colt_Experience
         add_shortcode('colt_vault_experience', [$this, 'render_vault_experience']);
         add_shortcode('colt_mystery_box_experience', [$this, 'render_mystery_box_experience']);
         add_shortcode('colt_mystery_box_product', [$this, 'render_mystery_box_product']);
+        add_shortcode('astratego_digital_tower', [$this, 'render_astratego_digital_tower']);
         add_shortcode('colt_service_experience', [$this, 'render_service_experience']);
 
         foreach (self::service_shortcode_map() as $shortcode => $service_key) {
@@ -98,6 +99,20 @@ final class Colt_Experience
 
         ob_start();
         include COLT_EXPERIENCE_DIR . 'templates/mystery-box-product.php';
+        return (string) ob_get_clean();
+    }
+
+    public function render_astratego_digital_tower($atts = [])
+    {
+        $atts = shortcode_atts([
+            'contact_url' => home_url('/contact/'),
+            'portfolio_url' => home_url('/projects/'),
+        ], $atts, 'astratego_digital_tower');
+
+        $this->enqueue_assets();
+
+        ob_start();
+        include COLT_EXPERIENCE_DIR . 'templates/astratego-digital-tower.php';
         return (string) ob_get_clean();
     }
 

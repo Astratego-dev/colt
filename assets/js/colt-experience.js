@@ -16,6 +16,7 @@
         setupVaultExperience(root, prefersReduced);
         setupMysteryBoxExperience(root, prefersReduced);
         setupServiceExperience(root, prefersReduced);
+        setupAstrategoTower(root, prefersReduced);
     });
 
     function setupReveal(root, prefersReduced) {
@@ -1486,6 +1487,212 @@
                     scrub: 0.42,
                 },
                 delay: (index % 4) * 0.02,
+            });
+        });
+    }
+
+    function setupAstrategoTower(root, prefersReduced) {
+        const tower = root.matches('[data-astratego-tower]') ? root : root.querySelector('[data-astratego-tower]');
+        if (!tower) return;
+
+        const gsap = window.gsap;
+        const ScrollTrigger = window.ScrollTrigger;
+        const floors = Array.from(tower.querySelectorAll('[data-astratego-floor]'));
+        const compact = isCompactViewport();
+
+        tower.querySelectorAll('a[href^="#astratego-floor-"]').forEach((link) => {
+            link.addEventListener('click', (event) => {
+                const target = tower.querySelector(link.getAttribute('href'));
+                if (!target) return;
+
+                event.preventDefault();
+                target.scrollIntoView({ behavior: prefersReduced ? 'auto' : 'smooth', block: 'start' });
+            });
+        });
+
+        floors.forEach((floor) => {
+            const stations = Array.from(floor.querySelectorAll('[data-astratego-station]'));
+            const screen = floor.querySelector('[data-floor-screen]');
+            const focus = floor.querySelector('[data-floor-focus]');
+            const heroBot = floor.querySelector('.stratego-bot--hero');
+            const label = floor.querySelector('[data-floor-station-label]');
+            const title = floor.querySelector('[data-floor-station-title]');
+            const text = floor.querySelector('[data-floor-station-text]');
+            const taskTitle = floor.querySelector('[data-floor-task-title]');
+            const taskText = floor.querySelector('[data-floor-task-text]');
+
+            const activateStation = (button, animate = true) => {
+                if (!button) return;
+
+                const index = Math.max(0, stations.indexOf(button));
+                stations.forEach((station) => {
+                    station.classList.toggle('is-active', station === button);
+                });
+
+                floor.style.setProperty('--active-station', index);
+                if (label) label.textContent = button.dataset.stationLabel || '';
+                if (title) title.textContent = button.dataset.stationTitle || '';
+                if (text) text.textContent = button.dataset.stationText || '';
+                if (taskTitle) taskTitle.textContent = button.dataset.stationStat || '';
+                if (taskText) taskText.textContent = button.dataset.stationTask || '';
+
+                if (!animate || prefersReduced || !gsap) return;
+
+                const bot = button.querySelector('.astratego-bot');
+                gsap.killTweensOf([screen, focus, button, bot, heroBot]);
+                gsap.timeline({ defaults: { ease: 'power2.out' } })
+                    .fromTo([screen, focus], {
+                        autoAlpha: 0.62,
+                        y: 18,
+                        scale: 0.985,
+                        filter: 'blur(10px)',
+                    }, {
+                        autoAlpha: 1,
+                        y: 0,
+                        scale: 1,
+                        filter: 'blur(0px)',
+                        duration: 0.42,
+                        stagger: 0.045,
+                    }, 0)
+                    .fromTo(button, {
+                        y: 8,
+                        scale: 0.96,
+                        rotateX: -5,
+                    }, {
+                        y: -10,
+                        scale: 1,
+                        rotateX: 3,
+                        duration: 0.38,
+                    }, 0)
+                    .fromTo(bot, {
+                        y: 16,
+                        scale: 0.92,
+                        rotateY: -20,
+                    }, {
+                        y: 0,
+                        scale: 1.12,
+                        rotateY: 0,
+                        duration: 0.5,
+                    }, 0.04)
+                    .fromTo(heroBot, {
+                        y: 20,
+                        scale: 0.88,
+                        rotateY: 24,
+                    }, {
+                        y: 0,
+                        scale: 1,
+                        rotateY: 0,
+                        duration: 0.54,
+                    }, 0.08);
+            };
+
+            stations.forEach((button) => {
+                button.addEventListener('click', () => activateStation(button));
+            });
+            activateStation(stations[0], false);
+        });
+
+        if (prefersReduced || !gsap || !ScrollTrigger) {
+            floors.forEach((floor) => floor.classList.add('is-active-floor'));
+            return;
+        }
+
+        gsap.registerPlugin(ScrollTrigger);
+        ensureSmoothScroll(gsap, ScrollTrigger);
+
+        const intro = tower.querySelector('.astratego-tower__intro');
+        if (intro) {
+            gsap.fromTo(intro.children, {
+                autoAlpha: 0,
+                y: 26,
+                filter: 'blur(10px)',
+            }, {
+                autoAlpha: 1,
+                y: 0,
+                filter: 'blur(0px)',
+                stagger: 0.08,
+                duration: 0.7,
+                ease: 'power2.out',
+                scrollTrigger: {
+                    trigger: intro,
+                    start: 'top 78%',
+                    end: 'center 48%',
+                    scrub: 0.5,
+                },
+            });
+        }
+
+        floors.forEach((floor, index) => {
+            const copy = floor.querySelector('.astratego-floor__copy');
+            const workspace = floor.querySelector('.astratego-floor__workspace');
+            const screen = floor.querySelector('[data-floor-screen]');
+            const stations = floor.querySelectorAll('[data-astratego-station]');
+            const focus = floor.querySelector('[data-floor-focus]');
+            const metric = floor.querySelector('.astratego-floor__metric');
+            const decor = floor.querySelectorAll('.astratego-floor__decor span');
+            const ceiling = floor.querySelectorAll('.astratego-floor__ceiling span');
+
+            gsap.set(copy, { autoAlpha: 0, x: compact ? 0 : 34, y: compact ? 26 : 0, filter: 'blur(12px)' });
+            gsap.set(workspace, { autoAlpha: 0.72, y: 54, scale: compact ? 0.985 : 0.96, filter: 'saturate(.78) brightness(.82)' });
+            gsap.set([screen, focus, metric], { autoAlpha: 0, y: 32, filter: 'blur(12px)' });
+            gsap.set(stations, { autoAlpha: 0, y: 74, rotateX: 16, filter: 'blur(10px)' });
+            gsap.set(decor, { autoAlpha: 0, y: 26, filter: 'blur(8px)' });
+            gsap.set(ceiling, { scaleX: 0.25, transformOrigin: '50% 50%' });
+
+            gsap.timeline({
+                defaults: { ease: 'power2.out' },
+                scrollTrigger: {
+                    trigger: floor,
+                    start: compact ? 'top 82%' : 'top 74%',
+                    end: compact ? 'center 48%' : 'center 42%',
+                    scrub: compact ? 0.58 : 0.76,
+                    onEnter: () => floor.classList.add('is-active-floor'),
+                    onEnterBack: () => floor.classList.add('is-active-floor'),
+                },
+            })
+                .to(workspace, { autoAlpha: 1, y: 0, scale: 1, filter: 'saturate(1.04) brightness(1)', duration: 0.64 }, 0)
+                .to(copy, { autoAlpha: 1, x: 0, y: 0, filter: 'blur(0px)', duration: 0.52 }, 0.06)
+                .to(ceiling, { scaleX: 1, stagger: 0.06, duration: 0.42 }, 0.08)
+                .to(screen, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.48 }, 0.16)
+                .to(stations, { autoAlpha: 1, y: 0, rotateX: 0, filter: 'blur(0px)', stagger: 0.055, duration: 0.58 }, 0.22)
+                .to(focus, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.46 }, 0.31)
+                .to(metric, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.42 }, 0.34)
+                .to(decor, { autoAlpha: 1, y: 0, filter: 'blur(0px)', stagger: 0.055, duration: 0.48 }, 0.38);
+
+            gsap.to(workspace, {
+                y: compact ? -18 : -34,
+                scale: compact ? 1.01 : 1.025,
+                ease: 'none',
+                scrollTrigger: {
+                    trigger: floor,
+                    start: 'top bottom',
+                    end: 'bottom top',
+                    scrub: 1.1,
+                },
+            });
+
+            gsap.to(screen, {
+                x: compact ? 0 : (index % 2 === 0 ? -18 : 18),
+                y: compact ? -10 : -26,
+                ease: 'none',
+                scrollTrigger: {
+                    trigger: floor,
+                    start: 'top bottom',
+                    end: 'bottom top',
+                    scrub: 0.92,
+                },
+            });
+
+            gsap.to(stations, {
+                y: (stationIndex) => (stationIndex % 2 === 0 ? -18 : -32),
+                rotateY: (stationIndex) => (stationIndex % 2 === 0 ? -4 : 4),
+                ease: 'none',
+                scrollTrigger: {
+                    trigger: floor,
+                    start: 'top bottom',
+                    end: 'bottom top',
+                    scrub: 0.86,
+                },
             });
         });
     }
