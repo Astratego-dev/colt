@@ -90,30 +90,51 @@ $floors = [
 
 $station_layouts = [
     [
-        'x' => '22%',
-        'y' => '61%',
-        'z' => '-135px',
-        'scale' => '.82',
+        'x' => '24%',
+        'y' => '64%',
+        'z' => '-230px',
+        'scale' => '.72',
+        'angle' => '-28deg',
+        'hover_turn' => '8deg',
+        'focus_turn' => '14deg',
+        'bot_gaze' => '-34deg',
+        'terminal_x' => '58%',
+        'terminal_turn' => '24deg',
+        'surface_turn' => '-5deg',
         'delay' => '-.6s',
         'camera_x' => '10%',
         'camera_y' => '-5%',
         'camera_scale' => '1.18',
     ],
     [
-        'x' => '47%',
-        'y' => '72%',
-        'z' => '70px',
-        'scale' => '1.04',
+        'x' => '48%',
+        'y' => '75%',
+        'z' => '42px',
+        'scale' => '.98',
+        'angle' => '18deg',
+        'hover_turn' => '-8deg',
+        'focus_turn' => '-15deg',
+        'bot_gaze' => '24deg',
+        'terminal_x' => '10%',
+        'terminal_turn' => '-26deg',
+        'surface_turn' => '4deg',
         'delay' => '-1.4s',
         'camera_x' => '-2%',
         'camera_y' => '-13%',
         'camera_scale' => '1.26',
     ],
     [
-        'x' => '70%',
-        'y' => '62%',
-        'z' => '-110px',
-        'scale' => '.84',
+        'x' => '72%',
+        'y' => '65%',
+        'z' => '-165px',
+        'scale' => '.76',
+        'angle' => '34deg',
+        'hover_turn' => '-10deg',
+        'focus_turn' => '-18deg',
+        'bot_gaze' => '36deg',
+        'terminal_x' => '7%',
+        'terminal_turn' => '-32deg',
+        'surface_turn' => '6deg',
         'delay' => '-2.1s',
         'camera_x' => '-14%',
         'camera_y' => '-6%',
@@ -121,9 +142,16 @@ $station_layouts = [
     ],
     [
         'x' => '36%',
-        'y' => '82%',
-        'z' => '190px',
-        'scale' => '1.15',
+        'y' => '84%',
+        'z' => '250px',
+        'scale' => '1.12',
+        'angle' => '-12deg',
+        'hover_turn' => '7deg',
+        'focus_turn' => '12deg',
+        'bot_gaze' => '-18deg',
+        'terminal_x' => '54%',
+        'terminal_turn' => '22deg',
+        'surface_turn' => '-3deg',
         'delay' => '-3s',
         'camera_x' => '6%',
         'camera_y' => '-18%',
@@ -132,7 +160,7 @@ $station_layouts = [
 ];
 ?>
 
-<section class="astratego-tower" dir="rtl" data-colt-xp data-astratego-tower data-version="1.9.8">
+<section class="astratego-tower" dir="rtl" data-colt-xp data-astratego-tower data-version="1.9.9">
     <canvas class="colt-xp__canvas stratego-tower__canvas" data-colt-canvas aria-hidden="true"></canvas>
 
     <header class="astratego-tower__nav">
@@ -241,6 +269,13 @@ $station_layouts = [
                                         --station-y: <?php echo esc_attr($station_layout['y']); ?>;
                                         --station-z: <?php echo esc_attr($station_layout['z']); ?>;
                                         --station-scale: <?php echo esc_attr($station_layout['scale']); ?>;
+                                        --station-angle: <?php echo esc_attr($station_layout['angle']); ?>;
+                                        --station-hover-turn: <?php echo esc_attr($station_layout['hover_turn']); ?>;
+                                        --station-focus-turn: <?php echo esc_attr($station_layout['focus_turn']); ?>;
+                                        --bot-gaze: <?php echo esc_attr($station_layout['bot_gaze']); ?>;
+                                        --terminal-x: <?php echo esc_attr($station_layout['terminal_x']); ?>;
+                                        --terminal-turn: <?php echo esc_attr($station_layout['terminal_turn']); ?>;
+                                        --surface-turn: <?php echo esc_attr($station_layout['surface_turn']); ?>;
                                         --station-delay: <?php echo esc_attr($station_layout['delay']); ?>;
                                     "
                                 >

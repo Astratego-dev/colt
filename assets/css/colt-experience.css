@@ -4170,9 +4170,13 @@ html.colt-is-traveling body {
     --floor-soft: rgba(118,243,93,.16);
     position: relative;
     z-index: 2;
+    display: grid;
+    align-items: stretch;
     min-height: 100vh;
-    padding: 34px 0;
+    min-height: 100svh;
+    padding: 0;
     isolation: isolate;
+    overflow: hidden;
 }
 
 .stratego-floor--green { --floor-glow: #82f45e; --floor-soft: rgba(130,244,94,.17); --floor-deep: #051f14; }
@@ -4211,10 +4215,11 @@ html.colt-is-traveling body {
 .astratego-floor__shell {
     position: relative;
     display: block;
-    width: min(1240px, calc(100% - 44px));
-    min-height: calc(100vh - 68px);
-    margin: 0 auto;
-    padding: 76px 0 34px;
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100svh;
+    margin: 0;
+    padding: 0;
 }
 
 .astratego-floor__copy {
@@ -4267,9 +4272,10 @@ html.colt-is-traveling body {
 
 .astratego-floor__workspace {
     position: relative;
-    min-height: min(760px, calc(100vh - 96px));
-    border: 1px solid color-mix(in srgb, var(--floor-glow) 22%, transparent);
-    border-radius: 8px;
+    min-height: 100vh;
+    min-height: 100svh;
+    border: 0;
+    border-radius: 0;
     overflow: hidden;
     isolation: isolate;
     perspective: 1280px;
@@ -4289,7 +4295,7 @@ html.colt-is-traveling body {
 .astratego-floor__workspace::before {
     content: "";
     position: absolute;
-    inset: 43% -8% -20%;
+    inset: 44% -18% -24%;
     z-index: 0;
     pointer-events: none;
     background:
@@ -4297,10 +4303,23 @@ html.colt-is-traveling body {
         linear-gradient(rgba(255,255,255,.055) 2px, transparent 2px),
         linear-gradient(90deg, rgba(255,255,255,.045) 2px, transparent 2px),
         linear-gradient(180deg, rgba(255,255,255,.08), rgba(0,0,0,.35));
-    background-size: auto, 86px 86px, 86px 86px, auto;
-    transform: rotateX(66deg) translateZ(-120px);
+    background-size: auto, 92px 92px, 92px 92px, auto;
+    transform: rotateX(68deg) translateZ(-132px);
     transform-origin: 50% 0;
     opacity: .92;
+}
+
+.astratego-floor__workspace::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background:
+        linear-gradient(90deg, rgba(0,0,0,.34), transparent 18% 82%, rgba(0,0,0,.36)),
+        linear-gradient(180deg, rgba(0,0,0,.18), transparent 28% 72%, rgba(0,0,0,.34)),
+        radial-gradient(ellipse at 50% 72%, transparent 0 44%, rgba(0,0,0,.28) 82%);
+    mix-blend-mode: multiply;
 }
 
 .astratego-floor.is-active-floor .astratego-floor__workspace {
@@ -4334,9 +4353,9 @@ html.colt-is-traveling body {
 }
 
 .astratego-room__wall {
-    top: 6%;
-    bottom: 11%;
-    width: 24%;
+    top: 0;
+    bottom: 0;
+    width: 31%;
     border: 1px solid color-mix(in srgb, var(--floor-glow) 14%, transparent);
     background:
         linear-gradient(180deg, color-mix(in srgb, var(--floor-glow) 10%, transparent), transparent 34%),
@@ -4346,38 +4365,38 @@ html.colt-is-traveling body {
 }
 
 .stratego-room__wall--left {
-    right: -4%;
-    transform: rotateY(-48deg) translateZ(-120px);
+    right: -9%;
+    transform: rotateY(-54deg) translateZ(-168px);
     transform-origin: right center;
 }
 
 .stratego-room__wall--right {
-    left: -4%;
-    transform: rotateY(48deg) translateZ(-120px);
+    left: -9%;
+    transform: rotateY(54deg) translateZ(-168px);
     transform-origin: left center;
 }
 
 .astratego-room__floor {
-    inset: auto -6% -10%;
-    height: 48%;
+    inset: auto -18% -18%;
+    height: 62%;
     background:
         linear-gradient(rgba(255,255,255,.04) 2px, transparent 2px),
         linear-gradient(90deg, rgba(255,255,255,.035) 2px, transparent 2px),
         radial-gradient(ellipse at 50% 0, color-mix(in srgb, var(--floor-glow) 18%, transparent), transparent 36rem),
         linear-gradient(180deg, rgba(255,255,255,.08), rgba(0,0,0,.42));
     background-size: 84px 84px, 84px 84px, auto, auto;
-    transform: rotateX(72deg) translateZ(-152px);
+    transform: rotateX(70deg) translateZ(-172px);
     transform-origin: top;
     opacity: .96;
 }
 
 .astratego-room__ceiling {
-    inset: -10% -5% auto;
-    height: 29%;
+    inset: -13% -12% auto;
+    height: 34%;
     background:
         linear-gradient(90deg, transparent, color-mix(in srgb, var(--floor-glow) 18%, transparent), transparent),
         linear-gradient(180deg, rgba(255,255,255,.11), rgba(0,0,0,.18));
-    transform: rotateX(-62deg) translateZ(-120px);
+    transform: rotateX(-64deg) translateZ(-148px);
     transform-origin: bottom;
     opacity: .72;
 }
@@ -4417,9 +4436,9 @@ html.colt-is-traveling body {
 
 .astratego-floor__backwall {
     position: absolute;
-    inset: 9% 10% auto;
+    inset: 8% 12% auto;
     z-index: 0;
-    height: 54%;
+    height: 57%;
     border: 1px solid color-mix(in srgb, var(--floor-glow) 18%, transparent);
     border-radius: 8px;
     background:
@@ -4429,7 +4448,7 @@ html.colt-is-traveling body {
         linear-gradient(180deg, rgba(255,255,255,.07), rgba(0,0,0,.2));
     background-size: 64px 64px, 64px 64px, auto, auto;
     box-shadow: inset 0 0 90px rgba(0,0,0,.24), 0 0 42px color-mix(in srgb, var(--floor-glow) 8%, transparent);
-    transform: translateZ(-260px);
+    transform: translateZ(-320px);
     pointer-events: none;
 }
 
@@ -4466,12 +4485,12 @@ html.colt-is-traveling body {
 .astratego-room__headline {
     position: absolute;
     z-index: 5;
-    left: 5.5%;
-    top: 17%;
+    left: 6%;
+    top: 18%;
     display: grid;
     justify-items: end;
     gap: 10px;
-    width: min(340px, 28%);
+    width: min(360px, 27%);
     text-align: right;
     transform: translateZ(40px);
     text-shadow: 0 18px 44px rgba(0,0,0,.45);
@@ -4517,8 +4536,8 @@ html.colt-is-traveling body {
 .astratego-room__elevator {
     position: absolute;
     z-index: 4;
-    right: 5.5%;
-    top: 18%;
+    right: 6%;
+    top: 19%;
     display: grid;
     justify-items: center;
     gap: 8px;
@@ -4535,7 +4554,7 @@ html.colt-is-traveling body {
     box-shadow:
         inset 0 24px 34px color-mix(in srgb, var(--floor-glow) 14%, transparent),
         0 0 36px color-mix(in srgb, var(--floor-glow) 12%, transparent);
-    transform: translateZ(-40px);
+    transform: translateZ(-72px);
 }
 
 .astratego-room__elevator b {
@@ -4580,13 +4599,13 @@ html.colt-is-traveling body {
 .astratego-floor__screen {
     position: absolute;
     z-index: 5;
-    right: 27%;
+    right: 28%;
     top: 14%;
     display: grid;
     grid-template-columns: minmax(0, .78fr) minmax(210px, .62fr);
     gap: 18px;
     align-items: center;
-    width: min(610px, 42%);
+    width: min(680px, 42%);
     min-height: 238px;
     padding: 24px;
     border: 1px solid color-mix(in srgb, var(--floor-glow) 42%, transparent);
@@ -4600,7 +4619,7 @@ html.colt-is-traveling body {
         inset 0 0 54px rgba(0,0,0,.34);
     backdrop-filter: blur(16px);
     transform-style: preserve-3d;
-    transform: translateZ(-20px);
+    transform: translateZ(-96px) rotateX(1deg);
     transition: opacity .36s ease, filter .36s ease;
 }
 
@@ -4780,11 +4799,13 @@ html.colt-is-traveling body {
     --station-focus-z: var(--station-z, 0px);
     --station-focus-scale: var(--station-scale, 1);
     --station-shift-y: 0px;
+    --station-angle: 0deg;
+    --station-turn: 0deg;
     --worker-x: 0px;
     --worker-y: 0px;
     --worker-scroll-y: 0px;
     translate: calc(50% + var(--worker-x)) calc(var(--worker-y) + var(--worker-scroll-y));
-    transform: translate3d(0, var(--station-shift-y), var(--station-focus-z)) scale(var(--station-focus-scale)) rotateY(var(--station-turn, 0deg));
+    transform: translate3d(0, var(--station-shift-y), var(--station-focus-z)) scale(var(--station-focus-scale)) rotateY(calc(var(--station-angle, 0deg) + var(--station-turn, 0deg)));
     transform-style: preserve-3d;
     transition:
         translate .56s ease,
@@ -4810,6 +4831,7 @@ html.colt-is-traveling body {
         linear-gradient(180deg, rgba(255,255,255,.1), rgba(0,0,0,.24)),
         rgba(255,255,255,.045);
     box-shadow: inset 0 0 22px rgba(0,0,0,.2);
+    transform: translateZ(-12px);
 }
 
 .astratego-station::after {
@@ -4835,7 +4857,7 @@ html.colt-is-traveling body {
     box-shadow:
         inset 0 0 20px rgba(255,255,255,.04),
         0 20px 38px rgba(0,0,0,.2);
-    transform: rotateX(64deg) translateZ(-12px);
+    transform: rotateX(64deg) translateZ(-12px) rotateZ(var(--surface-turn, 0deg));
     transform-origin: bottom;
 }
 
@@ -4872,7 +4894,7 @@ html.colt-is-traveling body {
 .astratego-station__terminal {
     position: absolute;
     z-index: 2;
-    right: 11%;
+    right: var(--terminal-x, 11%);
     bottom: 68px;
     width: 58px;
     height: 48px;
@@ -4880,7 +4902,7 @@ html.colt-is-traveling body {
     border-radius: 8px;
     background: rgba(3,9,14,.68);
     box-shadow: 0 0 22px color-mix(in srgb, var(--floor-glow) 12%, transparent);
-    transform: rotateY(-12deg) translateZ(16px);
+    transform: rotateY(var(--terminal-turn, -12deg)) translateZ(16px);
 }
 
 .astratego-station__terminal i,
@@ -4937,7 +4959,7 @@ html.colt-is-traveling body {
     background: color-mix(in srgb, var(--floor-glow) 11%, rgba(255,255,255,.035));
     box-shadow: 0 18px 56px color-mix(in srgb, var(--floor-glow) 16%, transparent);
     --station-shift-y: -12px;
-    --station-turn: -3deg;
+    --station-turn: var(--station-hover-turn, -3deg);
 }
 
 .astratego-floor.is-station-focused .astratego-station {
@@ -4952,7 +4974,7 @@ html.colt-is-traveling body {
     --station-focus-z: 360px;
     --station-focus-scale: 1.32;
     --station-shift-y: -58px;
-    --station-turn: -8deg;
+    --station-turn: var(--station-focus-turn, -8deg);
     --worker-x: 0px !important;
     --worker-y: 0px !important;
     --worker-scroll-y: 0px !important;
@@ -4972,8 +4994,9 @@ html.colt-is-traveling body {
     width: var(--bot-size);
     aspect-ratio: .78 / 1;
     transform-style: preserve-3d;
+    transform-origin: 50% 70%;
     animation: strategoBotIdle 3.8s ease-in-out infinite;
-    transition: width .46s ease, filter .3s ease;
+    transition: width .46s ease, filter .3s ease, transform .36s ease;
 }
 
 .astratego-bot i,
@@ -5103,6 +5126,12 @@ html.colt-is-traveling body {
         box-shadow .34s ease;
 }
 
+.astratego-floor:not(.is-station-focused) .astratego-floor__focus {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
 .astratego-floor.is-station-focused .astratego-floor__focus {
     z-index: 45;
     width: min(470px, 42%);
@@ -5224,8 +5253,8 @@ html.colt-is-traveling body {
 }
 
 @keyframes strategoBotIdle {
-    0%, 100% { transform: translateY(0) rotateY(-8deg); }
-    50% { transform: translateY(-10px) rotateY(8deg); }
+    0%, 100% { transform: translateY(0) rotateY(calc(var(--bot-gaze, 0deg) - 5deg)); }
+    50% { transform: translateY(-10px) rotateY(calc(var(--bot-gaze, 0deg) + 6deg)); }
 }
 
 @keyframes strategoWorkerRoam {
@@ -7151,15 +7180,18 @@ html.colt-is-traveling body {
         display: none;
     }
     .astratego-floor__shell {
-        grid-template-columns: 1fr;
-        min-height: auto;
+        width: 100%;
+        min-height: 100vh;
+        min-height: 100svh;
+        padding: 0;
     }
     .astratego-floor__copy {
         align-content: end;
         min-height: 260px;
     }
     .astratego-floor__workspace {
-        min-height: 710px;
+        min-height: 100vh;
+        min-height: 100svh;
     }
     .astratego-room__headline {
         left: 4%;
@@ -7169,8 +7201,8 @@ html.colt-is-traveling body {
         right: 4%;
     }
     .astratego-floor__screen {
-        right: 24%;
-        width: 49%;
+        right: 26%;
+        width: 46%;
     }
     .astratego-floor__focus {
         left: 4%;
@@ -7218,16 +7250,19 @@ html.colt-is-traveling body {
         display: none;
     }
     .astratego-floor {
-        min-height: auto;
-        padding: 12px 0 22px;
+        min-height: 100vh;
+        min-height: 100svh;
+        padding: 0;
     }
     .astratego-floor__shell {
-        width: min(100% - 28px, 1240px);
-        padding: 30px 0;
-        gap: 16px;
+        width: 100%;
+        min-height: 100vh;
+        min-height: 100svh;
+        padding: 0;
+        gap: 0;
     }
     .astratego-floor__copy {
-        display: grid;
+        display: none;
         min-height: auto;
         gap: 10px;
     }
@@ -7236,39 +7271,67 @@ html.colt-is-traveling body {
         font-size: 16px;
     }
     .astratego-floor__workspace {
-        display: grid;
-        gap: 14px;
-        min-height: auto;
-        padding: 96px 14px 18px;
+        display: block;
+        min-height: 100vh;
+        min-height: 100svh;
+        padding: 0;
         overflow: hidden;
-        perspective: none;
+        perspective: 980px;
+        perspective-origin: 50% 52%;
     }
     .astratego-floor__workspace::before,
     .astratego-floor__backwall,
     .astratego-room,
     .astratego-room__headline,
     .astratego-room__elevator {
-        display: none;
+        display: block;
     }
     .astratego-floor__depth {
-        position: relative;
-        inset: auto;
-        display: grid;
-        gap: 14px;
-        transform: none !important;
+        position: absolute;
+        inset: 0;
+        display: block;
+        transform: translate3d(var(--camera-x, 0), var(--camera-y, 0), 0) scale(var(--camera-scale, 1));
     }
     .astratego-floor__screen,
     .astratego-floor__stations,
     .astratego-floor__focus,
     .astratego-floor__metric {
-        position: relative;
+        position: absolute;
         inset: auto;
-        width: 100%;
     }
     .astratego-floor__screen {
+        right: 18px;
+        left: 18px;
+        top: 19%;
+        width: auto;
         grid-template-columns: 1fr;
         min-height: 0;
         padding: 18px;
+    }
+    .astratego-room__headline {
+        left: 18px;
+        top: 9%;
+        width: min(280px, 46%);
+        gap: 6px;
+    }
+    .astratego-room__headline small {
+        font-size: clamp(44px, 12vw, 72px);
+    }
+    .astratego-room__headline h3 {
+        font-size: clamp(25px, 7vw, 44px);
+    }
+    .astratego-room__headline p,
+    .astratego-room__headline a {
+        display: none;
+    }
+    .astratego-room__elevator {
+        right: 18px;
+        top: 10%;
+        width: 72px;
+        height: 150px;
+    }
+    .astratego-room__elevator b {
+        font-size: 31px;
     }
     .astratego-floor__screen-grid {
         grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -7277,28 +7340,32 @@ html.colt-is-traveling body {
         min-height: 48px;
     }
     .astratego-floor__stations {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 10px;
-        align-items: stretch;
+        inset: 0;
+        display: block;
         pointer-events: auto;
     }
     .astratego-station {
-        position: relative;
-        right: auto;
-        top: auto;
-        width: auto;
-        min-height: 152px;
+        position: absolute;
+        right: var(--station-x, 50%);
+        top: var(--station-y, 64%);
+        width: clamp(112px, 24vw, 150px);
+        min-height: 142px;
         padding: 12px 8px;
-        translate: none;
-        transform: none;
-        animation: none;
+        translate: calc(50% + var(--worker-x)) calc(var(--worker-y) + var(--worker-scroll-y));
+        transform: translate3d(0, var(--station-shift-y), var(--station-focus-z)) scale(var(--station-focus-scale)) rotateY(calc(var(--station-angle, 0deg) + var(--station-turn, 0deg)));
+        animation: strategoWorkerRoam 7.4s ease-in-out infinite alternate;
     }
     .astratego-floor.is-station-focused .astratego-station,
     .astratego-floor.is-station-focused .astratego-station.is-active {
+        transform: translate3d(0, var(--station-shift-y), var(--station-focus-z)) scale(var(--station-focus-scale)) rotateY(calc(var(--station-angle, 0deg) + var(--station-turn, 0deg)));
+    }
+    .astratego-floor.is-station-focused .astratego-station {
+        opacity: .35;
+        filter: blur(1px) saturate(.78) brightness(.82);
+    }
+    .astratego-floor.is-station-focused .astratego-station.is-active {
         opacity: 1;
         filter: none;
-        transform: none;
     }
     .astratego-station__surface {
         transform: rotateX(60deg) translateZ(-18px);
@@ -7314,15 +7381,22 @@ html.colt-is-traveling body {
         --bot-size: 86px;
     }
     .astratego-floor__focus {
+        left: 18px;
+        right: 18px;
+        top: 20%;
+        width: auto;
         grid-template-columns: auto minmax(0, 1fr);
         min-height: 132px;
-        transform: none;
+        transform: translateZ(180px) translateY(22px) scale(.94);
     }
     .astratego-floor.is-station-focused .astratego-floor__focus {
-        width: 100%;
-        transform: none;
+        width: auto;
+        transform: translateZ(300px) translateY(8px) scale(1);
     }
     .astratego-floor__metric {
+        left: 18px;
+        bottom: 23%;
+        width: auto;
         min-width: 0;
     }
     .astratego-floor__decor .stairs,
