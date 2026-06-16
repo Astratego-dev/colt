@@ -1528,7 +1528,7 @@
 
                 const index = Math.max(0, stations.indexOf(button));
                 stations.forEach((station) => {
-                    station.classList.toggle('is-active', station === button);
+                    station.classList.toggle('is-active', animate && station === button);
                 });
 
                 floor.style.setProperty('--active-station', index);
@@ -1606,10 +1606,13 @@
 
             if (!prefersReduced && gsap) {
                 stations.forEach((button, index) => {
-                    const travelDuration = gsap.utils.random(3.8, 6.4);
+                    const stationStyle = window.getComputedStyle(button);
+                    const walkX = parseFloat(stationStyle.getPropertyValue('--walk-x')) || 24;
+                    const walkY = parseFloat(stationStyle.getPropertyValue('--walk-y')) || 12;
+                    const travelDuration = gsap.utils.random(5.2, 9.4);
                     gsap.to(button, {
-                        '--worker-x': () => `${gsap.utils.random(-12, 12, 1)}px`,
-                        '--worker-y': () => `${gsap.utils.random(-10, 10, 1)}px`,
+                        '--worker-x': () => `${gsap.utils.random(-walkX, walkX, 1)}px`,
+                        '--worker-y': () => `${gsap.utils.random(-walkY, walkY, 1)}px`,
                         duration: travelDuration,
                         delay: index * 0.18,
                         repeat: -1,
@@ -1683,8 +1686,7 @@
                 .to(workspace, { autoAlpha: 1, y: 0, scale: 1, filter: 'saturate(1.04) brightness(1)', duration: 0.64 }, 0)
                 .to(copy, { autoAlpha: 1, x: 0, y: 0, filter: 'blur(0px)', duration: 0.52 }, 0.06)
                 .to(ceiling, { scaleX: 1, stagger: 0.06, duration: 0.42 }, 0.08)
-                .to(screen, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.48 }, 0.16)
-                .to(stations, { autoAlpha: 1, filter: 'blur(0px)', stagger: 0.055, duration: 0.58 }, 0.22)
+                .to(stations, { autoAlpha: 1, filter: 'blur(0px)', stagger: 0.055, duration: 0.58 }, 0.18)
                 .to(metric, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.42 }, 0.32)
                 .to(decor, { autoAlpha: 1, y: 0, filter: 'blur(0px)', stagger: 0.055, duration: 0.48 }, 0.38);
 
@@ -1697,18 +1699,6 @@
                     start: 'top bottom',
                     end: 'bottom top',
                     scrub: 1.1,
-                },
-            });
-
-            gsap.to(screen, {
-                x: compact ? 0 : (index % 2 === 0 ? -18 : 18),
-                y: compact ? -10 : -26,
-                ease: 'none',
-                scrollTrigger: {
-                    trigger: floor,
-                    start: 'top bottom',
-                    end: 'bottom top',
-                    scrub: 0.92,
                 },
             });
 

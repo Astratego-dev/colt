@@ -10,6 +10,7 @@ $floors = [
         'number' => '01',
         'slug' => 'growth',
         'tone' => 'green',
+        'background' => 'growth-ads.png',
         'title' => 'Growth Ads',
         'subtitle' => 'קומת השיווק והצמיחה',
         'text' => 'פרסום שמחבר בין תכנון, קריאייטיב, דאטה ואופטימיזציה. כל עמדה בקומה אחראית על חלק אחר במסע שמביא לקוחות ולא רק קליקים.',
@@ -26,6 +27,7 @@ $floors = [
         'number' => '02',
         'slug' => 'ai-chief',
         'tone' => 'purple',
+        'background' => 'ai-chief.png',
         'title' => 'AI Chief',
         'subtitle' => 'קומת המנהל החיצוני',
         'text' => 'קומה שמדמה מנהל AI חיצוני לעסק: אוטומציות, תהליכים, ניתוח נתונים וחיסכון בזמן בלי להעמיס על הצוות.',
@@ -42,6 +44,7 @@ $floors = [
         'number' => '03',
         'slug' => 'self-website',
         'tone' => 'blue',
+        'background' => 'self-website-ai.png',
         'title' => 'Self Website',
         'subtitle' => 'קומת האתר העצמאי',
         'text' => 'אתר שמרגיש פשוט לניהול, מהיר לטעינה וברור ללקוח. כל עמדה מטפלת בשכבה אחרת של הנכס הדיגיטלי.',
@@ -58,6 +61,7 @@ $floors = [
         'number' => '04',
         'slug' => 'idea-labs',
         'tone' => 'orange',
+        'background' => 'idea-labs.png',
         'title' => 'Idea Labs',
         'subtitle' => 'קומת המעבדה והפיתוח',
         'text' => 'מעבדה לבניית פתרונות דיגיטליים: מערכות, אפליקציות, SaaS ותהליכים שמתחילים ברעיון ומסתיימים במוצר עובד.',
@@ -74,6 +78,7 @@ $floors = [
         'number' => '05',
         'slug' => 'plugins',
         'tone' => 'pink',
+        'background' => 'astratego-plugins.png',
         'title' => 'Astratego Plugins',
         'subtitle' => 'קומת הכלים שעובדים בשבילכם',
         'text' => 'פתרונות תוספים ואינטגרציות שנבנים סביב תהליך העבודה שלכם: פחות ידני, יותר מדידה, יותר שליטה.',
@@ -90,27 +95,29 @@ $floors = [
 
 $station_layouts = [
     [
-        'x' => '24%',
-        'y' => '64%',
-        'z' => '-230px',
-        'scale' => '.72',
-        'angle' => '-28deg',
-        'hover_turn' => '8deg',
-        'focus_turn' => '14deg',
-        'bot_gaze' => '-34deg',
+        'x' => '28%',
+        'y' => '63%',
+        'z' => '-260px',
+        'scale' => '.54',
+        'angle' => '-32deg',
+        'hover_turn' => '10deg',
+        'focus_turn' => '18deg',
+        'bot_gaze' => '-42deg',
         'terminal_x' => '58%',
         'terminal_turn' => '24deg',
         'surface_turn' => '-5deg',
+        'walk_x' => '42px',
+        'walk_y' => '16px',
         'delay' => '-.6s',
-        'camera_x' => '10%',
-        'camera_y' => '-5%',
-        'camera_scale' => '1.18',
+        'camera_x' => '12%',
+        'camera_y' => '-10%',
+        'camera_scale' => '1.24',
     ],
     [
         'x' => '48%',
-        'y' => '75%',
-        'z' => '42px',
-        'scale' => '.98',
+        'y' => '76%',
+        'z' => '70px',
+        'scale' => '.72',
         'angle' => '18deg',
         'hover_turn' => '-8deg',
         'focus_turn' => '-15deg',
@@ -118,16 +125,18 @@ $station_layouts = [
         'terminal_x' => '10%',
         'terminal_turn' => '-26deg',
         'surface_turn' => '4deg',
+        'walk_x' => '58px',
+        'walk_y' => '24px',
         'delay' => '-1.4s',
         'camera_x' => '-2%',
-        'camera_y' => '-13%',
-        'camera_scale' => '1.26',
+        'camera_y' => '-18%',
+        'camera_scale' => '1.34',
     ],
     [
         'x' => '72%',
-        'y' => '65%',
-        'z' => '-165px',
-        'scale' => '.76',
+        'y' => '66%',
+        'z' => '-190px',
+        'scale' => '.58',
         'angle' => '34deg',
         'hover_turn' => '-10deg',
         'focus_turn' => '-18deg',
@@ -135,16 +144,18 @@ $station_layouts = [
         'terminal_x' => '7%',
         'terminal_turn' => '-32deg',
         'surface_turn' => '6deg',
+        'walk_x' => '38px',
+        'walk_y' => '18px',
         'delay' => '-2.1s',
         'camera_x' => '-14%',
-        'camera_y' => '-6%',
-        'camera_scale' => '1.2',
+        'camera_y' => '-12%',
+        'camera_scale' => '1.26',
     ],
     [
-        'x' => '36%',
-        'y' => '84%',
-        'z' => '250px',
-        'scale' => '1.12',
+        'x' => '37%',
+        'y' => '86%',
+        'z' => '290px',
+        'scale' => '.92',
         'angle' => '-12deg',
         'hover_turn' => '7deg',
         'focus_turn' => '12deg',
@@ -152,15 +163,17 @@ $station_layouts = [
         'terminal_x' => '54%',
         'terminal_turn' => '22deg',
         'surface_turn' => '-3deg',
+        'walk_x' => '64px',
+        'walk_y' => '28px',
         'delay' => '-3s',
         'camera_x' => '6%',
-        'camera_y' => '-18%',
-        'camera_scale' => '1.34',
+        'camera_y' => '-24%',
+        'camera_scale' => '1.42',
     ],
 ];
 ?>
 
-<section class="astratego-tower" dir="rtl" data-colt-xp data-astratego-tower data-version="1.9.9">
+<section class="astratego-tower" dir="rtl" data-colt-xp data-astratego-tower data-version="2.0.0">
     <canvas class="colt-xp__canvas stratego-tower__canvas" data-colt-canvas aria-hidden="true"></canvas>
 
     <header class="astratego-tower__nav">
@@ -203,7 +216,12 @@ $station_layouts = [
                     <a href="<?php echo esc_url($portfolio_url); ?>">לפרטים נוספים</a>
                 </aside>
 
-                <div class="astratego-floor__workspace" data-floor-workspace>
+                <?php $floor_background_url = COLT_EXPERIENCE_URL . 'assets/images/astratego-floors/' . $floor['background']; ?>
+                <div
+                    class="astratego-floor__workspace"
+                    data-floor-workspace
+                    style="--floor-bg: url('<?php echo esc_url($floor_background_url); ?>');"
+                >
                     <div class="astratego-floor__ceiling" aria-hidden="true">
                         <span></span><span></span><span></span>
                     </div>
@@ -252,7 +270,7 @@ $station_layouts = [
                             <?php foreach ($floor['stations'] as $station_index => $station) : ?>
                                 <?php $station_layout = $station_layouts[$station_index] ?? $station_layouts[0]; ?>
                                 <button
-                                    class="astratego-station <?php echo $station_index === 0 ? 'is-active' : ''; ?>"
+                                    class="astratego-station"
                                     type="button"
                                     data-astratego-station
                                     data-station-title="<?php echo esc_attr($station['title']); ?>"
@@ -276,6 +294,8 @@ $station_layouts = [
                                         --terminal-x: <?php echo esc_attr($station_layout['terminal_x']); ?>;
                                         --terminal-turn: <?php echo esc_attr($station_layout['terminal_turn']); ?>;
                                         --surface-turn: <?php echo esc_attr($station_layout['surface_turn']); ?>;
+                                        --walk-x: <?php echo esc_attr($station_layout['walk_x']); ?>;
+                                        --walk-y: <?php echo esc_attr($station_layout['walk_y']); ?>;
                                         --station-delay: <?php echo esc_attr($station_layout['delay']); ?>;
                                     "
                                 >
