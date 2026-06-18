@@ -1513,7 +1513,6 @@
         floors.forEach((floor) => {
             const stations = Array.from(floor.querySelectorAll('[data-astratego-station]'));
             const workspace = floor.querySelector('[data-floor-workspace]');
-            const stage = floor.querySelector('[data-floor-stage]');
             const screen = floor.querySelector('[data-floor-screen]');
             const focus = floor.querySelector('[data-floor-focus]');
             const heroBot = floor.querySelector('.stratego-bot--hero');
@@ -1540,15 +1539,6 @@
                     floor.classList.remove('is-station-focused');
                 }
 
-                if (stage && animate) {
-                    stage.style.setProperty('--camera-x', button.dataset.cameraX || '0');
-                    stage.style.setProperty('--camera-y', button.dataset.cameraY || '0');
-                    stage.style.setProperty('--camera-scale', button.dataset.cameraScale || '1.18');
-                } else if (stage) {
-                    stage.style.removeProperty('--camera-x');
-                    stage.style.removeProperty('--camera-y');
-                    stage.style.removeProperty('--camera-scale');
-                }
                 if (workspace) {
                     workspace.dataset.focusStation = String(index);
                 }

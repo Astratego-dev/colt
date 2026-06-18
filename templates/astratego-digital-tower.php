@@ -109,9 +109,6 @@ $station_layouts = [
         'walk_x' => '42px',
         'walk_y' => '16px',
         'delay' => '-.6s',
-        'camera_x' => '12%',
-        'camera_y' => '-10%',
-        'camera_scale' => '1.24',
     ],
     [
         'x' => '48%',
@@ -128,9 +125,6 @@ $station_layouts = [
         'walk_x' => '58px',
         'walk_y' => '24px',
         'delay' => '-1.4s',
-        'camera_x' => '-2%',
-        'camera_y' => '-18%',
-        'camera_scale' => '1.34',
     ],
     [
         'x' => '72%',
@@ -147,9 +141,6 @@ $station_layouts = [
         'walk_x' => '38px',
         'walk_y' => '18px',
         'delay' => '-2.1s',
-        'camera_x' => '-14%',
-        'camera_y' => '-12%',
-        'camera_scale' => '1.26',
     ],
     [
         'x' => '37%',
@@ -166,14 +157,16 @@ $station_layouts = [
         'walk_x' => '64px',
         'walk_y' => '28px',
         'delay' => '-3s',
-        'camera_x' => '6%',
-        'camera_y' => '-24%',
-        'camera_scale' => '1.42',
     ],
 ];
+
+$bot_model_file = COLT_EXPERIENCE_DIR . 'assets/models/astratego-bot/fun-robot.gltf';
+$bot_model_url = file_exists($bot_model_file)
+    ? COLT_EXPERIENCE_URL . 'assets/models/astratego-bot/fun-robot.gltf'
+    : '';
 ?>
 
-<section class="astratego-tower" dir="rtl" data-colt-xp data-astratego-tower data-version="2.0.0">
+<section class="astratego-tower" dir="rtl" data-colt-xp data-astratego-tower data-version="2.0.2">
     <canvas class="colt-xp__canvas stratego-tower__canvas" data-colt-canvas aria-hidden="true"></canvas>
 
     <header class="astratego-tower__nav">
@@ -260,6 +253,10 @@ $station_layouts = [
                                 <small data-floor-station-label><?php echo esc_html($floor['stations'][0]['label']); ?></small>
                                 <h3 data-floor-station-title><?php echo esc_html($floor['stations'][0]['title']); ?></h3>
                                 <p data-floor-station-text><?php echo esc_html($floor['stations'][0]['text']); ?></p>
+                                <div class="astratego-floor__screen-task">
+                                    <strong data-floor-task-title><?php echo esc_html($floor['stations'][0]['stat']); ?></strong>
+                                    <span data-floor-task-text><?php echo esc_html($floor['stations'][0]['task']); ?></span>
+                                </div>
                             </div>
                             <div class="astratego-floor__screen-grid" aria-hidden="true">
                                 <span></span><span></span><span></span><span></span>
@@ -278,9 +275,6 @@ $station_layouts = [
                                     data-station-text="<?php echo esc_attr($station['text']); ?>"
                                     data-station-task="<?php echo esc_attr($station['task']); ?>"
                                     data-station-stat="<?php echo esc_attr($station['stat']); ?>"
-                                    data-camera-x="<?php echo esc_attr($station_layout['camera_x']); ?>"
-                                    data-camera-y="<?php echo esc_attr($station_layout['camera_y']); ?>"
-                                    data-camera-scale="<?php echo esc_attr($station_layout['camera_scale']); ?>"
                                     style="
                                         --station: <?php echo esc_attr((string) $station_index); ?>;
                                         --station-x: <?php echo esc_attr($station_layout['x']); ?>;
@@ -303,7 +297,20 @@ $station_layouts = [
                                         <i></i><b></b><em></em>
                                     </span>
                                     <span class="astratego-bot" aria-hidden="true">
-                                        <i></i><b></b><em></em>
+                                        <?php if ($bot_model_url) : ?>
+                                            <model-viewer
+                                                class="astratego-bot__model"
+                                                src="<?php echo esc_url($bot_model_url); ?>"
+                                                autoplay
+                                                interaction-prompt="none"
+                                                disable-zoom
+                                                camera-orbit="0deg 78deg 5m"
+                                                exposure="1.05"
+                                                shadow-intensity=".38"
+                                            ></model-viewer>
+                                        <?php else : ?>
+                                            <i></i><b></b><em></em>
+                                        <?php endif; ?>
                                     </span>
                                     <span class="astratego-station__terminal" aria-hidden="true">
                                         <i></i><b></b>
@@ -316,7 +323,20 @@ $station_layouts = [
 
                         <div class="astratego-floor__focus" data-floor-focus>
                             <span class="astratego-bot stratego-bot--hero" aria-hidden="true">
-                                <i></i><b></b><em></em>
+                                <?php if ($bot_model_url) : ?>
+                                    <model-viewer
+                                        class="astratego-bot__model"
+                                        src="<?php echo esc_url($bot_model_url); ?>"
+                                        autoplay
+                                        interaction-prompt="none"
+                                        disable-zoom
+                                        camera-orbit="0deg 78deg 5m"
+                                        exposure="1.05"
+                                        shadow-intensity=".38"
+                                    ></model-viewer>
+                                <?php else : ?>
+                                    <i></i><b></b><em></em>
+                                <?php endif; ?>
                             </span>
                             <div>
                                 <small>WORKSTATION FOCUS</small>

@@ -237,10 +237,24 @@ final class Colt_Experience
             true
         );
 
+        $script_dependencies = ['colt-lenis', 'colt-gsap', 'colt-scrolltrigger'];
+
+        if (file_exists(COLT_EXPERIENCE_DIR . 'assets/models/astratego-bot/fun-robot.gltf')) {
+            wp_enqueue_script(
+                'colt-model-viewer',
+                'https://cdn.jsdelivr.net/npm/@google/model-viewer@4.1.0/dist/model-viewer.min.js',
+                [],
+                '4.1.0',
+                true
+            );
+            wp_script_add_data('colt-model-viewer', 'type', 'module');
+            $script_dependencies[] = 'colt-model-viewer';
+        }
+
         wp_enqueue_script(
             'colt-experience',
             COLT_EXPERIENCE_URL . 'assets/js/colt-experience.js',
-            ['colt-lenis', 'colt-gsap', 'colt-scrolltrigger'],
+            $script_dependencies,
             COLT_EXPERIENCE_VERSION,
             true
         );
