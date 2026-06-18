@@ -187,7 +187,7 @@ foreach ($bot_model_candidates as $model_filename => $required_files) {
 }
 ?>
 
-<section class="astratego-tower" dir="rtl" data-colt-xp data-astratego-tower data-version="2.0.3">
+<section class="astratego-tower" dir="rtl" data-colt-xp data-astratego-tower data-version="2.0.4">
     <canvas class="colt-xp__canvas stratego-tower__canvas" data-colt-canvas aria-hidden="true"></canvas>
 
     <header class="astratego-tower__nav">
@@ -213,6 +213,17 @@ foreach ($bot_model_candidates as $model_filename => $required_files) {
         <span></span>
         <span></span>
         <span></span>
+    </div>
+
+    <div class="astratego-elevator-transition" data-elevator-transition aria-hidden="true">
+        <span class="astratego-elevator-transition__door astratego-elevator-transition__door--left"></span>
+        <span class="astratego-elevator-transition__door astratego-elevator-transition__door--right"></span>
+        <div class="astratego-elevator-transition__indicator">
+            <span data-elevator-number>01</span>
+            <strong data-elevator-title>Growth Ads</strong>
+            <i></i>
+        </div>
+        <div class="astratego-elevator-transition__scan"></div>
     </div>
 
     <?php foreach ($floors as $floor_index => $floor) : ?>

@@ -4165,6 +4165,125 @@ html.colt-is-traveling body {
         rgba(255,255,255,.025);
 }
 
+.astratego-elevator-transition {
+    --elevator-progress: 0;
+    position: fixed;
+    z-index: 120;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    overflow: hidden;
+}
+
+.astratego-elevator-transition.is-active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.astratego-elevator-transition__door {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 50.3%;
+    background:
+        linear-gradient(90deg, rgba(255,255,255,.07), transparent 14% 86%, rgba(255,255,255,.06)),
+        repeating-linear-gradient(90deg, rgba(255,255,255,.035) 0 1px, transparent 1px 76px),
+        linear-gradient(180deg, #07101a, #0b1520 48%, #050910);
+    box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,.06),
+        inset 0 0 70px rgba(0,0,0,.5),
+        0 0 70px rgba(0,0,0,.46);
+    transform: translateX(calc(var(--door-open, 1) * -102%));
+    will-change: transform;
+}
+
+.astratego-elevator-transition__door--left {
+    left: 0;
+    border-right: 1px solid rgba(255,255,255,.16);
+}
+
+.astratego-elevator-transition__door--right {
+    right: 0;
+    transform: translateX(calc(var(--door-open, 1) * 102%));
+    border-left: 1px solid rgba(255,255,255,.16);
+}
+
+.astratego-elevator-transition__door::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at 50% 22%, color-mix(in srgb, var(--floor-glow) 18%, transparent), transparent 24rem),
+        linear-gradient(180deg, transparent, rgba(0,0,0,.28));
+    opacity: .84;
+}
+
+.astratego-elevator-transition__indicator {
+    position: absolute;
+    top: 18px;
+    left: 50%;
+    display: grid;
+    justify-items: center;
+    gap: 5px;
+    min-width: 210px;
+    padding: 12px 18px 13px;
+    border: 1px solid color-mix(in srgb, var(--floor-glow) 38%, transparent);
+    border-radius: 8px;
+    background:
+        linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.025)),
+        rgba(5,10,16,.78);
+    box-shadow:
+        0 24px 80px rgba(0,0,0,.38),
+        0 0 42px color-mix(in srgb, var(--floor-glow) 18%, transparent);
+    backdrop-filter: blur(18px);
+    transform: translate3d(-50%, -160%, 0);
+    color: #fff;
+    text-align: center;
+    will-change: transform, opacity;
+}
+
+.astratego-elevator-transition__indicator span {
+    color: var(--floor-glow);
+    font-size: 42px;
+    font-weight: 900;
+    line-height: .86;
+    letter-spacing: 0;
+    text-shadow: 0 0 24px color-mix(in srgb, var(--floor-glow) 56%, transparent);
+}
+
+.astratego-elevator-transition__indicator strong {
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+}
+
+.astratego-elevator-transition__indicator i {
+    display: block;
+    width: 86%;
+    height: 3px;
+    margin-top: 4px;
+    border-radius: 999px;
+    background:
+        linear-gradient(90deg, transparent, var(--floor-glow), transparent);
+    box-shadow: 0 0 18px var(--floor-glow);
+}
+
+.astratego-elevator-transition__scan {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    background:
+        linear-gradient(180deg, transparent 0 46%, color-mix(in srgb, var(--floor-glow) 24%, transparent) 50%, transparent 54%),
+        radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--floor-glow) 12%, transparent), transparent 22rem);
+    mix-blend-mode: screen;
+    transform: translateY(-22%);
+    pointer-events: none;
+}
+
 .astratego-floor {
     --floor-glow: #76f35d;
     --floor-soft: rgba(118,243,93,.16);

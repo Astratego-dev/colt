@@ -47,7 +47,7 @@ foreach ($social_links as $index => $social) {
 }
 ?>
 
-<section class="colt-xp" dir="rtl" data-colt-xp data-version="2.0.3">
+<section class="colt-xp" dir="rtl" data-colt-xp data-version="2.0.4">
     <canvas class="colt-xp__canvas" data-colt-canvas aria-hidden="true"></canvas>
     <div class="colt-xp__noise" aria-hidden="true"></div>
 

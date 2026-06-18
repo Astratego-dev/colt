@@ -1622,6 +1622,73 @@
         gsap.registerPlugin(ScrollTrigger);
         ensureSmoothScroll(gsap, ScrollTrigger);
 
+        const floorLinks = Array.from(tower.querySelectorAll('a[href^="#astratego-floor-"]'));
+        const elevator = tower.querySelector('[data-elevator-transition]');
+        const elevatorDoors = elevator ? elevator.querySelectorAll('.astratego-elevator-transition__door') : [];
+        const elevatorIndicator = elevator ? elevator.querySelector('.astratego-elevator-transition__indicator') : null;
+        const elevatorScan = elevator ? elevator.querySelector('.astratego-elevator-transition__scan') : null;
+        const elevatorNumber = elevator ? elevator.querySelector('[data-elevator-number]') : null;
+        const elevatorTitle = elevator ? elevator.querySelector('[data-elevator-title]') : null;
+        let currentFloorIndex = 0;
+        let elevatorTimeline = null;
+
+        const playElevatorTransition = (activeIndex) => {
+            if (!elevator || !elevatorDoors.length || !elevatorIndicator || !elevatorScan) return;
+            const activeFloor = floors[activeIndex];
+            if (!activeFloor) return;
+
+            const activeTitle = activeFloor.querySelector('.astratego-floor__copy h2');
+            const activeNumber = activeFloor.querySelector('.astratego-floor__copy small');
+            const floorGlow = window.getComputedStyle(activeFloor).getPropertyValue('--floor-glow').trim();
+
+            if (floorGlow) elevator.style.setProperty('--floor-glow', floorGlow);
+            if (elevatorTitle && activeTitle) elevatorTitle.textContent = activeTitle.textContent || '';
+            if (elevatorNumber && activeNumber) elevatorNumber.textContent = activeNumber.textContent || '';
+
+            if (elevatorTimeline) elevatorTimeline.kill();
+            elevator.classList.add('is-active');
+
+            elevatorTimeline = gsap.timeline({
+                defaults: { ease: 'power2.inOut' },
+                onComplete: () => {
+                    elevator.classList.remove('is-active');
+                    gsap.set(elevator, { autoAlpha: 0 });
+                },
+            });
+
+            elevatorTimeline
+                .set(elevator, { autoAlpha: 1 })
+                .set(elevatorDoors, { xPercent: (doorIndex) => (doorIndex === 0 ? -102 : 102) })
+                .set(elevatorIndicator, { yPercent: -160, autoAlpha: 0 })
+                .set(elevatorScan, { autoAlpha: 0, yPercent: -22 })
+                .to(elevatorDoors, { xPercent: 0, duration: 0.32 }, 0)
+                .to(elevatorIndicator, { yPercent: 0, autoAlpha: 1, duration: 0.36 }, 0.06)
+                .to(elevatorScan, { autoAlpha: 0.62, yPercent: 0, duration: 0.28 }, 0.15)
+                .to(elevatorScan, { autoAlpha: 0, yPercent: 26, duration: 0.24 }, 0.45)
+                .to(elevatorIndicator, { yPercent: 16, autoAlpha: 0.86, duration: 0.22 }, 0.48)
+                .to(elevatorDoors, { xPercent: (doorIndex) => (doorIndex === 0 ? -102 : 102), duration: 0.42, ease: 'power3.inOut' }, 0.58)
+                .to(elevatorIndicator, { yPercent: 120, autoAlpha: 0, duration: 0.3, ease: 'power2.in' }, 0.62)
+                .to(elevator, { autoAlpha: 0, duration: 0.14 }, 0.92);
+        };
+
+        const setCurrentFloor = (activeIndex) => {
+            floors.forEach((floor, floorIndex) => {
+                floor.classList.toggle('is-current-floor', floorIndex === activeIndex);
+            });
+
+            floorLinks.forEach((link) => {
+                const href = link.getAttribute('href') || '';
+                link.classList.toggle('is-current', floors[activeIndex] && href === `#${floors[activeIndex].id}`);
+            });
+
+            if (activeIndex !== currentFloorIndex) {
+                currentFloorIndex = activeIndex;
+                playElevatorTransition(activeIndex);
+            }
+        };
+
+        setCurrentFloor(0);
+
         const intro = tower.querySelector('.astratego-tower__intro');
         if (intro) {
             gsap.fromTo(intro.children, {
@@ -1643,20 +1710,6 @@
                 },
             });
         }
-
-        const floorLinks = Array.from(tower.querySelectorAll('a[href^="#astratego-floor-"]'));
-        const setCurrentFloor = (activeIndex) => {
-            floors.forEach((floor, floorIndex) => {
-                floor.classList.toggle('is-current-floor', floorIndex === activeIndex);
-            });
-
-            floorLinks.forEach((link) => {
-                const href = link.getAttribute('href') || '';
-                link.classList.toggle('is-current', floors[activeIndex] && href === `#${floors[activeIndex].id}`);
-            });
-        };
-
-        setCurrentFloor(0);
 
         floors.forEach((floor, index) => {
             const shell = floor.querySelector('.astratego-floor__shell');

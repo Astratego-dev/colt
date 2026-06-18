@@ -26,7 +26,7 @@ $contact_id = 'service-' . $service_key . '-contact';
     data-service-page
     data-service-key="<?php echo esc_attr($service_key); ?>"
     data-service-motion="<?php echo esc_attr($service_motion); ?>"
-    data-version="2.0.3"
+    data-version="2.0.4"
     style="<?php echo esc_attr($service_scene ? '--service-scene: url(' . esc_url($service_scene) . ');' : ''); ?>"
 >
     <canvas class="colt-xp__canvas" data-colt-canvas aria-hidden="true"></canvas>
