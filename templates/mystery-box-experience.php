@@ -23,7 +23,7 @@ $showcase_labels = array_values($mystery_content['showcase_labels'] ?? []);
     dir="rtl"
     data-colt-xp
     data-mystery-xp
-    data-version="2.0.2"
+    data-version="2.0.3"
 >
     <canvas class="colt-xp__canvas" data-colt-canvas aria-hidden="true"></canvas>
     <div class="colt-xp__noise" aria-hidden="true"></div>

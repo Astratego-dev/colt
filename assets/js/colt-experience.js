@@ -1644,9 +1644,24 @@
             });
         }
 
+        const floorLinks = Array.from(tower.querySelectorAll('a[href^="#astratego-floor-"]'));
+        const setCurrentFloor = (activeIndex) => {
+            floors.forEach((floor, floorIndex) => {
+                floor.classList.toggle('is-current-floor', floorIndex === activeIndex);
+            });
+
+            floorLinks.forEach((link) => {
+                const href = link.getAttribute('href') || '';
+                link.classList.toggle('is-current', floors[activeIndex] && href === `#${floors[activeIndex].id}`);
+            });
+        };
+
+        setCurrentFloor(0);
+
         floors.forEach((floor, index) => {
-            const copy = floor.querySelector('.astratego-floor__copy');
+            const shell = floor.querySelector('.astratego-floor__shell');
             const workspace = floor.querySelector('.astratego-floor__workspace');
+            const depth = floor.querySelector('[data-floor-stage]');
             const screen = floor.querySelector('[data-floor-screen]');
             const stations = floor.querySelectorAll('[data-astratego-station]');
             const focus = floor.querySelector('[data-floor-focus]');
@@ -1654,54 +1669,81 @@
             const decor = floor.querySelectorAll('.astratego-floor__decor span');
             const ceiling = floor.querySelectorAll('.astratego-floor__ceiling span');
 
-            gsap.set(copy, { autoAlpha: 0, x: compact ? 0 : 34, y: compact ? 26 : 0, filter: 'blur(12px)' });
-            gsap.set(workspace, { autoAlpha: 0.72, y: 54, scale: compact ? 0.985 : 0.96, filter: 'saturate(.78) brightness(.82)' });
-            gsap.set([screen, metric], { autoAlpha: 0, y: 32, filter: 'blur(12px)' });
-            gsap.set(focus, { autoAlpha: 0, y: 34, scale: 0.94, filter: 'blur(12px)' });
+            if (!shell || !workspace) return;
+
+            gsap.set(workspace, {
+                autoAlpha: index === 0 ? 1 : 0.18,
+                y: compact ? 30 : 70,
+                scale: compact ? 1.02 : 1.06,
+                filter: 'blur(14px) saturate(.76) brightness(.7)',
+            });
+            gsap.set(depth, {
+                rotationX: compact ? 0 : 3,
+                y: compact ? 0 : 18,
+                transformOrigin: '50% 70%',
+            });
+            gsap.set([screen, focus, metric], { autoAlpha: 0, y: 28, filter: 'blur(12px)' });
             gsap.set(stations, { autoAlpha: 0, filter: 'blur(10px)' });
             gsap.set(decor, { autoAlpha: 0, y: 26, filter: 'blur(8px)' });
             gsap.set(ceiling, { scaleX: 0.25, transformOrigin: '50% 50%' });
 
             gsap.timeline({
-                defaults: { ease: 'power2.out' },
+                defaults: { ease: 'none' },
                 scrollTrigger: {
                     trigger: floor,
-                    start: compact ? 'top 82%' : 'top 74%',
-                    end: compact ? 'center 48%' : 'center 42%',
-                    scrub: compact ? 0.58 : 0.76,
-                    onEnter: () => floor.classList.add('is-active-floor'),
-                    onEnterBack: () => floor.classList.add('is-active-floor'),
+                    start: 'top top',
+                    end: () => `+=${Math.max(window.innerHeight * (compact ? 1.08 : 1.26), 760)}`,
+                    pin: shell,
+                    pinSpacing: true,
+                    scrub: compact ? 0.66 : 0.84,
+                    anticipatePin: 1,
+                    invalidateOnRefresh: true,
+                    snap: compact ? false : {
+                        snapTo: [0, 0.5, 1],
+                        duration: { min: 0.16, max: 0.38 },
+                        delay: 0.03,
+                        ease: 'power1.inOut',
+                    },
+                    onEnter: () => setCurrentFloor(index),
+                    onEnterBack: () => setCurrentFloor(index),
                 },
             })
-                .to(workspace, { autoAlpha: 1, y: 0, scale: 1, filter: 'saturate(1.04) brightness(1)', duration: 0.64 }, 0)
-                .to(copy, { autoAlpha: 1, x: 0, y: 0, filter: 'blur(0px)', duration: 0.52 }, 0.06)
-                .to(ceiling, { scaleX: 1, stagger: 0.06, duration: 0.42 }, 0.08)
-                .to(stations, { autoAlpha: 1, filter: 'blur(0px)', stagger: 0.055, duration: 0.58 }, 0.18)
-                .to(metric, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.42 }, 0.32)
-                .to(decor, { autoAlpha: 1, y: 0, filter: 'blur(0px)', stagger: 0.055, duration: 0.48 }, 0.38);
-
-            gsap.to(workspace, {
-                y: compact ? -18 : -34,
-                scale: compact ? 1.01 : 1.025,
-                ease: 'none',
-                scrollTrigger: {
-                    trigger: floor,
-                    start: 'top bottom',
-                    end: 'bottom top',
-                    scrub: 1.1,
-                },
-            });
-
-            gsap.to(stations, {
-                '--worker-scroll-y': (stationIndex) => (stationIndex % 2 === 0 ? '-18px' : '-32px'),
-                ease: 'none',
-                scrollTrigger: {
-                    trigger: floor,
-                    start: 'top bottom',
-                    end: 'bottom top',
-                    scrub: 0.86,
-                },
-            });
+                .to(workspace, {
+                    autoAlpha: 1,
+                    y: 0,
+                    scale: 1,
+                    filter: 'blur(0px) saturate(1.04) brightness(1)',
+                    duration: 0.24,
+                    ease: 'power2.out',
+                }, 0)
+                .to(depth, { rotationX: 0, y: 0, duration: 0.24, ease: 'power2.out' }, 0)
+                .to(ceiling, { scaleX: 1, stagger: 0.035, duration: 0.2, ease: 'power2.out' }, 0.04)
+                .to(stations, {
+                    autoAlpha: 1,
+                    filter: 'blur(0px)',
+                    stagger: { each: 0.035, from: 'random' },
+                    duration: 0.24,
+                    ease: 'power2.out',
+                }, 0.1)
+                .to(workspace, {
+                    y: compact ? -10 : -24,
+                    scale: compact ? 1.012 : 1.026,
+                    filter: 'blur(0px) saturate(1.08) brightness(1.04)',
+                    duration: 0.42,
+                }, 0.34)
+                .to(stations, {
+                    '--worker-scroll-y': (stationIndex) => (stationIndex % 2 === 0 ? '-16px' : '-30px'),
+                    duration: 0.42,
+                }, 0.34)
+                .to([screen, focus], { autoAlpha: 0, filter: 'blur(14px)', duration: 0.16 }, 0.78)
+                .to(stations, { autoAlpha: 0.2, filter: 'blur(8px)', duration: 0.16 }, 0.84)
+                .to(workspace, {
+                    autoAlpha: 0.16,
+                    y: compact ? -36 : -74,
+                    scale: compact ? 0.985 : 0.94,
+                    filter: 'blur(16px) saturate(.72) brightness(.62)',
+                    duration: 0.18,
+                }, 0.82);
         });
     }
 

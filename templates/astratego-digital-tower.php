@@ -160,13 +160,34 @@ $station_layouts = [
     ],
 ];
 
-$bot_model_file = COLT_EXPERIENCE_DIR . 'assets/models/astratego-bot/fun-robot.gltf';
-$bot_model_url = file_exists($bot_model_file)
-    ? COLT_EXPERIENCE_URL . 'assets/models/astratego-bot/fun-robot.gltf'
-    : '';
+$bot_model_url = '';
+$bot_model_candidates = [
+    'fun-robot.glb' => [],
+    'fun robot.glb' => [],
+    'fun-robot.gltf' => ['fun-robot.bin', 'fun robot.bin'],
+    'fun robot.gltf' => ['fun robot.bin', 'fun%20robot.bin'],
+];
+
+foreach ($bot_model_candidates as $model_filename => $required_files) {
+    if (!file_exists(COLT_EXPERIENCE_DIR . 'assets/models/astratego-bot/' . $model_filename)) {
+        continue;
+    }
+
+    if (empty($required_files)) {
+        $bot_model_url = COLT_EXPERIENCE_URL . 'assets/models/astratego-bot/' . rawurlencode($model_filename);
+        break;
+    }
+
+    foreach ($required_files as $required_file) {
+        if (file_exists(COLT_EXPERIENCE_DIR . 'assets/models/astratego-bot/' . $required_file)) {
+            $bot_model_url = COLT_EXPERIENCE_URL . 'assets/models/astratego-bot/' . rawurlencode($model_filename);
+            break 2;
+        }
+    }
+}
 ?>
 
-<section class="astratego-tower" dir="rtl" data-colt-xp data-astratego-tower data-version="2.0.2">
+<section class="astratego-tower" dir="rtl" data-colt-xp data-astratego-tower data-version="2.0.3">
     <canvas class="colt-xp__canvas stratego-tower__canvas" data-colt-canvas aria-hidden="true"></canvas>
 
     <header class="astratego-tower__nav">

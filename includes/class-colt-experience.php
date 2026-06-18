@@ -239,7 +239,33 @@ final class Colt_Experience
 
         $script_dependencies = ['colt-lenis', 'colt-gsap', 'colt-scrolltrigger'];
 
-        if (file_exists(COLT_EXPERIENCE_DIR . 'assets/models/astratego-bot/fun-robot.gltf')) {
+        $bot_model_candidates = [
+            'fun-robot.glb' => [],
+            'fun robot.glb' => [],
+            'fun-robot.gltf' => ['fun-robot.bin', 'fun robot.bin'],
+            'fun robot.gltf' => ['fun robot.bin', 'fun%20robot.bin'],
+        ];
+        $has_bot_model = false;
+
+        foreach ($bot_model_candidates as $model_filename => $required_files) {
+            if (!file_exists(COLT_EXPERIENCE_DIR . 'assets/models/astratego-bot/' . $model_filename)) {
+                continue;
+            }
+
+            if (empty($required_files)) {
+                $has_bot_model = true;
+                break;
+            }
+
+            foreach ($required_files as $required_file) {
+                if (file_exists(COLT_EXPERIENCE_DIR . 'assets/models/astratego-bot/' . $required_file)) {
+                    $has_bot_model = true;
+                    break 2;
+                }
+            }
+        }
+
+        if ($has_bot_model) {
             wp_enqueue_script(
                 'colt-model-viewer',
                 'https://cdn.jsdelivr.net/npm/@google/model-viewer@4.1.0/dist/model-viewer.min.js',
