@@ -1630,12 +1630,12 @@
         const elevatorNumber = elevator ? elevator.querySelector('[data-elevator-number]') : null;
         const elevatorTitle = elevator ? elevator.querySelector('[data-elevator-title]') : null;
         let currentFloorIndex = 0;
-        let elevatorTimeline = null;
+        let elevatorLabelIndex = -1;
 
-        const playElevatorTransition = (activeIndex) => {
-            if (!elevator || !elevatorDoors.length || !elevatorIndicator || !elevatorScan) return;
+        const updateElevatorLabel = (activeIndex) => {
             const activeFloor = floors[activeIndex];
             if (!activeFloor) return;
+            if (activeIndex === elevatorLabelIndex) return;
 
             const activeTitle = activeFloor.querySelector('.astratego-floor__copy h2');
             const activeNumber = activeFloor.querySelector('.astratego-floor__copy small');
@@ -1644,31 +1644,32 @@
             if (floorGlow) elevator.style.setProperty('--floor-glow', floorGlow);
             if (elevatorTitle && activeTitle) elevatorTitle.textContent = activeTitle.textContent || '';
             if (elevatorNumber && activeNumber) elevatorNumber.textContent = activeNumber.textContent || '';
+            elevatorLabelIndex = activeIndex;
+        };
 
-            if (elevatorTimeline) elevatorTimeline.kill();
-            elevator.classList.add('is-active');
+        const renderElevatorFrame = (activeIndex, doorAmount, travelAmount = 0) => {
+            if (!elevator || !elevatorDoors.length || !elevatorIndicator || !elevatorScan) return;
 
-            elevatorTimeline = gsap.timeline({
-                defaults: { ease: 'power2.inOut' },
-                onComplete: () => {
-                    elevator.classList.remove('is-active');
-                    gsap.set(elevator, { autoAlpha: 0 });
-                },
+            const amount = gsap.utils.clamp(0, 1, doorAmount);
+            const travel = gsap.utils.clamp(0, 1, travelAmount);
+            const visible = amount > 0.035;
+
+            updateElevatorLabel(activeIndex);
+            elevator.classList.toggle('is-active', visible);
+
+            gsap.set(elevator, { autoAlpha: visible ? Math.min(1, 0.16 + amount * 0.92) : 0 });
+            gsap.set(elevatorDoors, {
+                xPercent: (doorIndex) => (doorIndex === 0 ? -102 + (102 * amount) : 102 - (102 * amount)),
             });
-
-            elevatorTimeline
-                .set(elevator, { autoAlpha: 1 })
-                .set(elevatorDoors, { xPercent: (doorIndex) => (doorIndex === 0 ? -102 : 102) })
-                .set(elevatorIndicator, { yPercent: -160, autoAlpha: 0 })
-                .set(elevatorScan, { autoAlpha: 0, yPercent: -22 })
-                .to(elevatorDoors, { xPercent: 0, duration: 0.32 }, 0)
-                .to(elevatorIndicator, { yPercent: 0, autoAlpha: 1, duration: 0.36 }, 0.06)
-                .to(elevatorScan, { autoAlpha: 0.62, yPercent: 0, duration: 0.28 }, 0.15)
-                .to(elevatorScan, { autoAlpha: 0, yPercent: 26, duration: 0.24 }, 0.45)
-                .to(elevatorIndicator, { yPercent: 16, autoAlpha: 0.86, duration: 0.22 }, 0.48)
-                .to(elevatorDoors, { xPercent: (doorIndex) => (doorIndex === 0 ? -102 : 102), duration: 0.42, ease: 'power3.inOut' }, 0.58)
-                .to(elevatorIndicator, { yPercent: 120, autoAlpha: 0, duration: 0.3, ease: 'power2.in' }, 0.62)
-                .to(elevator, { autoAlpha: 0, duration: 0.14 }, 0.92);
+            gsap.set(elevatorIndicator, {
+                autoAlpha: visible ? Math.min(1, amount * 1.35) : 0,
+                yPercent: -145 + (amount * 145) + (travel * 72),
+                scale: 0.94 + (amount * 0.06),
+            });
+            gsap.set(elevatorScan, {
+                autoAlpha: visible ? amount * 0.72 : 0,
+                yPercent: -34 + (travel * 76),
+            });
         };
 
         const setCurrentFloor = (activeIndex) => {
@@ -1683,11 +1684,11 @@
 
             if (activeIndex !== currentFloorIndex) {
                 currentFloorIndex = activeIndex;
-                playElevatorTransition(activeIndex);
             }
         };
 
         setCurrentFloor(0);
+        renderElevatorFrame(0, 0, 0);
 
         const intro = tower.querySelector('.astratego-tower__intro');
         if (intro) {
@@ -1759,6 +1760,24 @@
                     },
                     onEnter: () => setCurrentFloor(index),
                     onEnterBack: () => setCurrentFloor(index),
+                    onUpdate: (self) => {
+                        const progress = self.progress;
+
+                        if (progress < 0.22) {
+                            const local = progress / 0.22;
+                            renderElevatorFrame(index, 1 - local, local);
+                            return;
+                        }
+
+                        if (progress > 0.74) {
+                            const local = (progress - 0.74) / 0.26;
+                            const targetIndex = self.direction >= 0 ? Math.min(index + 1, floors.length - 1) : index;
+                            renderElevatorFrame(targetIndex, local, local);
+                            return;
+                        }
+
+                        renderElevatorFrame(index, 0, 0);
+                    },
                 },
             })
                 .to(workspace, {

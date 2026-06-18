@@ -187,7 +187,7 @@ foreach ($bot_model_candidates as $model_filename => $required_files) {
 }
 ?>
 
-<section class="astratego-tower" dir="rtl" data-colt-xp data-astratego-tower data-version="2.0.4">
+<section class="astratego-tower" dir="rtl" data-colt-xp data-astratego-tower data-version="2.0.5">
     <canvas class="colt-xp__canvas stratego-tower__canvas" data-colt-canvas aria-hidden="true"></canvas>
 
     <header class="astratego-tower__nav">
