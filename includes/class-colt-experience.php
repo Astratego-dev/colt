@@ -24,7 +24,6 @@ final class Colt_Experience
         add_shortcode('colt_vault_experience', [$this, 'render_vault_experience']);
         add_shortcode('colt_mystery_box_experience', [$this, 'render_mystery_box_experience']);
         add_shortcode('colt_mystery_box_product', [$this, 'render_mystery_box_product']);
-        add_shortcode('astratego_digital_tower', [$this, 'render_astratego_digital_tower']);
         add_shortcode('colt_service_experience', [$this, 'render_service_experience']);
 
         foreach (self::service_shortcode_map() as $shortcode => $service_key) {
@@ -99,20 +98,6 @@ final class Colt_Experience
 
         ob_start();
         include COLT_EXPERIENCE_DIR . 'templates/mystery-box-product.php';
-        return (string) ob_get_clean();
-    }
-
-    public function render_astratego_digital_tower($atts = [])
-    {
-        $atts = shortcode_atts([
-            'contact_url' => home_url('/contact/'),
-            'portfolio_url' => home_url('/projects/'),
-        ], $atts, 'astratego_digital_tower');
-
-        $this->enqueue_assets();
-
-        ob_start();
-        include COLT_EXPERIENCE_DIR . 'templates/astratego-digital-tower.php';
         return (string) ob_get_clean();
     }
 
@@ -237,50 +222,10 @@ final class Colt_Experience
             true
         );
 
-        $script_dependencies = ['colt-lenis', 'colt-gsap', 'colt-scrolltrigger'];
-
-        $bot_model_candidates = [
-            'fun-robot.glb' => [],
-            'fun robot.glb' => [],
-            'fun-robot.gltf' => ['fun-robot.bin', 'fun robot.bin'],
-            'fun robot.gltf' => ['fun robot.bin', 'fun%20robot.bin'],
-        ];
-        $has_bot_model = false;
-
-        foreach ($bot_model_candidates as $model_filename => $required_files) {
-            if (!file_exists(COLT_EXPERIENCE_DIR . 'assets/models/astratego-bot/' . $model_filename)) {
-                continue;
-            }
-
-            if (empty($required_files)) {
-                $has_bot_model = true;
-                break;
-            }
-
-            foreach ($required_files as $required_file) {
-                if (file_exists(COLT_EXPERIENCE_DIR . 'assets/models/astratego-bot/' . $required_file)) {
-                    $has_bot_model = true;
-                    break 2;
-                }
-            }
-        }
-
-        if ($has_bot_model) {
-            wp_enqueue_script(
-                'colt-model-viewer',
-                'https://cdn.jsdelivr.net/npm/@google/model-viewer@4.1.0/dist/model-viewer.min.js',
-                [],
-                '4.1.0',
-                true
-            );
-            wp_script_add_data('colt-model-viewer', 'type', 'module');
-            $script_dependencies[] = 'colt-model-viewer';
-        }
-
         wp_enqueue_script(
             'colt-experience',
             COLT_EXPERIENCE_URL . 'assets/js/colt-experience.js',
-            $script_dependencies,
+            ['colt-lenis', 'colt-gsap', 'colt-scrolltrigger'],
             COLT_EXPERIENCE_VERSION,
             true
         );
