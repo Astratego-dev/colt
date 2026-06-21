@@ -187,7 +187,7 @@ foreach ($bot_model_candidates as $model_filename => $required_files) {
 }
 ?>
 
-<section class="astratego-tower" dir="rtl" data-colt-xp data-astratego-tower data-version="2.0.5">
+<section class="astratego-tower" dir="rtl" data-colt-xp data-astratego-tower data-version="2.0.6">
     <canvas class="colt-xp__canvas stratego-tower__canvas" data-colt-canvas aria-hidden="true"></canvas>
 
     <header class="astratego-tower__nav">
@@ -325,6 +325,7 @@ foreach ($bot_model_candidates as $model_filename => $required_files) {
                                         --station-delay: <?php echo esc_attr($station_layout['delay']); ?>;
                                     "
                                 >
+                                    <span class="astratego-station__hit" aria-hidden="true"></span>
                                     <span class="astratego-station__surface" aria-hidden="true">
                                         <i></i><b></b><em></em>
                                     </span>

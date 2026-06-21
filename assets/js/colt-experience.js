@@ -1726,14 +1726,14 @@
             if (!shell || !workspace) return;
 
             gsap.set(workspace, {
-                autoAlpha: index === 0 ? 1 : 0.18,
-                y: compact ? 30 : 70,
-                scale: compact ? 1.02 : 1.06,
-                filter: 'blur(14px) saturate(.76) brightness(.7)',
+                autoAlpha: 1,
+                y: 0,
+                scale: 1,
+                filter: 'blur(0px) saturate(1) brightness(1)',
             });
             gsap.set(depth, {
-                rotationX: compact ? 0 : 3,
-                y: compact ? 0 : 18,
+                rotationX: 0,
+                y: 0,
                 transformOrigin: '50% 70%',
             });
             gsap.set([screen, focus, metric], { autoAlpha: 0, y: 28, filter: 'blur(12px)' });
@@ -1798,9 +1798,9 @@
                     ease: 'power2.out',
                 }, 0.1)
                 .to(workspace, {
-                    y: compact ? -10 : -24,
-                    scale: compact ? 1.012 : 1.026,
-                    filter: 'blur(0px) saturate(1.08) brightness(1.04)',
+                    y: 0,
+                    scale: 1,
+                    filter: 'blur(0px) saturate(1.04) brightness(1)',
                     duration: 0.42,
                 }, 0.34)
                 .to(stations, {
@@ -1810,10 +1810,10 @@
                 .to([screen, focus], { autoAlpha: 0, filter: 'blur(14px)', duration: 0.16 }, 0.78)
                 .to(stations, { autoAlpha: 0.2, filter: 'blur(8px)', duration: 0.16 }, 0.84)
                 .to(workspace, {
-                    autoAlpha: 0.16,
-                    y: compact ? -36 : -74,
-                    scale: compact ? 0.985 : 0.94,
-                    filter: 'blur(16px) saturate(.72) brightness(.62)',
+                    autoAlpha: 1,
+                    y: 0,
+                    scale: 1,
+                    filter: 'blur(0px) saturate(1) brightness(.96)',
                     duration: 0.18,
                 }, 0.82);
         });
