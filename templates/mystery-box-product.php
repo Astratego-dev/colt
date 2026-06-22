@@ -14,9 +14,12 @@ $contents = $content['contents'] ?? [];
 $features = $content['features'] ?? [];
 $worlds = $content['worlds'] ?? [];
 $steps = $content['steps'] ?? [];
+$hero_cards = $content['hero_cards'] ?? [];
+$hero_box_image = (string) ($content['hero_box_image'] ?? '');
+$hero_box_alt = (string) ($content['hero_box_alt'] ?? '');
 ?>
 
-<section class="colt-xp colt-mystery-product" dir="rtl" data-colt-xp data-version="2.0.7">
+<section class="colt-xp colt-mystery-product" dir="rtl" data-colt-xp data-version="2.0.8">
     <canvas class="colt-xp__canvas" data-colt-canvas aria-hidden="true"></canvas>
     <div class="colt-xp__noise" aria-hidden="true"></div>
 
@@ -48,17 +51,34 @@ $steps = $content['steps'] ?? [];
         </div>
 
         <div class="colt-mystery-product__visual" aria-hidden="true">
-            <div class="colt-mystery-product__box">
-                <span class="colt-mystery-product__lid"></span>
-                <span class="colt-mystery-product__body">
-                    <strong>COLT</strong>
-                    <em>MYSTERY BOX</em>
-                </span>
+            <div class="colt-mystery-product__box <?php echo $hero_box_image !== '' ? 'has-image' : ''; ?>">
+                <?php if ($hero_box_image !== '') : ?>
+                    <img class="colt-mystery-product__box-image" src="<?php echo esc_url($hero_box_image); ?>" alt="<?php echo esc_attr($hero_box_alt); ?>" loading="eager">
+                <?php else : ?>
+                    <span class="colt-mystery-product__lid"></span>
+                    <span class="colt-mystery-product__body">
+                        <strong>COLT</strong>
+                        <em>MYSTERY BOX</em>
+                    </span>
+                <?php endif; ?>
                 <span class="colt-mystery-product__seal"><?php echo esc_html($price); ?></span>
             </div>
-            <span class="colt-mystery-product__pull colt-mystery-product__pull--slab"><i></i><b>GRADED</b></span>
-            <span class="colt-mystery-product__pull colt-mystery-product__pull--pack"><i></i><b>SEALED</b></span>
-            <span class="colt-mystery-product__pull colt-mystery-product__pull--single"><i></i><b>SINGLE</b></span>
+            <?php foreach ($hero_cards as $index => $card) : ?>
+                <?php
+                $fallback_modifiers = ['slab', 'pack', 'single'];
+                $modifier = sanitize_html_class((string) ($card['modifier'] ?? ($fallback_modifiers[$index] ?? 'single')));
+                $card_image = (string) ($card['image'] ?? '');
+                $card_label = (string) ($card['label'] ?? '');
+                ?>
+                <span class="colt-mystery-product__pull colt-mystery-product__pull--<?php echo esc_attr($modifier); ?> <?php echo $card_image !== '' ? 'has-image' : ''; ?>">
+                    <?php if ($card_image !== '') : ?>
+                        <img src="<?php echo esc_url($card_image); ?>" alt="" loading="eager">
+                    <?php else : ?>
+                        <i></i>
+                    <?php endif; ?>
+                    <b><?php echo esc_html($card_label); ?></b>
+                </span>
+            <?php endforeach; ?>
         </div>
 
         <div class="colt-mystery-product__ledger" aria-label="נתוני מיסטרי בוקס">
@@ -81,7 +101,11 @@ $steps = $content['steps'] ?? [];
         <div class="colt-mystery-product__items">
             <?php foreach ($contents as $index => $item) : ?>
                 <article class="colt-mystery-product__item" style="--i: <?php echo esc_attr((string) $index); ?>">
-                    <span aria-hidden="true"></span>
+                    <span class="colt-mystery-product__item-media" aria-hidden="<?php echo empty($item['image']) ? 'true' : 'false'; ?>">
+                        <?php if (!empty($item['image'])) : ?>
+                            <img src="<?php echo esc_url((string) $item['image']); ?>" alt="<?php echo esc_attr((string) ($item['alt'] ?? $item['title'] ?? '')); ?>" loading="lazy">
+                        <?php endif; ?>
+                    </span>
                     <small><?php echo esc_html($item['meta'] ?? ''); ?></small>
                     <strong><?php echo esc_html($item['title'] ?? ''); ?></strong>
                     <p><?php echo esc_html($item['text'] ?? ''); ?></p>

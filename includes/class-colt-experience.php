@@ -34,6 +34,7 @@ final class Colt_Experience
 
         if (is_admin()) {
             add_action('admin_menu', [$this, 'register_admin_menu']);
+            add_action('admin_enqueue_scripts', [$this, 'enqueue_admin_assets']);
             add_action('admin_post_colt_experience_save_content', [$this, 'handle_admin_save_content']);
         }
     }
@@ -303,6 +304,45 @@ final class Colt_Experience
         );
     }
 
+    public function enqueue_admin_assets($hook_suffix)
+    {
+        if ($hook_suffix !== 'toplevel_page_colt-experience') {
+            return;
+        }
+
+        wp_enqueue_media();
+        wp_register_script('colt-experience-admin', false, ['jquery'], COLT_EXPERIENCE_VERSION, true);
+        wp_enqueue_script('colt-experience-admin');
+        wp_add_inline_script('colt-experience-admin', <<<'JS'
+jQuery(function ($) {
+    $('.colt-admin').on('click', '.colt-admin__media-button', function (event) {
+        event.preventDefault();
+
+        const $button = $(this);
+        const $field = $button.closest('.colt-admin__media').find('input[type="text"]').first();
+        const $preview = $button.closest('.colt-admin__media').find('.colt-admin__media-preview').first();
+        const frame = wp.media({
+            title: 'בחירת תמונה',
+            button: { text: 'שימוש בתמונה' },
+            multiple: false
+        });
+
+        frame.on('select', function () {
+            const attachment = frame.state().get('selection').first().toJSON();
+            const url = attachment.url || '';
+            $field.val(url).trigger('change');
+
+            if (url) {
+                $preview.empty().append($('<img>', { src: url, alt: '' }));
+            }
+        });
+
+        frame.open();
+    });
+});
+JS);
+    }
+
     public function handle_admin_save_content()
     {
         if (!current_user_can('manage_options')) {
@@ -368,7 +408,9 @@ final class Colt_Experience
 
             $value = is_scalar($posted[$key]) ? (string) $posted[$key] : '';
             $key_name = (string) $key;
-            $is_url_field = in_array($key_name, ['scene', 'url', 'image', 'primary_url', 'secondary_url'], true) || substr($key_name, -4) === '_url';
+            $is_url_field = in_array($key_name, ['scene', 'url', 'image', 'primary_url', 'secondary_url'], true)
+                || substr($key_name, -4) === '_url'
+                || substr($key_name, -6) === '_image';
             $clean[$key] = $is_url_field ? esc_url_raw($value) : sanitize_textarea_field($value);
         }
 
@@ -412,6 +454,11 @@ final class Colt_Experience
                 .colt-admin textarea { min-height: 82px; }
                 .colt-admin__wide { grid-column: 1 / -1; }
                 .colt-admin__shortcode { display: inline-block; direction: ltr; margin: 4px 0 0; padding: 6px 8px; border-radius: 6px; background: #f0f0f1; }
+                .colt-admin__media { display: grid; gap: 8px; }
+                .colt-admin__media-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; }
+                .colt-admin__media-preview { min-height: 64px; border: 1px dashed #c3c4c7; border-radius: 8px; background: #fff; overflow: hidden; }
+                .colt-admin__media-preview:empty { display: none; }
+                .colt-admin__media-preview img { display: block; width: 100%; max-height: 180px; object-fit: contain; background: #f6f7f7; }
                 @media (max-width: 960px) { .colt-admin__layout, .colt-admin__grid { grid-template-columns: 1fr; } .colt-admin__nav { position: static; } }
             </style>
 
@@ -783,6 +830,8 @@ final class Colt_Experience
                 'hero_meta' => 'Pokemon · One Piece · Marvel · Disney · Sports',
                 'hero_primary' => 'הזמנה ב-299 ש"ח',
                 'hero_secondary' => 'שאלה לפני רכישה',
+                'hero_box_image' => '',
+                'hero_box_alt' => 'COLT Mystery Box פתוחה',
                 'inside_kicker' => 'INSIDE EVERY BOX',
                 'inside_title' => 'שלושה פריטים, רגע פתיחה אחד.',
                 'inside_text' => 'בכל קופסה יש שילוב שנבנה לאספנים: פריט מדורג שנותן עוגן, חבילה סגורה לפתיחה, וסינגל שיכול להיות גם קלף חתימה, קלף ממוספר או פריט chase.',
@@ -804,10 +853,15 @@ final class Colt_Experience
                     ['value' => '100%', 'label' => 'התחייבות מקוריות'],
                     ['value' => '5', 'label' => 'עולמות אספנות'],
                 ],
+                'hero_cards' => [
+                    ['modifier' => 'slab', 'label' => 'GRADED', 'image' => '', 'alt' => 'קלף מדורג'],
+                    ['modifier' => 'pack', 'label' => 'SEALED', 'image' => '', 'alt' => 'חבילה סגורה'],
+                    ['modifier' => 'single', 'label' => 'SINGLE', 'image' => '', 'alt' => 'קלף סינגל'],
+                ],
                 'contents' => [
-                    ['title' => 'קלף מדורג', 'text' => 'סלאב אחד שמייצר את פריט ה-showcase של הקופסה.', 'meta' => 'Graded card'],
-                    ['title' => 'חבילה סגורה', 'text' => 'בוסטר או חבילה אטומה לפתיחה מתוך אחד מעולמות האספנות.', 'meta' => 'Sealed pack'],
-                    ['title' => 'קלף סינגל', 'text' => 'קלף נוסף שיכול להיות רגיל, חתום, ממוספר או chase לפי המלאי והדרופ.', 'meta' => 'Single card'],
+                    ['title' => 'קלף מדורג', 'text' => 'סלאב אחד שמייצר את פריט ה-showcase של הקופסה.', 'meta' => 'Graded card', 'image' => '', 'alt' => 'קלף מדורג במיסטרי בוקס'],
+                    ['title' => 'חבילה סגורה', 'text' => 'בוסטר או חבילה אטומה לפתיחה מתוך אחד מעולמות האספנות.', 'meta' => 'Sealed pack', 'image' => '', 'alt' => 'חבילה סגורה במיסטרי בוקס'],
+                    ['title' => 'קלף סינגל', 'text' => 'קלף נוסף שיכול להיות רגיל, חתום, ממוספר או chase לפי המלאי והדרופ.', 'meta' => 'Single card', 'image' => '', 'alt' => 'קלף סינגל במיסטרי בוקס'],
                 ],
                 'features' => [
                     ['title' => 'אפשרות לקלף חתום', 'text' => 'בחלק מהקופסאות עשויים להיכנס קלפי חתימה או פריטים עם ערך מיוחד.', 'meta' => 'Auto'],
@@ -943,6 +997,10 @@ final class Colt_Experience
             <?php $this->admin_text_field($active, 'hero_meta', 'פתיח - מידע קטן', $page['hero_meta'] ?? ''); ?>
             <?php $this->admin_text_field($active, 'hero_primary', 'פתיח - כפתור ראשי', $page['hero_primary'] ?? ''); ?>
             <?php $this->admin_text_field($active, 'hero_secondary', 'פתיח - כפתור משני', $page['hero_secondary'] ?? ''); ?>
+            <?php if ($active === 'mystery-product') : ?>
+                <?php $this->admin_image_field($active, 'hero_box_image', 'פתיח - תמונת קופסה מרכזית', $page['hero_box_image'] ?? '', true); ?>
+                <?php $this->admin_text_field($active, 'hero_box_alt', 'פתיח - תיאור תמונת קופסה', $page['hero_box_alt'] ?? ''); ?>
+            <?php endif; ?>
             <?php $this->admin_text_field($active, 'inside_kicker', 'מקטע פנימי - טקסט קטן', $page['inside_kicker'] ?? ''); ?>
             <?php $this->admin_text_field($active, 'inside_title', 'מקטע פנימי - כותרת', $page['inside_title'] ?? '', true); ?>
             <?php $this->admin_textarea_field($active, 'inside_text', 'מקטע פנימי - טקסט', $page['inside_text'] ?? '', true); ?>
@@ -978,9 +1036,12 @@ final class Colt_Experience
         <?php $this->admin_repeatable_fields($active, 'features', 'כרטיסי מידע', $page['features'] ?? [], ['meta' => 'Meta', 'title' => 'כותרת', 'text' => 'טקסט']); ?>
         <?php $this->admin_repeatable_fields($active, 'steps', 'שלבי תהליך', $page['steps'] ?? [], ['step' => 'מספר שלב', 'title' => 'כותרת', 'text' => 'טקסט']); ?>
         <?php $this->admin_repeatable_fields($active, 'rail', 'סרגל פתיחה', $page['rail'] ?? [], ['label' => 'תווית']); ?>
+        <?php if ($active === 'mystery-product') : ?>
+            <?php $this->admin_repeatable_fields($active, 'hero_cards', 'פתיח מוצר - קלפים מרחפים', $page['hero_cards'] ?? [], ['modifier' => 'מיקום: slab / pack / single', 'label' => 'תווית', 'image' => 'תמונה', 'alt' => 'תיאור תמונה']); ?>
+        <?php endif; ?>
         <?php $this->admin_repeatable_fields($active, 'stream_labels', 'Mystery - תוויות אלמנטים בפתיחה', $page['stream_labels'] ?? [], ['label' => 'תווית']); ?>
         <?php $this->admin_repeatable_fields($active, 'showcase_labels', 'Mystery - תוויות Showcase', $page['showcase_labels'] ?? [], ['label' => 'תווית']); ?>
-        <?php $this->admin_repeatable_fields($active, 'contents', 'תכולת Mystery Box', $page['contents'] ?? [], ['meta' => 'Meta', 'title' => 'כותרת', 'text' => 'טקסט']); ?>
+        <?php $this->admin_repeatable_fields($active, 'contents', 'תכולת Mystery Box', $page['contents'] ?? [], $active === 'mystery-product' ? ['meta' => 'Meta', 'title' => 'כותרת', 'text' => 'טקסט', 'image' => 'תמונה', 'alt' => 'תיאור תמונה'] : ['meta' => 'Meta', 'title' => 'כותרת', 'text' => 'טקסט']); ?>
         <?php $this->admin_repeatable_fields($active, 'worlds', 'עולמות Mystery Box', $page['worlds'] ?? [], ['value' => 'ערך מערכת', 'label' => 'שם', 'text' => 'טקסט']); ?>
         <?php $this->admin_repeatable_fields($active, 'languages', 'שפות Mystery Box', $page['languages'] ?? [], ['value' => 'ערך מערכת', 'label' => 'שם', 'text' => 'טקסט']); ?>
         <?php
@@ -993,6 +1054,31 @@ final class Colt_Experience
             <span><?php echo esc_html($label); ?></span>
             <input type="text" name="colt_service_pages[<?php echo esc_attr($service_key); ?>][<?php echo esc_attr($field); ?>]" value="<?php echo esc_attr((string) $value); ?>">
         </label>
+        <?php
+    }
+
+    private function admin_image_field($service_key, $field, $label, $value, $wide = false)
+    {
+        $value = (string) $value;
+        ?>
+        <label class="<?php echo $wide ? 'colt-admin__wide' : ''; ?>">
+            <span><?php echo esc_html($label); ?></span>
+            <?php $this->admin_media_input('colt_service_pages[' . $service_key . '][' . $field . ']', $value); ?>
+        </label>
+        <?php
+    }
+
+    private function admin_media_input($field_name, $field_value)
+    {
+        $field_value = (string) $field_value;
+        ?>
+        <span class="colt-admin__media">
+            <span class="colt-admin__media-row">
+                <input type="text" name="<?php echo esc_attr($field_name); ?>" value="<?php echo esc_attr($field_value); ?>" dir="ltr">
+                <button type="button" class="button colt-admin__media-button">בחירת תמונה</button>
+            </span>
+            <span class="colt-admin__media-preview"><?php if ($field_value !== '') : ?><img src="<?php echo esc_url($field_value); ?>" alt=""><?php endif; ?></span>
+        </span>
         <?php
     }
 
@@ -1024,11 +1110,14 @@ final class Colt_Experience
                                     : 'colt_service_pages[' . $service_key . '][' . $field . '][' . $index . '][' . $column_key . ']';
                                 $field_value = $is_scalar_item ? $item : ($item[$column_key] ?? '');
                                 $is_textarea = in_array($column_key, ['text', 'detail'], true);
-                                $is_wide = in_array($column_key, ['text', 'detail', 'url', 'image'], true);
+                                $is_image = $column_key === 'image' || substr((string) $column_key, -6) === '_image';
+                                $is_wide = in_array($column_key, ['text', 'detail', 'url', 'image'], true) || $is_image;
                                 ?>
                                 <label class="<?php echo $is_wide ? 'colt-admin__wide' : ''; ?>">
                                     <span><?php echo esc_html($column_label); ?></span>
-                                    <?php if ($is_textarea) : ?>
+                                    <?php if ($is_image) : ?>
+                                        <?php $this->admin_media_input($field_name, $field_value); ?>
+                                    <?php elseif ($is_textarea) : ?>
                                         <textarea name="<?php echo esc_attr($field_name); ?>"><?php echo esc_textarea((string) $field_value); ?></textarea>
                                     <?php else : ?>
                                         <input type="text" name="<?php echo esc_attr($field_name); ?>" value="<?php echo esc_attr((string) $field_value); ?>">

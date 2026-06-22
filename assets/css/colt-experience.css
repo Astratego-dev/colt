@@ -3703,14 +3703,28 @@ html.colt-is-traveling body {
     filter: drop-shadow(0 44px 90px rgba(0,0,0,.46));
 }
 
+.colt-mystery-product__box.has-image {
+    width: min(430px, 31vw);
+    aspect-ratio: 1.24 / .76;
+}
+
 .colt-mystery-product__lid,
 .colt-mystery-product__body,
-.colt-mystery-product__seal {
+.colt-mystery-product__seal,
+.colt-mystery-product__box-image {
     grid-area: 1 / 1;
     display: grid;
     place-items: center;
     border-radius: 8px;
     backface-visibility: hidden;
+}
+
+.colt-mystery-product__box-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 10px;
+    filter: saturate(1.05) contrast(1.04);
 }
 
 .colt-mystery-product__body {
@@ -3780,11 +3794,27 @@ html.colt-is-traveling body {
     animation: coltMysteryProductFloat 5.6s ease-in-out infinite;
 }
 
+.colt-mystery-product__pull.has-image {
+    background:
+        linear-gradient(145deg, rgba(255,255,255,.46), transparent 24%),
+        linear-gradient(135deg, rgba(255,244,212,.78), rgba(139,241,222,.24), rgba(255,145,198,.2));
+    overflow: hidden;
+}
+
 .colt-mystery-product__pull i {
     border-radius: 6px;
     background:
         radial-gradient(circle at 50% 25%, rgba(255,244,212,.85), transparent 22%),
         linear-gradient(135deg, rgba(7,8,15,.78), rgba(139,241,222,.4), rgba(255,145,198,.28));
+}
+
+.colt-mystery-product__pull img {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    border-radius: 6px;
+    object-fit: cover;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.14);
 }
 
 .colt-mystery-product__pull b {
@@ -3895,6 +3925,20 @@ html.colt-is-traveling body {
         linear-gradient(135deg, rgba(139,241,222,.32), rgba(255,145,198,.22), rgba(243,210,123,.24)),
         #121522;
     box-shadow: inset 0 0 0 1px rgba(255,255,255,.08);
+}
+
+.colt-mystery-product__item-media {
+    overflow: hidden;
+}
+
+.colt-mystery-product__item-media img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: inherit;
+    filter: saturate(1.06) contrast(1.04);
+    transform: scale(1.01);
 }
 
 .colt-mystery-product__item:nth-child(2) span {
@@ -5823,6 +5867,9 @@ html.colt-is-traveling body {
     .colt-mystery-product__box {
         width: min(390px, 56vw);
     }
+    .colt-mystery-product__box.has-image {
+        width: min(430px, 66vw);
+    }
     .colt-mystery-product__world-grid {
         grid-template-columns: repeat(3, minmax(0, 1fr));
     }
@@ -5852,6 +5899,9 @@ html.colt-is-traveling body {
     }
     .colt-mystery-product__box {
         width: min(330px, 72vw);
+    }
+    .colt-mystery-product__box.has-image {
+        width: min(360px, 78vw);
     }
     .colt-mystery-product__pull--slab {
         right: 2%;
