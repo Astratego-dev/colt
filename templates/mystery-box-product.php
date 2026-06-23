@@ -19,7 +19,7 @@ $hero_box_image = (string) ($content['hero_box_image'] ?? '');
 $hero_box_alt = (string) ($content['hero_box_alt'] ?? '');
 ?>
 
-<section class="colt-xp colt-mystery-product" dir="rtl" data-colt-xp data-version="2.0.8">
+<section class="colt-xp colt-mystery-product" dir="rtl" data-colt-xp data-version="2.0.9">
     <canvas class="colt-xp__canvas" data-colt-canvas aria-hidden="true"></canvas>
     <div class="colt-xp__noise" aria-hidden="true"></div>
 
@@ -66,13 +66,15 @@ $hero_box_alt = (string) ($content['hero_box_alt'] ?? '');
             <?php foreach ($hero_cards as $index => $card) : ?>
                 <?php
                 $fallback_modifiers = ['slab', 'pack', 'single'];
-                $modifier = sanitize_html_class((string) ($card['modifier'] ?? ($fallback_modifiers[$index] ?? 'single')));
+                $modifier_value = (string) ($card['modifier'] ?? '');
+                $modifier = sanitize_html_class($modifier_value !== '' ? $modifier_value : ($fallback_modifiers[$index] ?? 'single'));
                 $card_image = (string) ($card['image'] ?? '');
                 $card_label = (string) ($card['label'] ?? '');
+                $card_alt = (string) ($card['alt'] ?? $card_label);
                 ?>
                 <span class="colt-mystery-product__pull colt-mystery-product__pull--<?php echo esc_attr($modifier); ?> <?php echo $card_image !== '' ? 'has-image' : ''; ?>">
                     <?php if ($card_image !== '') : ?>
-                        <img src="<?php echo esc_url($card_image); ?>" alt="" loading="eager">
+                        <img src="<?php echo esc_url($card_image); ?>" alt="<?php echo esc_attr($card_alt); ?>" loading="eager">
                     <?php else : ?>
                         <i></i>
                     <?php endif; ?>

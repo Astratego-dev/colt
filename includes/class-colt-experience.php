@@ -1032,13 +1032,14 @@ JS);
             <?php $this->admin_text_field($active, 'contact_third', 'קשר - כפתור שלישי', $page['contact_third'] ?? ''); ?>
         </div>
 
+        <?php if ($active === 'mystery-product') : ?>
+            <?php $this->admin_repeatable_fields($active, 'hero_cards', 'פתיח - תמונות הקלפים המרחפים סביב הקופסה', $page['hero_cards'] ?? [], ['modifier' => 'מיקום קבוע: slab / pack / single', 'label' => 'טקסט קטן על הקלף', 'image' => 'תמונת הקלף המרחף', 'alt' => 'תיאור תמונה']); ?>
+        <?php endif; ?>
+
         <?php $this->admin_repeatable_fields($active, 'ledger', 'מדדי פתיח / Ledger', $page['ledger'] ?? [], ['value' => 'מספר/קוד', 'label' => 'טקסט']); ?>
         <?php $this->admin_repeatable_fields($active, 'features', 'כרטיסי מידע', $page['features'] ?? [], ['meta' => 'Meta', 'title' => 'כותרת', 'text' => 'טקסט']); ?>
         <?php $this->admin_repeatable_fields($active, 'steps', 'שלבי תהליך', $page['steps'] ?? [], ['step' => 'מספר שלב', 'title' => 'כותרת', 'text' => 'טקסט']); ?>
         <?php $this->admin_repeatable_fields($active, 'rail', 'סרגל פתיחה', $page['rail'] ?? [], ['label' => 'תווית']); ?>
-        <?php if ($active === 'mystery-product') : ?>
-            <?php $this->admin_repeatable_fields($active, 'hero_cards', 'פתיח מוצר - קלפים מרחפים', $page['hero_cards'] ?? [], ['modifier' => 'מיקום: slab / pack / single', 'label' => 'תווית', 'image' => 'תמונה', 'alt' => 'תיאור תמונה']); ?>
-        <?php endif; ?>
         <?php $this->admin_repeatable_fields($active, 'stream_labels', 'Mystery - תוויות אלמנטים בפתיחה', $page['stream_labels'] ?? [], ['label' => 'תווית']); ?>
         <?php $this->admin_repeatable_fields($active, 'showcase_labels', 'Mystery - תוויות Showcase', $page['showcase_labels'] ?? [], ['label' => 'תווית']); ?>
         <?php $this->admin_repeatable_fields($active, 'contents', 'תכולת Mystery Box', $page['contents'] ?? [], $active === 'mystery-product' ? ['meta' => 'Meta', 'title' => 'כותרת', 'text' => 'טקסט', 'image' => 'תמונה', 'alt' => 'תיאור תמונה'] : ['meta' => 'Meta', 'title' => 'כותרת', 'text' => 'טקסט']); ?>
