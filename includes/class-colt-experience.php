@@ -367,7 +367,7 @@ final class Colt_Experience
         $state = $this->live_show_prune_state($state);
         $map = self::live_show_map();
         $role = isset($params['role']) && $params['role'] === 'vendor' ? 'vendor' : 'collector';
-        $session_id = 'p_' . wp_generate_password(12, false, false);
+        $session_id = 'p_' . strtolower(wp_generate_password(12, false, false));
         $token = wp_generate_password(32, false, false);
         $name = $this->live_show_clean_text($params['name'] ?? '', $role === 'vendor' ? 'Vendor' : 'Collector', 28);
         $colors = ['#86f7d4', '#ffd36a', '#ff6fae', '#7cc8ff', '#b796ff', '#ff8a70'];
@@ -403,7 +403,7 @@ final class Colt_Experience
     {
         $state = $this->live_show_read_state();
         $state = $this->live_show_prune_state($state);
-        $session_id = sanitize_key((string) $request->get_param('session'));
+        $session_id = $this->live_show_state_key($state['sessions'], $request->get_param('session'));
         $token = (string) $request->get_param('token');
 
         if ($session_id && isset($state['sessions'][$session_id]) && hash_equals((string) $state['sessions'][$session_id]['token'], $token)) {
@@ -464,7 +464,7 @@ final class Colt_Experience
         }
 
         $map = self::live_show_map();
-        $booth_id = $session['boothId'] ?: 'b_' . wp_generate_password(10, false, false);
+        $booth_id = $session['boothId'] ?: 'b_' . strtolower(wp_generate_password(10, false, false));
         $x = $this->live_show_clamp_number($params['x'] ?? ($state['booths'][$booth_id]['x'] ?? 220), 0, $map['width']);
         $y = $this->live_show_clamp_number($params['y'] ?? ($state['booths'][$booth_id]['y'] ?? 220), 0, $map['height']);
         $width = (int) $map['boothWidth'];
@@ -517,7 +517,7 @@ final class Colt_Experience
         $state = $this->live_show_read_state();
         $state = $this->live_show_prune_state($state);
         $session = $this->live_show_verify_session($state, $params);
-        $booth_id = sanitize_key((string) ($params['boothId'] ?? ''));
+        $booth_id = $this->live_show_state_key($state['booths'], $params['boothId'] ?? '');
 
         if (!$session || !isset($state['booths'][$booth_id])) {
             return new WP_Error('colt_live_show_chat', 'Booth is unavailable.', ['status' => 404]);
@@ -538,7 +538,7 @@ final class Colt_Experience
             }
         }
 
-        $room_id = 'c_' . wp_generate_password(12, false, false);
+        $room_id = 'c_' . strtolower(wp_generate_password(12, false, false));
         $state['chats'][$room_id] = [
             'id' => $room_id,
             'boothId' => $booth_id,
@@ -564,7 +564,7 @@ final class Colt_Experience
         $params = $this->live_show_request_params($request);
         $state = $this->live_show_read_state();
         $session = $this->live_show_verify_session($state, $params);
-        $room_id = sanitize_key((string) ($params['roomId'] ?? ''));
+        $room_id = $this->live_show_state_key($state['chats'], $params['roomId'] ?? '');
 
         if (!$session || !isset($state['chats'][$room_id]) || $state['chats'][$room_id]['target'] !== $session['id']) {
             return new WP_Error('colt_live_show_chat', 'Chat request is unavailable.', ['status' => 404]);
@@ -584,7 +584,7 @@ final class Colt_Experience
         $state = $this->live_show_read_state();
         $state = $this->live_show_prune_state($state);
         $session = $this->live_show_verify_session($state, $params);
-        $room_id = sanitize_key((string) ($params['roomId'] ?? ''));
+        $room_id = $this->live_show_state_key($state['chats'], $params['roomId'] ?? '');
         $message = $this->live_show_clean_text($params['message'] ?? '', '', 280);
 
         if (!$session || $message === '' || !isset($state['chats'][$room_id])) {
@@ -719,7 +719,7 @@ final class Colt_Experience
 
     private function live_show_verify_session(array $state, array $params)
     {
-        $session_id = sanitize_key((string) ($params['session'] ?? ''));
+        $session_id = $this->live_show_state_key($state['sessions'], $params['session'] ?? '');
         $token = (string) ($params['token'] ?? '');
         if (!$session_id || !isset($state['sessions'][$session_id])) {
             return null;
@@ -728,6 +728,15 @@ final class Colt_Experience
             return null;
         }
         return $state['sessions'][$session_id];
+    }
+
+    private function live_show_state_key(array $items, $value)
+    {
+        $raw = (string) $value;
+        if ($raw !== '' && isset($items[$raw])) {
+            return $raw;
+        }
+        return sanitize_key($raw);
     }
 
     private function live_show_clean_text($value, $fallback, $max_length)
