@@ -13,6 +13,7 @@
         this.root = root;
         this.entry = root.querySelector('[data-live-entry]');
         this.joinForm = root.querySelector('[data-live-join]');
+        this.startButton = root.querySelector('[data-live-start]');
         this.game = root.querySelector('[data-live-game]');
         this.viewport = root.querySelector('[data-live-viewport]');
         this.world = root.querySelector('[data-live-world]');
@@ -54,6 +55,7 @@
         this.lastState = 0;
         this.scale = 0.86;
         this.started = false;
+        this.isJoining = false;
     }
 
     LiveShow.prototype.init = function () {
@@ -84,50 +86,69 @@
         });
         this.root.dataset.liveRole = this.joinForm.elements.role.value;
 
-        this.joinForm.addEventListener('submit', async (event) => {
+        const start = (event) => {
             event.preventDefault();
-            const form = new FormData(this.joinForm);
-            const role = String(form.get('role') || 'collector');
-            const name = String(form.get('name') || '').trim();
-            const color = String(form.get('color') || '#86f7d4');
-            this.vendorDraft.title = String(form.get('booth_title') || '').trim();
-            this.vendorDraft.color = color;
-            this.vendorDraft.description = 'סינגלים, סלאבים ומוצרים מיוחדים לתצוגה בלייב.';
-            this.vendorDraft.items = [
-                { title: 'Featured slab', price: 'Ask', note: 'PSA / CGC showcase' },
-                { title: 'Singles binder', price: 'Live offer', note: 'Pokemon / One Piece' },
-                { title: 'Sealed pack', price: 'Limited', note: 'Fresh sealed product' },
-            ];
+            this.join();
+        };
 
-            this.setNotice('נכנס ללייב...');
-            try {
-                const response = await this.post('/join', { role, name, color });
-                this.local = {
-                    session: response.session,
-                    token: response.token,
-                    role,
-                    name: name || (role === 'vendor' ? 'Vendor' : 'Collector'),
-                    color,
-                    x: response.state.sessions.find((item) => item.id === response.session)?.x || mapConfig.width / 2,
-                    y: response.state.sessions.find((item) => item.id === response.session)?.y || mapConfig.height / 2,
-                    dir: 'down',
-                };
-                this.state = response.state;
-                this.root.classList.add('is-live');
-                this.root.dataset.liveRole = role;
-                this.root.querySelector('[data-live-name]').textContent = this.local.name;
-                this.root.querySelector('[data-live-role]').textContent = role === 'vendor' ? 'Vendor' : 'Collector';
-                this.placeButton.hidden = role !== 'vendor';
-                this.editButton.hidden = role !== 'vendor';
-                this.started = true;
-                this.setNotice(role === 'vendor' ? 'בחר מקום לעמדה שלך בצדדים של המפה.' : 'ברוך הבא. הסתובב בין העמדות והתקרב כדי לפתוח שיחה.');
-                this.renderState();
-                this.loop(performance.now());
-                if (role === 'vendor') this.openPlacement();
-            } catch (error) {
-                this.setNotice(error.message || 'לא הצלחתי להיכנס ללייב.');
+        this.joinForm.addEventListener('submit', start);
+        this.startButton?.addEventListener('click', start);
+    };
+
+    LiveShow.prototype.join = async function () {
+        if (this.isJoining || this.started) return;
+        this.isJoining = true;
+        if (this.startButton) {
+            this.startButton.disabled = true;
+            this.startButton.textContent = 'נכנס ללייב...';
+        }
+
+        const form = new FormData(this.joinForm);
+        const role = String(form.get('role') || 'collector');
+        const name = String(form.get('name') || '').trim();
+        const color = String(form.get('color') || '#86f7d4');
+        this.vendorDraft.title = String(form.get('booth_title') || '').trim();
+        this.vendorDraft.color = color;
+        this.vendorDraft.description = 'סינגלים, סלאבים ומוצרים מיוחדים לתצוגה בלייב.';
+        this.vendorDraft.items = [
+            { title: 'Featured slab', price: 'Ask', note: 'PSA / CGC showcase' },
+            { title: 'Singles binder', price: 'Live offer', note: 'Pokemon / One Piece' },
+            { title: 'Sealed pack', price: 'Limited', note: 'Fresh sealed product' },
+        ];
+
+        this.setNotice('נכנס ללייב...');
+        try {
+            const response = await this.post('/join', { role, name, color });
+            this.local = {
+                session: response.session,
+                token: response.token,
+                role,
+                name: name || (role === 'vendor' ? 'Vendor' : 'Collector'),
+                color,
+                x: response.state.sessions.find((item) => item.id === response.session)?.x || mapConfig.width / 2,
+                y: response.state.sessions.find((item) => item.id === response.session)?.y || mapConfig.height / 2,
+                dir: 'down',
+            };
+            this.state = response.state;
+            this.root.classList.add('is-live');
+            this.root.dataset.liveRole = role;
+            this.root.querySelector('[data-live-name]').textContent = this.local.name;
+            this.root.querySelector('[data-live-role]').textContent = role === 'vendor' ? 'Vendor' : 'Collector';
+            this.placeButton.hidden = role !== 'vendor';
+            this.editButton.hidden = role !== 'vendor';
+            this.started = true;
+            this.setNotice(role === 'vendor' ? 'בחר מקום לעמדה שלך בצדדים של המפה.' : 'ברוך הבא. הסתובב בין העמדות והתקרב כדי לפתוח שיחה.');
+            this.renderState();
+            this.loop(performance.now());
+            if (role === 'vendor') this.openPlacement();
+        } catch (error) {
+            this.isJoining = false;
+            if (this.startButton) {
+                this.startButton.disabled = false;
+                this.startButton.textContent = 'כניסה ללייב';
             }
-        });
+            this.setNotice(error.message || 'לא הצלחתי להיכנס ללייב.');
+        }
     };
 
     LiveShow.prototype.bindControls = function () {

@@ -36,21 +36,39 @@ $map = Colt_Experience::live_show_map();
     </header>
 
     <div class="colt-live-show__entry" data-live-entry>
+        <div class="colt-live-show__entry-stage" aria-hidden="true">
+            <span class="colt-live-show__entry-neon colt-live-show__entry-neon--one"></span>
+            <span class="colt-live-show__entry-neon colt-live-show__entry-neon--two"></span>
+            <span class="colt-live-show__entry-neon colt-live-show__entry-neon--three"></span>
+            <span class="colt-live-show__entry-booth colt-live-show__entry-booth--left"></span>
+            <span class="colt-live-show__entry-booth colt-live-show__entry-booth--right"></span>
+            <span class="colt-live-show__entry-avatar colt-live-show__entry-avatar--one"></span>
+            <span class="colt-live-show__entry-avatar colt-live-show__entry-avatar--two"></span>
+            <span class="colt-live-show__entry-avatar colt-live-show__entry-avatar--three"></span>
+        </div>
         <div class="colt-live-show__entry-card">
             <p class="colt-live-show__kicker">COLT LIVE SHOW</p>
             <h1><?php echo esc_html($title); ?></h1>
             <p><?php echo esc_html($subtitle); ?></p>
 
-            <form class="colt-live-show__join" data-live-join>
-                <fieldset>
+            <form class="colt-live-show__join" data-live-join method="post" action="#" autocomplete="off" novalidate>
+                <fieldset class="colt-live-show__role-grid">
                     <legend>איך אתה נכנס ללייב?</legend>
-                    <label>
-                        <input type="radio" name="role" value="collector" checked>
-                        <span>לקוח / מבקר</span>
+                    <label class="colt-live-show__role-card">
+                        <input class="colt-live-show__role-input" type="radio" name="role" value="collector" checked>
+                        <span class="colt-live-show__role-icon" aria-hidden="true"></span>
+                        <span>
+                            <strong>לקוח / מבקר</strong>
+                            <small>נכנס, מסתובב בין עמדות ומבקש שיחה כשמשהו מעניין.</small>
+                        </span>
                     </label>
-                    <label>
-                        <input type="radio" name="role" value="vendor">
-                        <span>Vendor עם עמדה</span>
+                    <label class="colt-live-show__role-card">
+                        <input class="colt-live-show__role-input" type="radio" name="role" value="vendor">
+                        <span class="colt-live-show__role-icon" aria-hidden="true"></span>
+                        <span>
+                            <strong>Vendor עם עמדה</strong>
+                            <small>ממקם שולחן בצדדי האולם, בוחר צבע ומציג פריטים למכירה.</small>
+                        </span>
                     </label>
                 </fieldset>
 
@@ -70,7 +88,7 @@ $map = Colt_Experience::live_show_map();
                     </label>
                 </div>
 
-                <button type="submit">כניסה ללייב</button>
+                <button type="button" data-live-start>כניסה ללייב</button>
             </form>
         </div>
     </div>

@@ -10,6 +10,10 @@
     --live-red: #ff7f70;
     position: relative;
     min-height: 100vh;
+    width: 100vw;
+    max-width: 100vw;
+    margin-right: -50vw;
+    margin-left: -50vw;
     overflow: hidden;
     color: var(--live-cream);
     background:
@@ -116,11 +120,145 @@
     z-index: 4;
     display: grid;
     min-height: 100vh;
-    place-items: center;
+    grid-template-columns: minmax(0, .92fr) minmax(420px, .72fr);
+    gap: clamp(20px, 4vw, 70px);
+    align-items: center;
     padding: 110px 18px 34px;
 }
 
+.colt-live-show__entry-stage {
+    position: relative;
+    min-height: min(620px, 72vh);
+    border: 1px solid rgba(255, 238, 196, .16);
+    background:
+        linear-gradient(to bottom, rgba(255, 243, 207, .08), transparent 18%),
+        linear-gradient(90deg, rgba(255, 211, 106, .16), transparent 8%, transparent 92%, rgba(134, 247, 212, .14)),
+        linear-gradient(rgba(255, 238, 196, .035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 238, 196, .035) 1px, transparent 1px),
+        radial-gradient(circle at 48% 86%, rgba(134, 247, 212, .2), transparent 26%),
+        linear-gradient(140deg, #08141c, #101525 58%, #06080d);
+    background-size: cover, cover, 44px 44px, 44px 44px, cover, cover;
+    box-shadow: inset 0 0 130px rgba(0, 0, 0, .5), 0 34px 90px rgba(0, 0, 0, .36);
+    image-rendering: pixelated;
+    overflow: hidden;
+}
+
+.colt-live-show__entry-stage::before {
+    content: "LIVE CARD CONVENTION";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    color: rgba(255, 243, 207, .065);
+    font-size: clamp(44px, 7vw, 118px);
+    font-weight: 900;
+    white-space: nowrap;
+    transform: translate(-50%, -50%);
+}
+
+.colt-live-show__entry-stage::after {
+    content: "";
+    position: absolute;
+    right: 11%;
+    bottom: 12%;
+    width: 54%;
+    height: 12px;
+    background: linear-gradient(90deg, transparent, rgba(255, 211, 106, .68), transparent);
+    box-shadow: 0 0 24px rgba(255, 211, 106, .44);
+    transform: skewX(-12deg);
+}
+
+.colt-live-show__entry-neon {
+    position: absolute;
+    height: 7px;
+    background: var(--live-mint);
+    box-shadow: 0 0 18px currentColor, 0 0 44px currentColor;
+    opacity: .86;
+}
+
+.colt-live-show__entry-neon--one { left: 11%; top: 14%; width: 22%; color: var(--live-mint); }
+.colt-live-show__entry-neon--two { right: 12%; top: 18%; width: 30%; color: var(--live-pink); }
+.colt-live-show__entry-neon--three { left: 33%; top: 72%; width: 24%; color: var(--live-gold); }
+
+.colt-live-show__entry-booth {
+    position: absolute;
+    width: 178px;
+    height: 118px;
+    border: 4px solid var(--live-mint);
+    background: rgba(5, 9, 14, .72);
+    box-shadow: 0 20px 0 rgba(0, 0, 0, .35), 0 0 34px rgba(134, 247, 212, .28);
+}
+
+.colt-live-show__entry-booth::before {
+    content: "VENDOR";
+    position: absolute;
+    inset: 15px 12px auto;
+    color: var(--live-cream);
+    font-size: 18px;
+    font-weight: 900;
+}
+
+.colt-live-show__entry-booth::after {
+    content: "";
+    position: absolute;
+    left: 16px;
+    right: 16px;
+    bottom: 18px;
+    height: 22px;
+    background: linear-gradient(90deg, var(--live-gold) 0 28%, var(--live-pink) 28% 58%, var(--live-blue) 58%);
+}
+
+.colt-live-show__entry-booth--left {
+    left: 8%;
+    bottom: 18%;
+    transform: scale(.86);
+}
+
+.colt-live-show__entry-booth--right {
+    right: 8%;
+    bottom: 24%;
+    border-color: var(--live-pink);
+    box-shadow: 0 20px 0 rgba(0, 0, 0, .35), 0 0 34px rgba(255, 111, 174, .28);
+    transform: scale(1.08);
+}
+
+.colt-live-show__entry-avatar {
+    position: absolute;
+    width: 36px;
+    height: 46px;
+    border: 3px solid #03070a;
+    background: var(--live-mint);
+    box-shadow: 0 12px 0 rgba(0, 0, 0, .38);
+    animation: coltLiveIdle 2.6s ease-in-out infinite;
+}
+
+.colt-live-show__entry-avatar::before {
+    content: "";
+    position: absolute;
+    left: 6px;
+    top: 9px;
+    width: 22px;
+    height: 12px;
+    background: #03070a;
+}
+
+.colt-live-show__entry-avatar::after {
+    content: "";
+    position: absolute;
+    left: 8px;
+    bottom: -13px;
+    width: 6px;
+    height: 12px;
+    background: #03070a;
+    box-shadow: 14px 0 0 #03070a;
+}
+
+.colt-live-show__entry-avatar--one { left: 28%; bottom: 23%; transform: scale(.76); }
+.colt-live-show__entry-avatar--two { left: 54%; bottom: 19%; background: var(--live-gold); animation-delay: -.6s; transform: scale(.94); }
+.colt-live-show__entry-avatar--three { right: 27%; bottom: 35%; background: var(--live-pink); animation-delay: -1.1s; transform: scale(.68); }
+
 .colt-live-show__entry-card {
+    position: relative;
+    z-index: 2;
     width: min(760px, 100%);
     padding: clamp(22px, 4vw, 46px);
     border: 1px solid rgba(255, 238, 196, .2);
@@ -172,6 +310,10 @@
     background: rgba(255, 255, 255, .05);
 }
 
+.colt-live-show__role-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .colt-live-show__join legend,
 .colt-live-show__editor legend {
     padding: 0 8px;
@@ -187,14 +329,92 @@
     font-weight: 800;
 }
 
-.colt-live-show__join fieldset label {
-    display: flex;
+.colt-live-show__join fieldset .colt-live-show__role-card {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 12px;
     align-items: center;
-    min-height: 44px;
-    padding: 8px 10px;
+    min-height: 94px;
+    padding: 14px;
     border: 1px solid rgba(255, 238, 196, .14);
     background: rgba(0, 0, 0, .2);
     cursor: pointer;
+    transition: border-color .18s ease, background .18s ease, transform .18s ease;
+}
+
+.colt-live-show__role-card:hover {
+    transform: translateY(-1px);
+    border-color: rgba(134, 247, 212, .45);
+}
+
+.colt-live-show__role-input {
+    position: absolute;
+    width: 1px !important;
+    height: 1px !important;
+    min-height: 0 !important;
+    margin: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.colt-live-show__role-icon {
+    position: relative;
+    width: 48px;
+    height: 48px;
+    border: 2px solid rgba(255, 238, 196, .2);
+    background: rgba(255, 255, 255, .06);
+    box-shadow: inset 0 -10px 0 rgba(0, 0, 0, .16);
+}
+
+.colt-live-show__role-icon::before {
+    content: "";
+    position: absolute;
+    left: 11px;
+    top: 10px;
+    width: 24px;
+    height: 14px;
+    background: #05070b;
+    box-shadow: inset 12px 0 0 rgba(255, 255, 255, .08);
+}
+
+.colt-live-show__role-icon::after {
+    content: "";
+    position: absolute;
+    left: 13px;
+    bottom: -9px;
+    width: 6px;
+    height: 10px;
+    background: #05070b;
+    box-shadow: 14px 0 0 #05070b;
+}
+
+.colt-live-show__role-card strong,
+.colt-live-show__role-card small {
+    display: block;
+}
+
+.colt-live-show__role-card strong {
+    color: var(--live-cream);
+    font-size: 16px;
+}
+
+.colt-live-show__role-card small {
+    margin-top: 5px;
+    color: rgba(255, 243, 207, .64);
+    font-size: 12px;
+    line-height: 1.35;
+}
+
+.colt-live-show__role-card:has(.colt-live-show__role-input:checked) {
+    border-color: rgba(134, 247, 212, .76);
+    background: linear-gradient(135deg, rgba(134, 247, 212, .18), rgba(255, 211, 106, .06));
+    box-shadow: inset 0 0 32px rgba(134, 247, 212, .1), 0 0 34px rgba(134, 247, 212, .08);
+}
+
+.colt-live-show__role-card:has(.colt-live-show__role-input:checked) .colt-live-show__role-icon {
+    background: var(--live-mint);
+    border-color: var(--live-mint);
 }
 
 .colt-live-show input,
@@ -207,6 +427,12 @@
     color: var(--live-cream);
     padding: 10px 12px;
     font: inherit;
+}
+
+.colt-live-show input[type="radio"] {
+    width: auto;
+    min-height: 0;
+    padding: 0;
 }
 
 .colt-live-show input[type="color"] {
@@ -877,7 +1103,18 @@
     50% { transform: translateY(-7px); }
 }
 
+@keyframes coltLiveIdle {
+    0%, 100% { margin-bottom: 0; }
+    50% { margin-bottom: 8px; }
+}
+
 @media (max-width: 980px) {
+    .colt-live-show__entry {
+        grid-template-columns: 1fr;
+    }
+    .colt-live-show__entry-stage {
+        min-height: 360px;
+    }
     .colt-live-show__topbar {
         grid-template-columns: auto minmax(0, 1fr);
     }
@@ -904,6 +1141,7 @@
     }
     .colt-live-show__vendor-fields,
     .colt-live-show[data-live-role="vendor"] .colt-live-show__vendor-fields,
+    .colt-live-show__role-grid,
     .colt-live-show__editor-items,
     .colt-live-show__booth-items {
         grid-template-columns: 1fr;
