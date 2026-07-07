@@ -8,6 +8,7 @@ final class Colt_Experience
 {
     private static $instance = null;
     private $assets_enqueued = false;
+    private $live_show_assets_enqueued = false;
 
     public static function instance()
     {
@@ -25,12 +26,15 @@ final class Colt_Experience
         add_shortcode('colt_mystery_box_experience', [$this, 'render_mystery_box_experience']);
         add_shortcode('colt_mystery_box_product', [$this, 'render_mystery_box_product']);
         add_shortcode('colt_service_experience', [$this, 'render_service_experience']);
+        add_shortcode('colt_live_show', [$this, 'render_live_show']);
 
         foreach (self::service_shortcode_map() as $shortcode => $service_key) {
             add_shortcode($shortcode, function ($atts = []) use ($service_key, $shortcode) {
                 return $this->render_named_service_experience($service_key, $atts, $shortcode);
             });
         }
+
+        add_action('rest_api_init', [$this, 'register_live_show_routes']);
 
         if (is_admin()) {
             add_action('admin_menu', [$this, 'register_admin_menu']);
@@ -114,6 +118,20 @@ final class Colt_Experience
         ], $atts, 'colt_service_experience');
 
         return $this->render_named_service_experience((string) $atts['service'], $atts, 'colt_service_experience');
+    }
+
+    public function render_live_show($atts = [])
+    {
+        $atts = shortcode_atts([
+            'title' => 'COLT Live Show',
+            'subtitle' => 'יריד קלפים חי שבו אספנים ו-vendors נפגשים בזמן אמת.',
+        ], $atts, 'colt_live_show');
+
+        $this->enqueue_live_show_assets();
+
+        ob_start();
+        include COLT_EXPERIENCE_DIR . 'templates/live-show.php';
+        return (string) ob_get_clean();
     }
 
     public function render_named_service_experience($service_key, $atts = [], $shortcode = 'colt_service_experience')
@@ -234,6 +252,39 @@ final class Colt_Experience
         $this->assets_enqueued = true;
     }
 
+    private function enqueue_live_show_assets()
+    {
+        if ($this->live_show_assets_enqueued) {
+            return;
+        }
+
+        $this->enqueue_assets();
+
+        wp_enqueue_style(
+            'colt-live-show',
+            COLT_EXPERIENCE_URL . 'assets/css/colt-live-show.css',
+            ['colt-experience'],
+            COLT_EXPERIENCE_VERSION
+        );
+
+        wp_enqueue_script(
+            'colt-live-show',
+            COLT_EXPERIENCE_URL . 'assets/js/colt-live-show.js',
+            [],
+            COLT_EXPERIENCE_VERSION,
+            true
+        );
+
+        wp_localize_script('colt-live-show', 'COLT_LIVE_SHOW', [
+            'restUrl' => esc_url_raw(rest_url('colt/v1/live-show')),
+            'map' => self::live_show_map(),
+            'npcs' => self::live_show_npcs(),
+            'version' => COLT_EXPERIENCE_VERSION,
+        ]);
+
+        $this->live_show_assets_enqueued = true;
+    }
+
     public static function logo_url()
     {
         $custom_logo_id = (int) get_theme_mod('custom_logo');
@@ -251,6 +302,495 @@ final class Colt_Experience
     public static function asset_url($path)
     {
         return COLT_EXPERIENCE_URL . ltrim((string) $path, '/');
+    }
+
+    public static function live_show_map()
+    {
+        return [
+            'width' => 3200,
+            'height' => 1760,
+            'boothWidth' => 250,
+            'boothHeight' => 150,
+            'sideDepth' => 430,
+            'participantTtl' => 45,
+        ];
+    }
+
+    public static function live_show_npcs()
+    {
+        return [
+            ['id' => 'npc-01', 'name' => 'Mika', 'x' => 760, 'y' => 520, 'tone' => 'mint', 'line' => 'ראית את הסלאבים ליד הכניסה? יש שם דברים יפים.'],
+            ['id' => 'npc-02', 'name' => 'Rex', 'x' => 1220, 'y' => 410, 'tone' => 'gold', 'line' => 'אני מחכה שמישהו יפתח בוסטר מול כולם.'],
+            ['id' => 'npc-03', 'name' => 'Nova', 'x' => 1840, 'y' => 500, 'tone' => 'pink', 'line' => 'אם אתה מחפש וואן פיס, תבדוק את העמדות בצד ימין.'],
+            ['id' => 'npc-04', 'name' => 'Kai', 'x' => 2380, 'y' => 390, 'tone' => 'blue', 'line' => 'טיפ קטן: תמיד שואלים על מצב הקלף לפני מחיר.'],
+            ['id' => 'npc-05', 'name' => 'Juno', 'x' => 2860, 'y' => 730, 'tone' => 'violet', 'line' => 'יש פה אווירה של כנס אספנים אמיתי.'],
+            ['id' => 'npc-06', 'name' => 'Ash', 'x' => 2460, 'y' => 1180, 'tone' => 'red', 'line' => 'קלף מדורג 10 תמיד מושך אנשים לשולחן.'],
+            ['id' => 'npc-07', 'name' => 'Lio', 'x' => 2020, 'y' => 1370, 'tone' => 'mint', 'line' => 'אני בודק מי מביא Mystery Box הכי מעניין.'],
+            ['id' => 'npc-08', 'name' => 'Skye', 'x' => 1540, 'y' => 1240, 'tone' => 'blue', 'line' => 'השולחנות הכי טובים הם אלה שמספרים סיפור.'],
+            ['id' => 'npc-09', 'name' => 'Ori', 'x' => 1040, 'y' => 1370, 'tone' => 'gold', 'line' => 'יש כאן כמה chase cards שמתחבאים יפה.'],
+            ['id' => 'npc-10', 'name' => 'Zed', 'x' => 510, 'y' => 1120, 'tone' => 'pink', 'line' => 'אם vendor זמין, פשוט תתקרב ותבקש שיחה.'],
+            ['id' => 'npc-11', 'name' => 'Tali', 'x' => 430, 'y' => 710, 'tone' => 'violet', 'line' => 'אני אוהבת עמדות עם צבע ברור וכותרת קצרה.'],
+            ['id' => 'npc-12', 'name' => 'Ben', 'x' => 1600, 'y' => 820, 'tone' => 'red', 'line' => 'המעברים פתוחים בכוונה, שלא ירגיש צפוף.'],
+            ['id' => 'npc-13', 'name' => 'Nox', 'x' => 2120, 'y' => 890, 'tone' => 'blue', 'line' => 'פוקימון ווואן פיס זה שילוב שמביא קהל טוב.'],
+            ['id' => 'npc-14', 'name' => 'Yam', 'x' => 1160, 'y' => 900, 'tone' => 'mint', 'line' => 'אני פה בשביל הקלפים, אבל נשאר בגלל האנשים.'],
+            ['id' => 'npc-15', 'name' => 'Vera', 'x' => 2780, 'y' => 1420, 'tone' => 'gold', 'line' => 'תסתובב קצת. לפעמים העסקה הטובה נמצאת בקצה המפה.'],
+        ];
+    }
+
+    public function register_live_show_routes()
+    {
+        $namespace = 'colt/v1';
+        $routes = [
+            ['/live-show/join', 'POST', 'rest_live_show_join'],
+            ['/live-show/state', 'GET', 'rest_live_show_state'],
+            ['/live-show/heartbeat', 'POST', 'rest_live_show_heartbeat'],
+            ['/live-show/leave', 'POST', 'rest_live_show_leave'],
+            ['/live-show/booth', 'POST', 'rest_live_show_booth'],
+            ['/live-show/chat/request', 'POST', 'rest_live_show_chat_request'],
+            ['/live-show/chat/respond', 'POST', 'rest_live_show_chat_respond'],
+            ['/live-show/chat/message', 'POST', 'rest_live_show_chat_message'],
+        ];
+
+        foreach ($routes as $route) {
+            register_rest_route($namespace, $route[0], [
+                'methods' => $route[1],
+                'callback' => [$this, $route[2]],
+                'permission_callback' => '__return_true',
+            ]);
+        }
+    }
+
+    public function rest_live_show_join($request)
+    {
+        $params = $this->live_show_request_params($request);
+        $state = $this->live_show_read_state();
+        $state = $this->live_show_prune_state($state);
+        $map = self::live_show_map();
+        $role = isset($params['role']) && $params['role'] === 'vendor' ? 'vendor' : 'collector';
+        $session_id = 'p_' . wp_generate_password(12, false, false);
+        $token = wp_generate_password(32, false, false);
+        $name = $this->live_show_clean_text($params['name'] ?? '', $role === 'vendor' ? 'Vendor' : 'Collector', 28);
+        $colors = ['#86f7d4', '#ffd36a', '#ff6fae', '#7cc8ff', '#b796ff', '#ff8a70'];
+        $color = sanitize_hex_color($params['color'] ?? '') ?: $colors[array_rand($colors)];
+        $spawn = $role === 'vendor'
+            ? ['x' => 260, 'y' => (int) floor($map['height'] / 2)]
+            : ['x' => (int) floor($map['width'] / 2), 'y' => (int) floor($map['height'] / 2)];
+
+        $state['sessions'][$session_id] = [
+            'id' => $session_id,
+            'token' => $token,
+            'role' => $role,
+            'name' => $name,
+            'color' => $color,
+            'x' => $spawn['x'],
+            'y' => $spawn['y'],
+            'dir' => 'down',
+            'boothId' => '',
+            'lastSeen' => time(),
+            'joined' => time(),
+        ];
+
+        $this->live_show_save_state($state);
+
+        return rest_ensure_response([
+            'session' => $session_id,
+            'token' => $token,
+            'state' => $this->live_show_public_state($state, $session_id),
+        ]);
+    }
+
+    public function rest_live_show_state($request)
+    {
+        $state = $this->live_show_read_state();
+        $state = $this->live_show_prune_state($state);
+        $session_id = sanitize_key((string) $request->get_param('session'));
+        $token = (string) $request->get_param('token');
+
+        if ($session_id && isset($state['sessions'][$session_id]) && hash_equals((string) $state['sessions'][$session_id]['token'], $token)) {
+            $state['sessions'][$session_id]['lastSeen'] = time();
+        }
+
+        $this->live_show_save_state($state);
+
+        return rest_ensure_response($this->live_show_public_state($state, $session_id));
+    }
+
+    public function rest_live_show_heartbeat($request)
+    {
+        $params = $this->live_show_request_params($request);
+        $state = $this->live_show_read_state();
+        $state = $this->live_show_prune_state($state);
+        $session = $this->live_show_verify_session($state, $params);
+
+        if (!$session) {
+            return new WP_Error('colt_live_show_session', 'Session expired.', ['status' => 401]);
+        }
+
+        $map = self::live_show_map();
+        $id = $session['id'];
+        $state['sessions'][$id]['x'] = $this->live_show_clamp_number($params['x'] ?? $session['x'], 60, $map['width'] - 60);
+        $state['sessions'][$id]['y'] = $this->live_show_clamp_number($params['y'] ?? $session['y'], 120, $map['height'] - 80);
+        $state['sessions'][$id]['dir'] = in_array(($params['dir'] ?? 'down'), ['up', 'down', 'left', 'right'], true) ? $params['dir'] : 'down';
+        $state['sessions'][$id]['lastSeen'] = time();
+
+        $this->live_show_save_state($state);
+
+        return rest_ensure_response($this->live_show_public_state($state, $id));
+    }
+
+    public function rest_live_show_leave($request)
+    {
+        $params = $this->live_show_request_params($request);
+        $state = $this->live_show_read_state();
+        $session = $this->live_show_verify_session($state, $params);
+
+        if ($session) {
+            $state = $this->live_show_remove_session($state, $session['id']);
+            $this->live_show_save_state($state);
+        }
+
+        return rest_ensure_response(['ok' => true]);
+    }
+
+    public function rest_live_show_booth($request)
+    {
+        $params = $this->live_show_request_params($request);
+        $state = $this->live_show_read_state();
+        $state = $this->live_show_prune_state($state);
+        $session = $this->live_show_verify_session($state, $params);
+
+        if (!$session || $session['role'] !== 'vendor') {
+            return new WP_Error('colt_live_show_vendor', 'Vendor session required.', ['status' => 403]);
+        }
+
+        $map = self::live_show_map();
+        $booth_id = $session['boothId'] ?: 'b_' . wp_generate_password(10, false, false);
+        $x = $this->live_show_clamp_number($params['x'] ?? ($state['booths'][$booth_id]['x'] ?? 220), 0, $map['width']);
+        $y = $this->live_show_clamp_number($params['y'] ?? ($state['booths'][$booth_id]['y'] ?? 220), 0, $map['height']);
+        $width = (int) $map['boothWidth'];
+        $height = (int) $map['boothHeight'];
+
+        if (!$this->live_show_is_valid_booth_position($x, $y, $width, $height, $state['booths'], $booth_id)) {
+            return new WP_Error('colt_live_show_booth_position', 'This booth position is unavailable.', ['status' => 409]);
+        }
+
+        $items = [];
+        if (isset($params['items']) && is_array($params['items'])) {
+            foreach (array_slice($params['items'], 0, 6) as $item) {
+                if (!is_array($item)) {
+                    continue;
+                }
+                $items[] = [
+                    'title' => $this->live_show_clean_text($item['title'] ?? '', 'Showcase item', 40),
+                    'price' => $this->live_show_clean_text($item['price'] ?? '', '', 18),
+                    'note' => $this->live_show_clean_text($item['note'] ?? '', '', 72),
+                ];
+            }
+        }
+
+        $state['booths'][$booth_id] = [
+            'id' => $booth_id,
+            'owner' => $session['id'],
+            'title' => $this->live_show_clean_text($params['title'] ?? '', $session['name'] . ' table', 42),
+            'description' => $this->live_show_clean_text($params['description'] ?? '', 'A collector booth with fresh cards and live trades.', 180),
+            'color' => sanitize_hex_color($params['color'] ?? '') ?: $session['color'],
+            'x' => $x,
+            'y' => $y,
+            'w' => $width,
+            'h' => $height,
+            'items' => $items,
+            'updated' => time(),
+        ];
+        $state['sessions'][$session['id']]['boothId'] = $booth_id;
+        $state['sessions'][$session['id']]['x'] = $x;
+        $state['sessions'][$session['id']]['y'] = min($map['height'] - 90, $y + $height + 72);
+        $state['sessions'][$session['id']]['lastSeen'] = time();
+
+        $this->live_show_save_state($state);
+
+        return rest_ensure_response($this->live_show_public_state($state, $session['id']));
+    }
+
+    public function rest_live_show_chat_request($request)
+    {
+        $params = $this->live_show_request_params($request);
+        $state = $this->live_show_read_state();
+        $state = $this->live_show_prune_state($state);
+        $session = $this->live_show_verify_session($state, $params);
+        $booth_id = sanitize_key((string) ($params['boothId'] ?? ''));
+
+        if (!$session || !isset($state['booths'][$booth_id])) {
+            return new WP_Error('colt_live_show_chat', 'Booth is unavailable.', ['status' => 404]);
+        }
+
+        $target_id = (string) $state['booths'][$booth_id]['owner'];
+        if (!isset($state['sessions'][$target_id]) || $target_id === $session['id']) {
+            return new WP_Error('colt_live_show_chat_target', 'Vendor is unavailable.', ['status' => 409]);
+        }
+
+        foreach ($state['chats'] as $room_id => $room) {
+            $participants = $room['participants'] ?? [];
+            if (in_array($session['id'], $participants, true) && in_array($target_id, $participants, true) && in_array($room['status'], ['pending', 'active'], true)) {
+                return rest_ensure_response([
+                    'roomId' => $room_id,
+                    'state' => $this->live_show_public_state($state, $session['id']),
+                ]);
+            }
+        }
+
+        $room_id = 'c_' . wp_generate_password(12, false, false);
+        $state['chats'][$room_id] = [
+            'id' => $room_id,
+            'boothId' => $booth_id,
+            'requester' => $session['id'],
+            'target' => $target_id,
+            'participants' => [$session['id'], $target_id],
+            'status' => 'pending',
+            'created' => time(),
+            'updated' => time(),
+            'messages' => [],
+        ];
+
+        $this->live_show_save_state($state);
+
+        return rest_ensure_response([
+            'roomId' => $room_id,
+            'state' => $this->live_show_public_state($state, $session['id']),
+        ]);
+    }
+
+    public function rest_live_show_chat_respond($request)
+    {
+        $params = $this->live_show_request_params($request);
+        $state = $this->live_show_read_state();
+        $session = $this->live_show_verify_session($state, $params);
+        $room_id = sanitize_key((string) ($params['roomId'] ?? ''));
+
+        if (!$session || !isset($state['chats'][$room_id]) || $state['chats'][$room_id]['target'] !== $session['id']) {
+            return new WP_Error('colt_live_show_chat', 'Chat request is unavailable.', ['status' => 404]);
+        }
+
+        $accept = !empty($params['accept']);
+        $state['chats'][$room_id]['status'] = $accept ? 'active' : 'declined';
+        $state['chats'][$room_id]['updated'] = time();
+        $this->live_show_save_state($state);
+
+        return rest_ensure_response($this->live_show_public_state($state, $session['id']));
+    }
+
+    public function rest_live_show_chat_message($request)
+    {
+        $params = $this->live_show_request_params($request);
+        $state = $this->live_show_read_state();
+        $state = $this->live_show_prune_state($state);
+        $session = $this->live_show_verify_session($state, $params);
+        $room_id = sanitize_key((string) ($params['roomId'] ?? ''));
+        $message = $this->live_show_clean_text($params['message'] ?? '', '', 280);
+
+        if (!$session || $message === '' || !isset($state['chats'][$room_id])) {
+            return new WP_Error('colt_live_show_chat', 'Chat is unavailable.', ['status' => 404]);
+        }
+
+        $room = $state['chats'][$room_id];
+        if ($room['status'] !== 'active' || !in_array($session['id'], $room['participants'], true)) {
+            return new WP_Error('colt_live_show_chat_forbidden', 'Chat is not active.', ['status' => 403]);
+        }
+
+        $state['chats'][$room_id]['messages'][] = [
+            'from' => $session['id'],
+            'name' => $session['name'],
+            'text' => $message,
+            'time' => time(),
+        ];
+        $state['chats'][$room_id]['messages'] = array_slice($state['chats'][$room_id]['messages'], -50);
+        $state['chats'][$room_id]['updated'] = time();
+        $this->live_show_save_state($state);
+
+        return rest_ensure_response($this->live_show_public_state($state, $session['id']));
+    }
+
+    private function live_show_request_params($request)
+    {
+        $params = method_exists($request, 'get_json_params') ? $request->get_json_params() : [];
+        return is_array($params) ? $params : [];
+    }
+
+    private function live_show_default_state()
+    {
+        return [
+            'sessions' => [],
+            'booths' => [],
+            'chats' => [],
+        ];
+    }
+
+    private function live_show_read_state()
+    {
+        $state = get_option('colt_live_show_state', []);
+        if (!is_array($state)) {
+            $state = [];
+        }
+        return array_merge($this->live_show_default_state(), $state);
+    }
+
+    private function live_show_save_state(array $state)
+    {
+        update_option('colt_live_show_state', $state, false);
+    }
+
+    private function live_show_prune_state(array $state)
+    {
+        $map = self::live_show_map();
+        $now = time();
+        foreach ($state['sessions'] as $session_id => $session) {
+            if (($now - (int) ($session['lastSeen'] ?? 0)) > (int) $map['participantTtl']) {
+                $state = $this->live_show_remove_session($state, $session_id);
+            }
+        }
+
+        foreach ($state['chats'] as $room_id => $room) {
+            $participants = $room['participants'] ?? [];
+            $has_missing = false;
+            foreach ($participants as $participant) {
+                if (!isset($state['sessions'][$participant])) {
+                    $has_missing = true;
+                    break;
+                }
+            }
+            if ($has_missing || ($now - (int) ($room['updated'] ?? 0)) > 900) {
+                unset($state['chats'][$room_id]);
+            }
+        }
+
+        return $state;
+    }
+
+    private function live_show_remove_session(array $state, $session_id)
+    {
+        unset($state['sessions'][$session_id]);
+
+        foreach ($state['booths'] as $booth_id => $booth) {
+            if (($booth['owner'] ?? '') === $session_id) {
+                unset($state['booths'][$booth_id]);
+            }
+        }
+
+        foreach ($state['chats'] as $room_id => $room) {
+            if (in_array($session_id, $room['participants'] ?? [], true)) {
+                unset($state['chats'][$room_id]);
+            }
+        }
+
+        return $state;
+    }
+
+    private function live_show_public_state(array $state, $viewer_id = '')
+    {
+        $sessions = [];
+        foreach ($state['sessions'] as $session) {
+            $sessions[] = [
+                'id' => $session['id'],
+                'role' => $session['role'],
+                'name' => $session['name'],
+                'color' => $session['color'],
+                'x' => (int) $session['x'],
+                'y' => (int) $session['y'],
+                'dir' => $session['dir'] ?? 'down',
+                'boothId' => $session['boothId'] ?? '',
+                'lastSeen' => (int) ($session['lastSeen'] ?? 0),
+            ];
+        }
+
+        $chats = [];
+        foreach ($state['chats'] as $room) {
+            if ($viewer_id && in_array($viewer_id, $room['participants'] ?? [], true)) {
+                $chats[] = $room;
+            }
+        }
+
+        return [
+            'map' => self::live_show_map(),
+            'sessions' => array_values($sessions),
+            'booths' => array_values($state['booths']),
+            'chats' => array_values($chats),
+            'serverTime' => time(),
+        ];
+    }
+
+    private function live_show_verify_session(array $state, array $params)
+    {
+        $session_id = sanitize_key((string) ($params['session'] ?? ''));
+        $token = (string) ($params['token'] ?? '');
+        if (!$session_id || !isset($state['sessions'][$session_id])) {
+            return null;
+        }
+        if (!hash_equals((string) $state['sessions'][$session_id]['token'], $token)) {
+            return null;
+        }
+        return $state['sessions'][$session_id];
+    }
+
+    private function live_show_clean_text($value, $fallback, $max_length)
+    {
+        $value = sanitize_text_field((string) $value);
+        $value = trim($value);
+        if ($value === '') {
+            $value = (string) $fallback;
+        }
+        if (function_exists('mb_substr')) {
+            return mb_substr($value, 0, $max_length);
+        }
+        return substr($value, 0, $max_length);
+    }
+
+    private function live_show_clamp_number($value, $min, $max)
+    {
+        $number = is_numeric($value) ? (float) $value : (float) $min;
+        return (int) max($min, min($max, $number));
+    }
+
+    private function live_show_is_valid_booth_position($x, $y, $width, $height, array $booths, $ignore_id = '')
+    {
+        $map = self::live_show_map();
+        $half_w = $width / 2;
+        $half_h = $height / 2;
+
+        if ($x - $half_w < 20 || $x + $half_w > $map['width'] - 20 || $y - $half_h < 40 || $y + $half_h > $map['height'] - 30) {
+            return false;
+        }
+
+        $side_depth = (int) $map['sideDepth'];
+        $in_side_zone = $x <= $side_depth || $x >= ($map['width'] - $side_depth) || $y <= $side_depth || $y >= ($map['height'] - $side_depth);
+        if (!$in_side_zone) {
+            return false;
+        }
+
+        $candidate = [
+            'left' => $x - $half_w - 28,
+            'right' => $x + $half_w + 28,
+            'top' => $y - $half_h - 28,
+            'bottom' => $y + $half_h + 28,
+        ];
+
+        foreach ($booths as $booth_id => $booth) {
+            if ($booth_id === $ignore_id) {
+                continue;
+            }
+            $existing_half_w = ((int) ($booth['w'] ?? $width)) / 2;
+            $existing_half_h = ((int) ($booth['h'] ?? $height)) / 2;
+            $existing = [
+                'left' => ((int) $booth['x']) - $existing_half_w,
+                'right' => ((int) $booth['x']) + $existing_half_w,
+                'top' => ((int) $booth['y']) - $existing_half_h,
+                'bottom' => ((int) $booth['y']) + $existing_half_h,
+            ];
+
+            if ($candidate['left'] < $existing['right'] && $candidate['right'] > $existing['left'] && $candidate['top'] < $existing['bottom'] && $candidate['bottom'] > $existing['top']) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public static function service_shortcode_map()
