@@ -42,6 +42,7 @@ final class Colt_Experience
             add_action('admin_enqueue_scripts', [$this, 'enqueue_admin_assets']);
             add_action('admin_post_colt_experience_save_content', [$this, 'handle_admin_save_content']);
             add_action('admin_post_colt_product_crm_bulk', [$this, 'handle_product_crm_bulk_action']);
+            add_action('admin_post_colt_product_crm_create', [$this, 'handle_product_crm_create_product']);
         }
     }
 
@@ -866,7 +867,7 @@ final class Colt_Experience
 
     public function enqueue_admin_assets($hook_suffix)
     {
-        if ($hook_suffix !== 'toplevel_page_colt-experience') {
+        if (!in_array($hook_suffix, ['toplevel_page_colt-experience', 'colt-experience_page_colt-product-crm'], true)) {
             return;
         }
 
@@ -875,7 +876,7 @@ final class Colt_Experience
         wp_enqueue_script('colt-experience-admin');
         wp_add_inline_script('colt-experience-admin', <<<'JS'
 jQuery(function ($) {
-    $('.colt-admin').on('click', '.colt-admin__media-button', function (event) {
+    $('.colt-admin, .colt-crm').on('click', '.colt-admin__media-button', function (event) {
         event.preventDefault();
 
         const $button = $(this);
@@ -1086,17 +1087,20 @@ JS);
                 .colt-crm__hero { display: flex; justify-content: space-between; gap: 18px; align-items: center; margin: 18px 0; padding: 20px; border: 1px solid #dcdcde; border-radius: 14px; background: linear-gradient(135deg, #0d1119, #172230 58%, #21150a); color: #fff; box-shadow: 0 20px 60px rgba(16, 21, 28, .14); }
                 .colt-crm__hero p { max-width: 740px; margin: 4px 0 0; color: rgba(255,255,255,.72); }
                 .colt-crm__hero-code { direction: ltr; padding: 10px 13px; border-radius: 999px; background: rgba(255,255,255,.12); color: #ffd36a; font-weight: 800; white-space: nowrap; }
-                .colt-crm__stats { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; margin: 16px 0; }
+                .colt-crm__hero-actions { display: grid; gap: 10px; justify-items: end; }
+                .colt-crm__stats { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 10px; margin: 16px 0; }
                 .colt-crm__stat { padding: 14px; border: 1px solid #dcdcde; border-radius: 12px; background: #fff; }
                 .colt-crm__stat strong { display: block; font-size: 24px; line-height: 1.1; color: #111827; }
                 .colt-crm__stat span { display: block; margin-top: 5px; color: #646970; font-weight: 700; }
                 .colt-crm__panel { margin: 16px 0; padding: 16px; border: 1px solid #dcdcde; border-radius: 14px; background: #fff; }
-                .colt-crm__filters { display: grid; grid-template-columns: minmax(180px, 1.2fr) repeat(3, minmax(140px, .75fr)) auto; gap: 10px; align-items: end; }
+                .colt-crm__filters { display: grid; grid-template-columns: minmax(180px, 1.2fr) repeat(4, minmax(135px, .75fr)) auto; gap: 10px; align-items: end; }
                 .colt-crm label { display: grid; gap: 6px; font-weight: 800; color: #1d2327; }
-                .colt-crm input[type="text"], .colt-crm input[type="number"], .colt-crm select { width: 100%; max-width: none; min-height: 36px; }
+                .colt-crm input[type="text"], .colt-crm input[type="number"], .colt-crm select, .colt-crm textarea { width: 100%; max-width: none; min-height: 36px; }
+                .colt-crm textarea { min-height: 90px; }
                 .colt-crm select[multiple] { min-height: 110px; }
-                .colt-crm__bulk { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; align-items: start; }
+                .colt-crm__bulk { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; align-items: start; }
                 .colt-crm__bulk-card { display: grid; gap: 10px; padding: 14px; border: 1px solid #dcdcde; border-radius: 12px; background: #f6f7f7; min-height: 100%; }
+                .colt-crm__bulk-card--danger { border-color: #f1b8b8; background: #fff5f5; }
                 .colt-crm__table-wrap { overflow-x: auto; border: 1px solid #dcdcde; border-radius: 12px; background: #fff; }
                 .colt-crm table { margin: 0; border: 0; }
                 .colt-crm th { font-weight: 900; }
@@ -1119,8 +1123,19 @@ JS);
                 .colt-crm__pagination { margin-top: 14px; text-align: center; }
                 .colt-crm__pagination .page-numbers { display: inline-block; margin: 0 2px; padding: 6px 10px; border-radius: 8px; background: #fff; border: 1px solid #dcdcde; text-decoration: none; }
                 .colt-crm__pagination .current { background: #111827; color: #fff; border-color: #111827; }
+                .colt-crm__modal { position: fixed; inset: 0; z-index: 100000; display: none; align-items: center; justify-content: center; padding: 24px; background: rgba(5, 8, 13, .66); }
+                .colt-crm__modal.is-open { display: flex; }
+                .colt-crm__modal-card { width: min(980px, 100%); max-height: calc(100vh - 48px); overflow: auto; padding: 20px; border-radius: 16px; background: #fff; box-shadow: 0 30px 100px rgba(0, 0, 0, .35); }
+                .colt-crm__modal-head { display: flex; justify-content: space-between; gap: 12px; align-items: start; margin-bottom: 14px; }
+                .colt-crm__create-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+                .colt-crm__wide { grid-column: 1 / -1; }
+                .colt-admin__media { display: grid; gap: 8px; }
+                .colt-admin__media-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; }
+                .colt-admin__media-preview { min-height: 64px; border: 1px dashed #c3c4c7; border-radius: 8px; background: #fff; overflow: hidden; }
+                .colt-admin__media-preview:empty { display: none; }
+                .colt-admin__media-preview img { display: block; width: 100%; max-height: 160px; object-fit: contain; background: #f6f7f7; }
                 @media (max-width: 1240px) { .colt-crm__stats { grid-template-columns: repeat(3, 1fr); } .colt-crm__bulk, .colt-crm__insights { grid-template-columns: repeat(2, 1fr); } }
-                @media (max-width: 782px) { .colt-crm__hero, .colt-crm__footer-actions { display: grid; } .colt-crm__stats, .colt-crm__filters, .colt-crm__bulk, .colt-crm__insights { grid-template-columns: 1fr; } }
+                @media (max-width: 782px) { .colt-crm__hero, .colt-crm__footer-actions, .colt-crm__modal-head { display: grid; } .colt-crm__hero-actions { justify-items: start; } .colt-crm__stats, .colt-crm__filters, .colt-crm__bulk, .colt-crm__insights, .colt-crm__create-grid { grid-template-columns: 1fr; } }
             </style>
 
             <h1>COLT Product CRM</h1>
@@ -1134,14 +1149,16 @@ JS);
             endif;
 
             $filters = $this->product_crm_filters();
+            $period_days = (int) $filters['period'];
+            $period_label = $this->product_crm_period_label($period_days);
             $categories = $this->product_crm_terms('product_cat');
             $tags = $this->product_crm_terms('product_tag');
             $products_query = $this->product_crm_query($filters);
-            $stats = $this->product_crm_stats();
-            $top_products = $this->product_crm_sales_products(6, 'DESC');
-            $slow_products = $this->product_crm_sales_products(6, 'ASC');
+            $stats = $this->product_crm_stats($period_days);
+            $top_products = $this->product_crm_sales_products(6, 'DESC', $period_days);
+            $slow_products = $this->product_crm_sales_products(6, 'ASC', $period_days);
             $low_stock = $this->product_crm_low_stock_products(8);
-            $customers = $this->product_crm_customer_summary(8);
+            $customers = $this->product_crm_customer_summary(8, $period_days);
             $promotions = get_option('colt_product_crm_promotions', []);
             $promotions = is_array($promotions) ? array_slice(array_reverse($promotions), 0, 5) : [];
             ?>
@@ -1149,13 +1166,22 @@ JS);
             <div class="colt-crm__hero">
                 <div>
                     <h2>מרכז שליטה למוצרים ומבצעים</h2>
-                    <p>בחר מוצרים מהרשימה, הפעל שינויי bulk, צור קופונים, שמור כללי 3+1, ועקוב אחרי מוצרים חזקים, מוצרים שצריך להעיר ומלאי שדורש תשומת לב.</p>
+                    <p>בחר מוצרים מהרשימה, הפעל שינויי bulk, צור קופונים, שמור כללי 3+1, ועקוב אחרי מוצרים חזקים, מוצרים שצריך להעיר ומלאי שדורש תשומת לב. הסטטיסטיקות כרגע מתייחסות ל<?php echo esc_html($period_label); ?>.</p>
                 </div>
-                <div class="colt-crm__hero-code">WooCommerce Admin</div>
+                <div class="colt-crm__hero-actions">
+                    <button type="button" class="button button-primary button-hero" data-colt-crm-open-create>הקמת מוצר חדש</button>
+                    <div class="colt-crm__hero-code">WooCommerce Admin</div>
+                </div>
             </div>
 
             <?php if (isset($_GET['crm_updated'])) : ?>
                 <div class="notice notice-success is-dismissible"><p><?php echo esc_html((int) $_GET['crm_updated']); ?> מוצרים עודכנו בהצלחה.</p></div>
+            <?php endif; ?>
+            <?php if (isset($_GET['product_created'])) : ?>
+                <div class="notice notice-success is-dismissible"><p>המוצר החדש נוצר בהצלחה.</p></div>
+            <?php endif; ?>
+            <?php if (isset($_GET['crm_deleted'])) : ?>
+                <div class="notice notice-success is-dismissible"><p><?php echo esc_html((int) $_GET['crm_deleted']); ?> מוצרים נמחקו או הועברו לפח.</p></div>
             <?php endif; ?>
             <?php if (isset($_GET['coupon_created'])) : ?>
                 <div class="notice notice-success is-dismissible"><p>הקופון נוצר ושויך לפי הבחירה.</p></div>
@@ -1166,6 +1192,99 @@ JS);
             <?php if (isset($_GET['crm_error'])) : ?>
                 <div class="notice notice-error is-dismissible"><p><?php echo esc_html($this->product_crm_error_message((string) wp_unslash($_GET['crm_error']))); ?></p></div>
             <?php endif; ?>
+
+            <div class="colt-crm__modal" data-colt-crm-create-modal aria-hidden="true">
+                <div class="colt-crm__modal-card" role="dialog" aria-modal="true" aria-labelledby="colt-create-product-title">
+                    <div class="colt-crm__modal-head">
+                        <div>
+                            <h2 id="colt-create-product-title">הקמת מוצר חדש</h2>
+                            <p class="colt-crm__muted">מוצר WooCommerce רגיל עם שם, מחיר, מלאי, קטגוריות, תגיות, תיאור ותמונה ראשית.</p>
+                        </div>
+                        <button type="button" class="button" data-colt-crm-close-create>סגירה</button>
+                    </div>
+
+                    <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+                        <?php wp_nonce_field('colt_product_crm_create'); ?>
+                        <input type="hidden" name="action" value="colt_product_crm_create">
+                        <div class="colt-crm__create-grid">
+                            <label class="colt-crm__wide">
+                                <span>שם מוצר</span>
+                                <input type="text" name="product_title" required placeholder="לדוגמה: Ascended Heroes Booster Bundle">
+                            </label>
+                            <label>
+                                <span>סטטוס פרסום</span>
+                                <select name="product_status">
+                                    <option value="draft">טיוטה</option>
+                                    <option value="publish">פרסום מיידי</option>
+                                </select>
+                            </label>
+                            <label>
+                                <span>SKU / מק"ט</span>
+                                <input type="text" name="product_sku" placeholder="אופציונלי">
+                            </label>
+                            <label>
+                                <span>סטטוס מלאי</span>
+                                <select name="product_stock_status">
+                                    <?php foreach ($this->product_crm_stock_statuses() as $status_key => $status_label) : ?>
+                                        <option value="<?php echo esc_attr($status_key); ?>"><?php echo esc_html($status_label); ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </label>
+                            <label>
+                                <span>מחיר רגיל</span>
+                                <input type="number" name="product_regular_price" min="0" step="0.01" placeholder="0.00">
+                            </label>
+                            <label>
+                                <span>מחיר מבצע</span>
+                                <input type="number" name="product_sale_price" min="0" step="0.01" placeholder="אופציונלי">
+                            </label>
+                            <label>
+                                <span>כמות במלאי</span>
+                                <input type="number" name="product_stock_quantity" min="0" step="1" placeholder="אופציונלי">
+                            </label>
+                            <label>
+                                <span>קטגוריות</span>
+                                <select name="product_categories[]" multiple>
+                                    <?php foreach ($categories as $term) : ?>
+                                        <option value="<?php echo esc_attr($term->term_id); ?>"><?php echo esc_html($term->name); ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </label>
+                            <label>
+                                <span>תגיות</span>
+                                <input type="text" name="product_tags" placeholder="פוקימון, יפנית, בוסטר">
+                            </label>
+                            <label>
+                                <span>Set / סדרה</span>
+                                <input type="text" name="product_set" placeholder="לדוגמה: Scarlet & Violet">
+                            </label>
+                            <label>
+                                <span>שפה</span>
+                                <select name="product_language">
+                                    <option value="">לא מוגדר</option>
+                                    <option value="English">English</option>
+                                    <option value="Japanese">Japanese</option>
+                                </select>
+                            </label>
+                            <label class="colt-crm__wide">
+                                <span>תמונה ראשית</span>
+                                <?php $this->admin_media_input('product_image_url', ''); ?>
+                            </label>
+                            <label class="colt-crm__wide">
+                                <span>תיאור קצר</span>
+                                <textarea name="product_short_description" placeholder="תיאור קצר שמופיע ליד המחיר בעמוד המוצר."></textarea>
+                            </label>
+                            <label class="colt-crm__wide">
+                                <span>תיאור מלא</span>
+                                <textarea name="product_description" placeholder="כל מה שחשוב לדעת על המוצר: מה יש בפנים, למי מתאים, מצב, שפה, סט וכו׳."></textarea>
+                            </label>
+                        </div>
+                        <p class="submit">
+                            <button type="submit" class="button button-primary button-hero">יצירת מוצר</button>
+                        </p>
+                    </form>
+                </div>
+            </div>
 
             <section class="colt-crm__stats" aria-label="סקירת מוצרים">
                 <?php foreach ($stats as $stat) : ?>
@@ -1206,6 +1325,14 @@ JS);
                         <option value="0">כל התגיות</option>
                         <?php foreach ($tags as $term) : ?>
                             <option value="<?php echo esc_attr($term->term_id); ?>" <?php selected($filters['tag'], (int) $term->term_id); ?>><?php echo esc_html($term->name); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </label>
+                <label>
+                    <span>טווח סטטיסטיקות</span>
+                    <select name="period">
+                        <?php foreach ($this->product_crm_period_options() as $days => $label) : ?>
+                            <option value="<?php echo esc_attr($days); ?>" <?php selected($period_days, (int) $days); ?>><?php echo esc_html($label); ?></option>
                         <?php endforeach; ?>
                     </select>
                 </label>
@@ -1333,6 +1460,22 @@ JS);
                             </label>
                             <input type="text" name="promo_name" placeholder="3+1 מאותה קטגוריה">
                         </div>
+
+                        <div class="colt-crm__bulk-card colt-crm__bulk-card--danger">
+                            <h3>מחיקה</h3>
+                            <label>
+                                <span>פעולת מחיקה</span>
+                                <select name="delete_action" data-colt-crm-delete-action>
+                                    <option value="">ללא מחיקה</option>
+                                    <option value="trash">העבר לפח</option>
+                                    <option value="delete">מחיקה לצמיתות</option>
+                                </select>
+                            </label>
+                            <label>
+                                <span><input type="checkbox" name="confirm_delete" value="1"> אני מאשר למחוק את המוצרים שסומנו</span>
+                            </label>
+                            <p class="colt-crm__note">מחיקה לצמיתות לא ניתנת לשחזור מתוך וורדפרס. עדיף להשתמש קודם ב"העבר לפח".</p>
+                        </div>
                     </div>
                 </section>
 
@@ -1412,11 +1555,11 @@ JS);
             <section class="colt-crm__insights">
                 <div class="colt-crm__panel">
                     <h2>מוצרים מובילים</h2>
-                    <?php $this->render_product_crm_product_list($top_products, 'מכירות'); ?>
+                    <?php $this->render_product_crm_product_list($top_products, 'יחידות'); ?>
                 </div>
                 <div class="colt-crm__panel">
                     <h2>מוצרים שצריך להעיר</h2>
-                    <?php $this->render_product_crm_product_list($slow_products, 'מכירות'); ?>
+                    <?php $this->render_product_crm_product_list($slow_products, 'יחידות'); ?>
                 </div>
                 <div class="colt-crm__panel">
                     <h2>התראות מלאי</h2>
@@ -1484,6 +1627,46 @@ JS);
                 checkbox.checked = event.target.checked;
             });
         });
+        document.addEventListener('click', function (event) {
+            const openButton = event.target.closest('[data-colt-crm-open-create]');
+            const closeButton = event.target.closest('[data-colt-crm-close-create]');
+            const modal = document.querySelector('[data-colt-crm-create-modal]');
+
+            if (openButton && modal) {
+                modal.classList.add('is-open');
+                modal.setAttribute('aria-hidden', 'false');
+            }
+
+            if (closeButton && modal) {
+                modal.classList.remove('is-open');
+                modal.setAttribute('aria-hidden', 'true');
+            }
+
+            if (event.target === modal) {
+                modal.classList.remove('is-open');
+                modal.setAttribute('aria-hidden', 'true');
+            }
+        });
+        document.addEventListener('submit', function (event) {
+            const form = event.target;
+            if (!form.matches('.colt-crm form')) {
+                return;
+            }
+            const deleteAction = form.querySelector('[data-colt-crm-delete-action]');
+            if (!deleteAction || !deleteAction.value) {
+                return;
+            }
+            const confirmed = form.querySelector('input[name="confirm_delete"]:checked');
+            const selected = form.querySelectorAll('input[name="product_ids[]"]:checked').length;
+            if (!confirmed || selected < 1) {
+                event.preventDefault();
+                alert('צריך לסמן מוצרים ולאשר מחיקה לפני שממשיכים.');
+                return;
+            }
+            if (!window.confirm('אתה בטוח שברצונך למחוק את המוצרים שסומנו?')) {
+                event.preventDefault();
+            }
+        });
         </script>
         <?php
     }
@@ -1503,6 +1686,16 @@ JS);
         $product_ids = $this->product_crm_posted_ids('product_ids');
         if (!$product_ids) {
             $this->product_crm_redirect(['crm_error' => 'no_products']);
+        }
+
+        $delete_action = isset($_POST['delete_action']) ? sanitize_key(wp_unslash($_POST['delete_action'])) : '';
+        if (in_array($delete_action, ['trash', 'delete'], true)) {
+            if (empty($_POST['confirm_delete'])) {
+                $this->product_crm_redirect(['crm_error' => 'confirm_delete']);
+            }
+
+            $deleted = $this->product_crm_delete_products($product_ids, $delete_action === 'delete');
+            $this->product_crm_redirect(['crm_deleted' => $deleted]);
         }
 
         $stock_status = isset($_POST['stock_status']) ? sanitize_key(wp_unslash($_POST['stock_status'])) : '';
@@ -1624,6 +1817,112 @@ JS);
         $this->product_crm_redirect($redirect_args);
     }
 
+    public function handle_product_crm_create_product()
+    {
+        if (!$this->can_manage_product_crm()) {
+            wp_die(esc_html__('You do not have permission to create products.', 'colt-experience'));
+        }
+
+        check_admin_referer('colt_product_crm_create');
+
+        if (!$this->is_woocommerce_ready() || !class_exists('WC_Product_Simple')) {
+            $this->product_crm_redirect(['crm_error' => 'woocommerce']);
+        }
+
+        $title = isset($_POST['product_title']) ? sanitize_text_field(wp_unslash($_POST['product_title'])) : '';
+        if ($title === '') {
+            $this->product_crm_redirect(['crm_error' => 'product_title']);
+        }
+
+        $status = isset($_POST['product_status']) ? sanitize_key(wp_unslash($_POST['product_status'])) : 'draft';
+        if (!in_array($status, ['draft', 'publish'], true)) {
+            $status = 'draft';
+        }
+
+        $stock_status = isset($_POST['product_stock_status']) ? sanitize_key(wp_unslash($_POST['product_stock_status'])) : 'instock';
+        if (!in_array($stock_status, array_keys($this->product_crm_stock_statuses()), true)) {
+            $stock_status = 'instock';
+        }
+
+        $regular_price = $this->product_crm_decimal_from_post('product_regular_price');
+        $sale_price = $this->product_crm_decimal_from_post('product_sale_price');
+        $stock_quantity_raw = isset($_POST['product_stock_quantity']) ? trim((string) wp_unslash($_POST['product_stock_quantity'])) : '';
+        $stock_quantity = $stock_quantity_raw !== '' && is_numeric($stock_quantity_raw) ? max(0, (int) $stock_quantity_raw) : null;
+        $sku = isset($_POST['product_sku']) ? sanitize_text_field(wp_unslash($_POST['product_sku'])) : '';
+        $short_description = isset($_POST['product_short_description']) ? wp_kses_post(wp_unslash($_POST['product_short_description'])) : '';
+        $description = isset($_POST['product_description']) ? wp_kses_post(wp_unslash($_POST['product_description'])) : '';
+        $image_url = isset($_POST['product_image_url']) ? esc_url_raw(wp_unslash($_POST['product_image_url'])) : '';
+        $set_name = isset($_POST['product_set']) ? sanitize_text_field(wp_unslash($_POST['product_set'])) : '';
+        $language = isset($_POST['product_language']) ? sanitize_text_field(wp_unslash($_POST['product_language'])) : '';
+        if (!in_array($language, ['', 'English', 'Japanese'], true)) {
+            $language = '';
+        }
+
+        try {
+            $product = new WC_Product_Simple();
+            $product->set_name($title);
+            $product->set_status($status);
+            $product->set_catalog_visibility('visible');
+            $product->set_stock_status($stock_status);
+            $product->set_description($description);
+            $product->set_short_description($short_description);
+
+            if ($sku !== '') {
+                $product->set_sku($sku);
+            }
+
+            if ($regular_price !== null) {
+                $product->set_regular_price(wc_format_decimal($regular_price));
+            }
+
+            if ($sale_price !== null) {
+                $product->set_sale_price(wc_format_decimal($sale_price));
+            }
+
+            if ($stock_quantity !== null) {
+                $product->set_manage_stock(true);
+                $product->set_stock_quantity($stock_quantity);
+            }
+
+            $image_id = $this->product_crm_attachment_id_from_url($image_url);
+            if ($image_id > 0) {
+                $product->set_image_id($image_id);
+            }
+
+            $product_id = (int) $product->save();
+        } catch (Exception $exception) {
+            $this->product_crm_redirect(['crm_error' => 'product_create']);
+        }
+
+        if ($product_id <= 0) {
+            $this->product_crm_redirect(['crm_error' => 'product_create']);
+        }
+
+        $category_ids = $this->product_crm_posted_ids('product_categories');
+        if ($category_ids) {
+            wp_set_object_terms($product_id, $category_ids, 'product_cat', false);
+        }
+
+        $tag_names = $this->product_crm_posted_tags('product_tags');
+        if ($tag_names) {
+            wp_set_object_terms($product_id, $tag_names, 'product_tag', true);
+        }
+
+        if ($image_url !== '' && empty($image_id)) {
+            update_post_meta($product_id, '_colt_crm_source_image_url', $image_url);
+        }
+
+        if ($set_name !== '') {
+            update_post_meta($product_id, '_colt_product_set', $set_name);
+        }
+
+        if ($language !== '') {
+            update_post_meta($product_id, '_colt_product_language', $language);
+        }
+
+        $this->product_crm_redirect(['product_created' => $product_id]);
+    }
+
     private function can_manage_product_crm()
     {
         return current_user_can('manage_options') || current_user_can('manage_woocommerce') || current_user_can('edit_products');
@@ -1641,6 +1940,7 @@ JS);
             'stock' => isset($_GET['stock']) ? sanitize_key(wp_unslash($_GET['stock'])) : '',
             'category' => isset($_GET['product_cat']) ? absint(wp_unslash($_GET['product_cat'])) : 0,
             'tag' => isset($_GET['product_tag']) ? absint(wp_unslash($_GET['product_tag'])) : 0,
+            'period' => $this->product_crm_normalize_period(isset($_GET['period']) ? absint(wp_unslash($_GET['period'])) : 30),
             'paged' => max(1, isset($_GET['paged']) ? absint(wp_unslash($_GET['paged'])) : 1),
         ];
     }
@@ -1730,7 +2030,47 @@ JS);
         return '<span class="' . esc_attr($class) . '">' . esc_html($labels[$status] ?? $status) . '</span>';
     }
 
-    private function product_crm_stats()
+    private function product_crm_period_options()
+    {
+        return [
+            7 => '7 ימים אחרונים',
+            30 => '30 ימים אחרונים',
+            90 => '90 ימים אחרונים',
+            365 => 'שנה אחרונה',
+            0 => 'כל הזמן',
+        ];
+    }
+
+    private function product_crm_normalize_period($days)
+    {
+        $days = (int) $days;
+        return array_key_exists($days, $this->product_crm_period_options()) ? $days : 30;
+    }
+
+    private function product_crm_period_label($days)
+    {
+        $options = $this->product_crm_period_options();
+        return $options[$this->product_crm_normalize_period($days)] ?? $options[30];
+    }
+
+    private function product_crm_order_query_args($limit, $days)
+    {
+        $args = [
+            'limit' => $limit,
+            'status' => ['processing', 'completed', 'on-hold'],
+            'orderby' => 'date',
+            'order' => 'DESC',
+        ];
+
+        $days = $this->product_crm_normalize_period($days);
+        if ($days > 0) {
+            $args['date_created'] = '>' . (time() - ($days * DAY_IN_SECONDS));
+        }
+
+        return $args;
+    }
+
+    private function product_crm_stats($days = 30)
     {
         $counts = wp_count_posts('product');
         $total = 0;
@@ -1774,17 +2114,91 @@ JS);
             $stock_value += (float) $product->get_price() * $qty;
         }
 
+        $period_orders = [];
+        if (function_exists('wc_get_orders')) {
+            $period_orders = wc_get_orders($this->product_crm_order_query_args(-1, $days));
+        }
+        $period_revenue = 0;
+        $period_units = 0;
+
+        foreach ($period_orders as $order) {
+            if (!is_object($order) || !method_exists($order, 'get_total')) {
+                continue;
+            }
+            $period_revenue += (float) $order->get_total();
+            foreach ($order->get_items() as $item) {
+                $period_units += (int) $item->get_quantity();
+            }
+        }
+
         return [
             ['value' => number_format_i18n($total), 'label' => 'סה"כ מוצרים'],
             ['value' => number_format_i18n($stock_counts['instock'] ?? 0), 'label' => 'במלאי'],
             ['value' => number_format_i18n($stock_counts['outofstock'] ?? 0), 'label' => 'אזל'],
-            ['value' => number_format_i18n($stock_counts['onbackorder'] ?? 0), 'label' => 'Backorder'],
+            ['value' => number_format_i18n(count($period_orders)), 'label' => 'הזמנות - ' . $this->product_crm_period_label($days)],
+            ['value' => wp_strip_all_tags(wc_price($period_revenue)), 'label' => 'מכירות - ' . $this->product_crm_period_label($days)],
+            ['value' => number_format_i18n($period_units), 'label' => 'יחידות נמכרו - ' . $this->product_crm_period_label($days)],
             ['value' => wp_strip_all_tags(wc_price($stock_value)), 'label' => 'ערך מלאי משוער'],
         ];
     }
 
-    private function product_crm_sales_products($limit, $order)
+    private function product_crm_sales_products($limit, $order, $days = 30)
     {
+        $days = $this->product_crm_normalize_period($days);
+
+        if ($days > 0 && function_exists('wc_get_orders')) {
+            $orders = wc_get_orders($this->product_crm_order_query_args(-1, $days));
+            $sales = [];
+
+            foreach ($orders as $order_item_source) {
+                if (!is_object($order_item_source) || !method_exists($order_item_source, 'get_items')) {
+                    continue;
+                }
+
+                foreach ($order_item_source->get_items() as $item) {
+                    $product_id = (int) $item->get_product_id();
+                    if ($product_id <= 0) {
+                        continue;
+                    }
+                    if (!isset($sales[$product_id])) {
+                        $sales[$product_id] = 0;
+                    }
+                    $sales[$product_id] += (int) $item->get_quantity();
+                }
+            }
+
+            if ($order === 'ASC') {
+                $candidate_query = new WP_Query([
+                    'post_type' => 'product',
+                    'post_status' => ['publish', 'draft', 'private'],
+                    'posts_per_page' => 120,
+                    'fields' => 'ids',
+                    'no_found_rows' => true,
+                ]);
+
+                foreach ($candidate_query->posts as $product_id) {
+                    if (!isset($sales[$product_id])) {
+                        $sales[$product_id] = 0;
+                    }
+                }
+                asort($sales, SORT_NUMERIC);
+            } else {
+                arsort($sales, SORT_NUMERIC);
+            }
+
+            $rows = [];
+            foreach (array_slice($sales, 0, max(1, (int) $limit), true) as $product_id => $quantity) {
+                $rows[] = [
+                    'id' => (int) $product_id,
+                    'title' => get_the_title($product_id),
+                    'value' => (int) $quantity,
+                    'url' => get_edit_post_link($product_id),
+                ];
+            }
+
+            return $rows;
+        }
+
         $query = new WP_Query([
             'post_type' => 'product',
             'post_status' => ['publish', 'draft', 'private'],
@@ -1848,18 +2262,13 @@ JS);
         return $rows;
     }
 
-    private function product_crm_customer_summary($limit)
+    private function product_crm_customer_summary($limit, $days = 30)
     {
         if (!function_exists('wc_get_orders')) {
             return [];
         }
 
-        $orders = wc_get_orders([
-            'limit' => 80,
-            'status' => ['processing', 'completed', 'on-hold'],
-            'orderby' => 'date',
-            'order' => 'DESC',
-        ]);
+        $orders = wc_get_orders($this->product_crm_order_query_args(120, $days));
 
         $customers = [];
         foreach ($orders as $order) {
@@ -1937,6 +2346,7 @@ JS);
                 'stock' => $filters['stock'],
                 'product_cat' => $filters['category'],
                 'product_tag' => $filters['tag'],
+                'period' => $filters['period'],
                 'paged' => '%#%',
             ], admin_url('admin.php')),
             'format' => '',
@@ -1961,9 +2371,52 @@ JS);
         return array_values(array_filter(array_unique(array_map('absint', $value))));
     }
 
-    private function product_crm_posted_tags()
+    private function product_crm_delete_products(array $product_ids, $force_delete = false)
     {
-        $raw = isset($_POST['bulk_tags']) ? (string) wp_unslash($_POST['bulk_tags']) : '';
+        $deleted = 0;
+
+        foreach ($product_ids as $product_id) {
+            if (!current_user_can('delete_post', $product_id)) {
+                continue;
+            }
+
+            $result = $force_delete ? wp_delete_post($product_id, true) : wp_trash_post($product_id);
+            if ($result) {
+                $deleted++;
+            }
+        }
+
+        return $deleted;
+    }
+
+    private function product_crm_decimal_from_post($field)
+    {
+        $raw = isset($_POST[$field]) ? trim((string) wp_unslash($_POST[$field])) : '';
+        if ($raw === '' || !is_numeric($raw)) {
+            return null;
+        }
+
+        return max(0, (float) $raw);
+    }
+
+    private function product_crm_attachment_id_from_url($url)
+    {
+        $url = (string) $url;
+        if ($url === '' || !function_exists('attachment_url_to_postid')) {
+            return 0;
+        }
+
+        $attachment_id = attachment_url_to_postid($url);
+        if (!$attachment_id && strpos($url, '/wp-content/uploads/') === 0) {
+            $attachment_id = attachment_url_to_postid(home_url($url));
+        }
+
+        return absint($attachment_id);
+    }
+
+    private function product_crm_posted_tags($field = 'bulk_tags')
+    {
+        $raw = isset($_POST[$field]) ? (string) wp_unslash($_POST[$field]) : '';
         if ($raw === '') {
             return [];
         }
@@ -2131,6 +2584,9 @@ JS);
             'no_products' => 'לא נבחרו מוצרים לעדכון.',
             'coupon' => 'לא ניתן ליצור קופון. ודא שיש קוד תקין וסכום הנחה גדול מאפס.',
             'promo' => 'לא ניתן לשמור את כלל המבצע.',
+            'confirm_delete' => 'צריך לאשר מחיקה לפני הפעלת פעולת מחיקה.',
+            'product_title' => 'חובה להזין שם מוצר.',
+            'product_create' => 'לא ניתן ליצור את המוצר. בדוק SKU כפול או שדות לא תקינים.',
         ];
 
         return $messages[$code] ?? 'הפעולה לא הושלמה. נסה שוב.';
