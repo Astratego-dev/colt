@@ -35,11 +35,13 @@ final class Colt_Experience
         }
 
         add_action('rest_api_init', [$this, 'register_live_show_routes']);
+        add_action('woocommerce_cart_calculate_fees', [$this, 'apply_product_crm_promo_rules']);
 
         if (is_admin()) {
             add_action('admin_menu', [$this, 'register_admin_menu']);
             add_action('admin_enqueue_scripts', [$this, 'enqueue_admin_assets']);
             add_action('admin_post_colt_experience_save_content', [$this, 'handle_admin_save_content']);
+            add_action('admin_post_colt_product_crm_bulk', [$this, 'handle_product_crm_bulk_action']);
         }
     }
 
@@ -851,6 +853,15 @@ final class Colt_Experience
             'dashicons-edit-page',
             58
         );
+
+        add_submenu_page(
+            'colt-experience',
+            'COLT Product CRM',
+            'Product CRM',
+            'manage_options',
+            'colt-product-crm',
+            [$this, 'render_product_crm_page']
+        );
     }
 
     public function enqueue_admin_assets($hook_suffix)
@@ -1056,6 +1067,1073 @@ JS);
             </div>
         </div>
         <?php
+    }
+
+    public function render_product_crm_page()
+    {
+        if (!$this->can_manage_product_crm()) {
+            return;
+        }
+
+        ?>
+        <div class="wrap colt-crm" dir="rtl">
+            <style>
+                .colt-crm { max-width: 1440px; color: #10151c; }
+                .colt-crm h1 { font-size: 30px; font-weight: 900; margin-bottom: 6px; }
+                .colt-crm h2 { margin: 0 0 12px; font-size: 19px; font-weight: 900; }
+                .colt-crm h3 { margin: 0 0 10px; font-size: 15px; font-weight: 900; }
+                .colt-crm p { font-size: 14px; }
+                .colt-crm__hero { display: flex; justify-content: space-between; gap: 18px; align-items: center; margin: 18px 0; padding: 20px; border: 1px solid #dcdcde; border-radius: 14px; background: linear-gradient(135deg, #0d1119, #172230 58%, #21150a); color: #fff; box-shadow: 0 20px 60px rgba(16, 21, 28, .14); }
+                .colt-crm__hero p { max-width: 740px; margin: 4px 0 0; color: rgba(255,255,255,.72); }
+                .colt-crm__hero-code { direction: ltr; padding: 10px 13px; border-radius: 999px; background: rgba(255,255,255,.12); color: #ffd36a; font-weight: 800; white-space: nowrap; }
+                .colt-crm__stats { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; margin: 16px 0; }
+                .colt-crm__stat { padding: 14px; border: 1px solid #dcdcde; border-radius: 12px; background: #fff; }
+                .colt-crm__stat strong { display: block; font-size: 24px; line-height: 1.1; color: #111827; }
+                .colt-crm__stat span { display: block; margin-top: 5px; color: #646970; font-weight: 700; }
+                .colt-crm__panel { margin: 16px 0; padding: 16px; border: 1px solid #dcdcde; border-radius: 14px; background: #fff; }
+                .colt-crm__filters { display: grid; grid-template-columns: minmax(180px, 1.2fr) repeat(3, minmax(140px, .75fr)) auto; gap: 10px; align-items: end; }
+                .colt-crm label { display: grid; gap: 6px; font-weight: 800; color: #1d2327; }
+                .colt-crm input[type="text"], .colt-crm input[type="number"], .colt-crm select { width: 100%; max-width: none; min-height: 36px; }
+                .colt-crm select[multiple] { min-height: 110px; }
+                .colt-crm__bulk { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; align-items: start; }
+                .colt-crm__bulk-card { display: grid; gap: 10px; padding: 14px; border: 1px solid #dcdcde; border-radius: 12px; background: #f6f7f7; min-height: 100%; }
+                .colt-crm__table-wrap { overflow-x: auto; border: 1px solid #dcdcde; border-radius: 12px; background: #fff; }
+                .colt-crm table { margin: 0; border: 0; }
+                .colt-crm th { font-weight: 900; }
+                .colt-crm td, .colt-crm th { vertical-align: middle; }
+                .colt-crm__product { display: flex; gap: 10px; align-items: center; min-width: 280px; }
+                .colt-crm__thumb { width: 54px; height: 54px; border-radius: 8px; object-fit: cover; background: #f0f0f1; border: 1px solid #dcdcde; }
+                .colt-crm__product strong { display: block; color: #1d2327; }
+                .colt-crm__product a { text-decoration: none; }
+                .colt-crm__muted { color: #646970; font-size: 12px; }
+                .colt-crm__badge { display: inline-flex; align-items: center; padding: 4px 8px; border-radius: 999px; background: #f0f0f1; font-size: 12px; font-weight: 900; }
+                .colt-crm__badge--in { background: #ddf7e7; color: #006b38; }
+                .colt-crm__badge--out { background: #ffe3e3; color: #9b1c1c; }
+                .colt-crm__badge--back { background: #fff3cd; color: #7a4c00; }
+                .colt-crm__insights { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+                .colt-crm__list { display: grid; gap: 9px; margin: 0; }
+                .colt-crm__list li { display: flex; justify-content: space-between; gap: 10px; margin: 0; padding: 10px; border: 1px solid #e7e8ea; border-radius: 10px; background: #fff; }
+                .colt-crm__list a { text-decoration: none; font-weight: 800; }
+                .colt-crm__footer-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; margin-top: 14px; }
+                .colt-crm__note { margin: 0; padding: 10px 12px; border-radius: 10px; background: #fff8e5; color: #6f4e00; font-weight: 700; }
+                .colt-crm__pagination { margin-top: 14px; text-align: center; }
+                .colt-crm__pagination .page-numbers { display: inline-block; margin: 0 2px; padding: 6px 10px; border-radius: 8px; background: #fff; border: 1px solid #dcdcde; text-decoration: none; }
+                .colt-crm__pagination .current { background: #111827; color: #fff; border-color: #111827; }
+                @media (max-width: 1240px) { .colt-crm__stats { grid-template-columns: repeat(3, 1fr); } .colt-crm__bulk, .colt-crm__insights { grid-template-columns: repeat(2, 1fr); } }
+                @media (max-width: 782px) { .colt-crm__hero, .colt-crm__footer-actions { display: grid; } .colt-crm__stats, .colt-crm__filters, .colt-crm__bulk, .colt-crm__insights { grid-template-columns: 1fr; } }
+            </style>
+
+            <h1>COLT Product CRM</h1>
+            <p>ניהול מוצרים מהיר לחנות: עריכה רוחבית, מבצעים, מלאי, מכירות ותובנות בלי להיכנס מוצר-מוצר.</p>
+
+            <?php if (!$this->is_woocommerce_ready()) : ?>
+                <div class="notice notice-error"><p>WooCommerce לא פעיל או שסוג הפוסט Product לא זמין. הפעל את WooCommerce כדי להשתמש ב־Product CRM.</p></div>
+            </div>
+                <?php
+                return;
+            endif;
+
+            $filters = $this->product_crm_filters();
+            $categories = $this->product_crm_terms('product_cat');
+            $tags = $this->product_crm_terms('product_tag');
+            $products_query = $this->product_crm_query($filters);
+            $stats = $this->product_crm_stats();
+            $top_products = $this->product_crm_sales_products(6, 'DESC');
+            $slow_products = $this->product_crm_sales_products(6, 'ASC');
+            $low_stock = $this->product_crm_low_stock_products(8);
+            $customers = $this->product_crm_customer_summary(8);
+            $promotions = get_option('colt_product_crm_promotions', []);
+            $promotions = is_array($promotions) ? array_slice(array_reverse($promotions), 0, 5) : [];
+            ?>
+
+            <div class="colt-crm__hero">
+                <div>
+                    <h2>מרכז שליטה למוצרים ומבצעים</h2>
+                    <p>בחר מוצרים מהרשימה, הפעל שינויי bulk, צור קופונים, שמור כללי 3+1, ועקוב אחרי מוצרים חזקים, מוצרים שצריך להעיר ומלאי שדורש תשומת לב.</p>
+                </div>
+                <div class="colt-crm__hero-code">WooCommerce Admin</div>
+            </div>
+
+            <?php if (isset($_GET['crm_updated'])) : ?>
+                <div class="notice notice-success is-dismissible"><p><?php echo esc_html((int) $_GET['crm_updated']); ?> מוצרים עודכנו בהצלחה.</p></div>
+            <?php endif; ?>
+            <?php if (isset($_GET['coupon_created'])) : ?>
+                <div class="notice notice-success is-dismissible"><p>הקופון נוצר ושויך לפי הבחירה.</p></div>
+            <?php endif; ?>
+            <?php if (isset($_GET['promo_created'])) : ?>
+                <div class="notice notice-success is-dismissible"><p>כלל המבצע נשמר ב־CRM.</p></div>
+            <?php endif; ?>
+            <?php if (isset($_GET['crm_error'])) : ?>
+                <div class="notice notice-error is-dismissible"><p><?php echo esc_html($this->product_crm_error_message((string) wp_unslash($_GET['crm_error']))); ?></p></div>
+            <?php endif; ?>
+
+            <section class="colt-crm__stats" aria-label="סקירת מוצרים">
+                <?php foreach ($stats as $stat) : ?>
+                    <div class="colt-crm__stat">
+                        <strong><?php echo esc_html($stat['value']); ?></strong>
+                        <span><?php echo esc_html($stat['label']); ?></span>
+                    </div>
+                <?php endforeach; ?>
+            </section>
+
+            <form class="colt-crm__panel colt-crm__filters" method="get" action="<?php echo esc_url(admin_url('admin.php')); ?>">
+                <input type="hidden" name="page" value="colt-product-crm">
+                <label>
+                    <span>חיפוש מוצר</span>
+                    <input type="text" name="s" value="<?php echo esc_attr($filters['search']); ?>" placeholder="שם מוצר, סט, שפה...">
+                </label>
+                <label>
+                    <span>סטטוס מלאי</span>
+                    <select name="stock">
+                        <option value="">הכל</option>
+                        <?php foreach ($this->product_crm_stock_statuses() as $status_key => $status_label) : ?>
+                            <option value="<?php echo esc_attr($status_key); ?>" <?php selected($filters['stock'], $status_key); ?>><?php echo esc_html($status_label); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </label>
+                <label>
+                    <span>קטגוריה</span>
+                    <select name="product_cat">
+                        <option value="0">כל הקטגוריות</option>
+                        <?php foreach ($categories as $term) : ?>
+                            <option value="<?php echo esc_attr($term->term_id); ?>" <?php selected($filters['category'], (int) $term->term_id); ?>><?php echo esc_html($term->name); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </label>
+                <label>
+                    <span>תגית</span>
+                    <select name="product_tag">
+                        <option value="0">כל התגיות</option>
+                        <?php foreach ($tags as $term) : ?>
+                            <option value="<?php echo esc_attr($term->term_id); ?>" <?php selected($filters['tag'], (int) $term->term_id); ?>><?php echo esc_html($term->name); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </label>
+                <button class="button button-primary">סינון</button>
+            </form>
+
+            <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+                <?php wp_nonce_field('colt_product_crm_bulk'); ?>
+                <input type="hidden" name="action" value="colt_product_crm_bulk">
+
+                <section class="colt-crm__panel">
+                    <h2>פעולות Bulk</h2>
+                    <div class="colt-crm__bulk">
+                        <div class="colt-crm__bulk-card">
+                            <h3>מלאי</h3>
+                            <label>
+                                <span>סטטוס מלאי</span>
+                                <select name="stock_status">
+                                    <option value="">ללא שינוי</option>
+                                    <?php foreach ($this->product_crm_stock_statuses() as $status_key => $status_label) : ?>
+                                        <option value="<?php echo esc_attr($status_key); ?>"><?php echo esc_html($status_label); ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </label>
+                            <label>
+                                <span>כמות במלאי</span>
+                                <input type="number" name="stock_quantity" min="0" step="1" placeholder="ללא שינוי">
+                            </label>
+                        </div>
+
+                        <div class="colt-crm__bulk-card">
+                            <h3>מחיר</h3>
+                            <label>
+                                <span>פעולת מחיר רגיל</span>
+                                <select name="price_mode">
+                                    <option value="">ללא שינוי</option>
+                                    <option value="set">קבע מחיר</option>
+                                    <option value="percent">שינוי באחוזים</option>
+                                    <option value="fixed">הוספה/הפחתה קבועה</option>
+                                </select>
+                            </label>
+                            <label>
+                                <span>ערך</span>
+                                <input type="number" name="price_value" step="0.01" placeholder="לדוגמה 10 או -5">
+                            </label>
+                            <label>
+                                <span>מחיר מבצע</span>
+                                <select name="sale_price_action">
+                                    <option value="">ללא שינוי</option>
+                                    <option value="set">קבע מחיר מבצע</option>
+                                    <option value="clear">נקה מחיר מבצע</option>
+                                </select>
+                            </label>
+                            <input type="number" name="sale_price_value" step="0.01" placeholder="מחיר מבצע">
+                        </div>
+
+                        <div class="colt-crm__bulk-card">
+                            <h3>קטגוריות ותגיות</h3>
+                            <label>
+                                <span>מצב קטגוריות</span>
+                                <select name="category_mode">
+                                    <option value="">ללא שינוי</option>
+                                    <option value="add">הוסף קטגוריות</option>
+                                    <option value="replace">החלף קטגוריות</option>
+                                </select>
+                            </label>
+                            <label>
+                                <span>קטגוריות</span>
+                                <select name="bulk_categories[]" multiple>
+                                    <?php foreach ($categories as $term) : ?>
+                                        <option value="<?php echo esc_attr($term->term_id); ?>"><?php echo esc_html($term->name); ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </label>
+                            <label>
+                                <span>תגיות להוספה</span>
+                                <input type="text" name="bulk_tags" placeholder="יפנית, בוסטר, PSA">
+                            </label>
+                        </div>
+
+                        <div class="colt-crm__bulk-card">
+                            <h3>תמונה ותצוגה</h3>
+                            <label>
+                                <span>רוחב תצוגה</span>
+                                <input type="number" name="image_width" min="0" step="1" placeholder="px">
+                            </label>
+                            <label>
+                                <span>גובה תצוגה</span>
+                                <input type="number" name="image_height" min="0" step="1" placeholder="px">
+                            </label>
+                            <label>
+                                <span>התאמת תמונה</span>
+                                <select name="image_fit">
+                                    <option value="">ללא שינוי</option>
+                                    <option value="cover">Cover</option>
+                                    <option value="contain">Contain</option>
+                                    <option value="fill">Fill</option>
+                                </select>
+                            </label>
+                            <p class="colt-crm__note">נשמר כ־meta לתצוגה עתידית, בלי להרוס או לחתוך את קובץ התמונה המקורי.</p>
+                        </div>
+
+                        <div class="colt-crm__bulk-card">
+                            <h3>קופון / 3+1</h3>
+                            <label>
+                                <span><input type="checkbox" name="create_coupon" value="1"> צור קופון לבחירה</span>
+                            </label>
+                            <input type="text" name="coupon_code" placeholder="COLT-DROP">
+                            <select name="coupon_type">
+                                <option value="percent">אחוז הנחה</option>
+                                <option value="fixed_product">סכום למוצר</option>
+                                <option value="fixed_cart">סכום לעגלה</option>
+                            </select>
+                            <input type="number" name="coupon_amount" min="0" step="0.01" placeholder="גובה הנחה">
+                            <label>
+                                <span>קטגוריות לקופון</span>
+                                <select name="coupon_categories[]" multiple>
+                                    <?php foreach ($categories as $term) : ?>
+                                        <option value="<?php echo esc_attr($term->term_id); ?>"><?php echo esc_html($term->name); ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </label>
+                            <label>
+                                <span><input type="checkbox" name="create_promo_rule" value="1"> שמור כלל 3+1</span>
+                            </label>
+                            <input type="text" name="promo_name" placeholder="3+1 מאותה קטגוריה">
+                        </div>
+                    </div>
+                </section>
+
+                <section class="colt-crm__panel">
+                    <div class="colt-crm__footer-actions">
+                        <h2>מוצרים</h2>
+                        <button class="button button-primary button-hero" type="submit">הפעל פעולות על המוצרים שסומנו</button>
+                    </div>
+                    <p class="colt-crm__muted">נמצאו <?php echo esc_html(number_format_i18n((int) $products_query->found_posts)); ?> מוצרים לפי הסינון הנוכחי.</p>
+
+                    <div class="colt-crm__table-wrap">
+                        <table class="widefat striped">
+                            <thead>
+                                <tr>
+                                    <th><input type="checkbox" data-colt-crm-check-all></th>
+                                    <th>מוצר</th>
+                                    <th>SKU</th>
+                                    <th>מחיר</th>
+                                    <th>מבצע</th>
+                                    <th>מלאי</th>
+                                    <th>כמות</th>
+                                    <th>קטגוריות</th>
+                                    <th>תגיות</th>
+                                    <th>מכירות</th>
+                                    <th>עודכן</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php if ($products_query->posts) : ?>
+                                    <?php foreach ($products_query->posts as $product_id) : ?>
+                                        <?php
+                                        $product = wc_get_product($product_id);
+                                        if (!$product) {
+                                            continue;
+                                        }
+                                        $image = get_the_post_thumbnail_url($product_id, 'woocommerce_thumbnail') ?: wc_placeholder_img_src('woocommerce_thumbnail');
+                                        $stock_status = $product->get_stock_status();
+                                        $regular_price = $product->get_regular_price();
+                                        $sale_price = $product->get_sale_price();
+                                        ?>
+                                        <tr>
+                                            <td><input type="checkbox" name="product_ids[]" value="<?php echo esc_attr($product_id); ?>"></td>
+                                            <td>
+                                                <div class="colt-crm__product">
+                                                    <img class="colt-crm__thumb" src="<?php echo esc_url($image); ?>" alt="">
+                                                    <span>
+                                                        <strong><a href="<?php echo esc_url(get_edit_post_link($product_id)); ?>"><?php echo esc_html(get_the_title($product_id)); ?></a></strong>
+                                                        <span class="colt-crm__muted">ID <?php echo esc_html((string) $product_id); ?> · <?php echo esc_html($product->get_type()); ?></span>
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td><?php echo esc_html($product->get_sku() ?: '—'); ?></td>
+                                            <td><?php echo $regular_price !== '' ? wp_kses_post(wc_price((float) $regular_price)) : '—'; ?></td>
+                                            <td><?php echo $sale_price !== '' ? wp_kses_post(wc_price((float) $sale_price)) : '—'; ?></td>
+                                            <td><?php echo wp_kses_post($this->product_crm_stock_badge($stock_status)); ?></td>
+                                            <td><?php echo esc_html($product->get_stock_quantity() !== null ? (string) $product->get_stock_quantity() : '—'); ?></td>
+                                            <td><?php echo esc_html($this->product_crm_term_names($product_id, 'product_cat')); ?></td>
+                                            <td><?php echo esc_html($this->product_crm_term_names($product_id, 'product_tag')); ?></td>
+                                            <td><?php echo esc_html(number_format_i18n((int) get_post_meta($product_id, 'total_sales', true))); ?></td>
+                                            <td><?php echo esc_html(get_the_modified_date('d.m.Y', $product_id)); ?></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php else : ?>
+                                    <tr><td colspan="11">לא נמצאו מוצרים לפי הסינון הנוכחי.</td></tr>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <?php $pagination = $this->product_crm_pagination($products_query, $filters); ?>
+                    <?php if ($pagination) : ?>
+                        <div class="colt-crm__pagination"><?php echo wp_kses_post($pagination); ?></div>
+                    <?php endif; ?>
+                </section>
+            </form>
+
+            <section class="colt-crm__insights">
+                <div class="colt-crm__panel">
+                    <h2>מוצרים מובילים</h2>
+                    <?php $this->render_product_crm_product_list($top_products, 'מכירות'); ?>
+                </div>
+                <div class="colt-crm__panel">
+                    <h2>מוצרים שצריך להעיר</h2>
+                    <?php $this->render_product_crm_product_list($slow_products, 'מכירות'); ?>
+                </div>
+                <div class="colt-crm__panel">
+                    <h2>התראות מלאי</h2>
+                    <?php $this->render_product_crm_product_list($low_stock, 'במלאי'); ?>
+                </div>
+            </section>
+
+            <section class="colt-crm__insights">
+                <div class="colt-crm__panel">
+                    <h2>לקוחות מובילים</h2>
+                    <?php if ($customers) : ?>
+                        <ul class="colt-crm__list">
+                            <?php foreach ($customers as $customer) : ?>
+                                <li>
+                                    <span>
+                                        <strong><?php echo esc_html($customer['name']); ?></strong><br>
+                                        <span class="colt-crm__muted"><?php echo esc_html($customer['email']); ?> · <?php echo esc_html((string) $customer['orders']); ?> הזמנות</span>
+                                    </span>
+                                    <strong><?php echo wp_kses_post(wc_price($customer['total'])); ?></strong>
+                                </li>
+                            <?php endforeach; ?>
+                        </ul>
+                    <?php else : ?>
+                        <p>עדיין אין מספיק הזמנות להצגה.</p>
+                    <?php endif; ?>
+                </div>
+
+                <div class="colt-crm__panel">
+                    <h2>כללי מבצע שמורים</h2>
+                    <?php if ($promotions) : ?>
+                        <ul class="colt-crm__list">
+                            <?php foreach ($promotions as $promotion) : ?>
+                                <li>
+                                    <span>
+                                        <strong><?php echo esc_html($promotion['name'] ?? 'מבצע'); ?></strong><br>
+                                        <span class="colt-crm__muted"><?php echo esc_html(($promotion['buy_qty'] ?? 3) . '+' . ($promotion['get_qty'] ?? 1)); ?> · <?php echo esc_html($promotion['status'] ?? 'draft'); ?></span>
+                                    </span>
+                                    <span class="colt-crm__badge">Rule</span>
+                                </li>
+                            <?php endforeach; ?>
+                        </ul>
+                    <?php else : ?>
+                        <p>עדיין לא נשמרו כללי מבצע. אפשר ליצור כלל 3+1 מתוך אזור ה־bulk.</p>
+                    <?php endif; ?>
+                    <p class="colt-crm__note">כללי 3+1 שנשמרים כאן פעילים בעגלה ומחושבים לפי המוצרים או הקטגוריות שנבחרו.</p>
+                </div>
+
+                <div class="colt-crm__panel">
+                    <h2>פעולות מומלצות</h2>
+                    <ul class="colt-crm__list">
+                        <li><span>מוצרים ללא מכירות</span><strong>בדיקת מחיר / תמונה</strong></li>
+                        <li><span>מלאי נמוך</span><strong>הזמנה / הסתרה זמנית</strong></li>
+                        <li><span>קטגוריות חזקות</span><strong>קופון ממוקד</strong></li>
+                        <li><span>לקוחות חוזרים</span><strong>דרופ VIP</strong></li>
+                    </ul>
+                </div>
+            </section>
+        </div>
+        <script>
+        document.addEventListener('change', function (event) {
+            if (!event.target.matches('[data-colt-crm-check-all]')) {
+                return;
+            }
+            document.querySelectorAll('.colt-crm input[name="product_ids[]"]').forEach(function (checkbox) {
+                checkbox.checked = event.target.checked;
+            });
+        });
+        </script>
+        <?php
+    }
+
+    public function handle_product_crm_bulk_action()
+    {
+        if (!$this->can_manage_product_crm()) {
+            wp_die(esc_html__('You do not have permission to manage products.', 'colt-experience'));
+        }
+
+        check_admin_referer('colt_product_crm_bulk');
+
+        if (!$this->is_woocommerce_ready()) {
+            $this->product_crm_redirect(['crm_error' => 'woocommerce']);
+        }
+
+        $product_ids = $this->product_crm_posted_ids('product_ids');
+        if (!$product_ids) {
+            $this->product_crm_redirect(['crm_error' => 'no_products']);
+        }
+
+        $stock_status = isset($_POST['stock_status']) ? sanitize_key(wp_unslash($_POST['stock_status'])) : '';
+        $stock_statuses = array_keys($this->product_crm_stock_statuses());
+        if (!in_array($stock_status, $stock_statuses, true)) {
+            $stock_status = '';
+        }
+
+        $stock_quantity_raw = isset($_POST['stock_quantity']) ? trim((string) wp_unslash($_POST['stock_quantity'])) : '';
+        $stock_quantity = $stock_quantity_raw !== '' && is_numeric($stock_quantity_raw) ? max(0, (int) $stock_quantity_raw) : null;
+        $price_mode = isset($_POST['price_mode']) ? sanitize_key(wp_unslash($_POST['price_mode'])) : '';
+        $price_value_raw = isset($_POST['price_value']) ? trim((string) wp_unslash($_POST['price_value'])) : '';
+        $price_value = $price_value_raw !== '' && is_numeric($price_value_raw) ? (float) $price_value_raw : null;
+        $sale_action = isset($_POST['sale_price_action']) ? sanitize_key(wp_unslash($_POST['sale_price_action'])) : '';
+        $sale_price_raw = isset($_POST['sale_price_value']) ? trim((string) wp_unslash($_POST['sale_price_value'])) : '';
+        $sale_price = $sale_price_raw !== '' && is_numeric($sale_price_raw) ? max(0, (float) $sale_price_raw) : null;
+        $category_mode = isset($_POST['category_mode']) ? sanitize_key(wp_unslash($_POST['category_mode'])) : '';
+        $category_ids = $this->product_crm_posted_ids('bulk_categories');
+        $tag_names = $this->product_crm_posted_tags();
+        $image_width = isset($_POST['image_width']) ? absint(wp_unslash($_POST['image_width'])) : 0;
+        $image_height = isset($_POST['image_height']) ? absint(wp_unslash($_POST['image_height'])) : 0;
+        $image_fit = isset($_POST['image_fit']) ? sanitize_key(wp_unslash($_POST['image_fit'])) : '';
+        if (!in_array($image_fit, ['cover', 'contain', 'fill'], true)) {
+            $image_fit = '';
+        }
+
+        $updated = 0;
+
+        foreach ($product_ids as $product_id) {
+            $product = wc_get_product($product_id);
+            if (!$product) {
+                continue;
+            }
+
+            $changed = false;
+
+            if ($stock_status !== '') {
+                $product->set_stock_status($stock_status);
+                $changed = true;
+            }
+
+            if ($stock_quantity !== null) {
+                $product->set_manage_stock(true);
+                $product->set_stock_quantity($stock_quantity);
+                $changed = true;
+            }
+
+            if ($price_mode !== '' && $price_value !== null) {
+                $base_price = $product->get_regular_price() !== '' ? (float) $product->get_regular_price() : (float) $product->get_price();
+                if ($price_mode === 'set') {
+                    $product->set_regular_price(wc_format_decimal(max(0, $price_value)));
+                    $changed = true;
+                } elseif ($price_mode === 'percent' && $base_price > 0) {
+                    $product->set_regular_price(wc_format_decimal(max(0, $base_price * (1 + ($price_value / 100)))));
+                    $changed = true;
+                } elseif ($price_mode === 'fixed' && $base_price >= 0) {
+                    $product->set_regular_price(wc_format_decimal(max(0, $base_price + $price_value)));
+                    $changed = true;
+                }
+            }
+
+            if ($sale_action === 'clear') {
+                $product->set_sale_price('');
+                $changed = true;
+            } elseif ($sale_action === 'set' && $sale_price !== null) {
+                $product->set_sale_price(wc_format_decimal($sale_price));
+                $changed = true;
+            }
+
+            if ($changed) {
+                $product->save();
+            }
+
+            if ($category_mode === 'replace' && $category_ids) {
+                wp_set_object_terms($product_id, $category_ids, 'product_cat', false);
+                $changed = true;
+            } elseif ($category_mode === 'add' && $category_ids) {
+                $current_categories = wp_get_object_terms($product_id, 'product_cat', ['fields' => 'ids']);
+                $current_categories = is_wp_error($current_categories) ? [] : array_map('absint', $current_categories);
+                wp_set_object_terms($product_id, array_values(array_unique(array_merge($current_categories, $category_ids))), 'product_cat', false);
+                $changed = true;
+            }
+
+            if ($tag_names) {
+                wp_set_object_terms($product_id, $tag_names, 'product_tag', true);
+                $changed = true;
+            }
+
+            if ($image_width > 0) {
+                update_post_meta($product_id, '_colt_crm_image_width', $image_width);
+                $changed = true;
+            }
+            if ($image_height > 0) {
+                update_post_meta($product_id, '_colt_crm_image_height', $image_height);
+                $changed = true;
+            }
+            if ($image_fit !== '') {
+                update_post_meta($product_id, '_colt_crm_image_fit', $image_fit);
+                $changed = true;
+            }
+
+            if ($changed) {
+                $updated++;
+            }
+        }
+
+        $redirect_args = ['crm_updated' => $updated];
+        $coupon_categories = $this->product_crm_posted_ids('coupon_categories');
+        if (!empty($_POST['create_coupon'])) {
+            $coupon_id = $this->product_crm_create_coupon($product_ids, $coupon_categories);
+            $redirect_args[$coupon_id ? 'coupon_created' : 'crm_error'] = $coupon_id ? '1' : 'coupon';
+        }
+
+        if (!empty($_POST['create_promo_rule'])) {
+            $promo_created = $this->product_crm_create_promo_rule($product_ids, $coupon_categories ?: $category_ids);
+            $redirect_args[$promo_created ? 'promo_created' : 'crm_error'] = $promo_created ? '1' : 'promo';
+        }
+
+        $this->product_crm_redirect($redirect_args);
+    }
+
+    private function can_manage_product_crm()
+    {
+        return current_user_can('manage_options') || current_user_can('manage_woocommerce') || current_user_can('edit_products');
+    }
+
+    private function is_woocommerce_ready()
+    {
+        return function_exists('wc_get_product') && function_exists('wc_get_orders') && post_type_exists('product');
+    }
+
+    private function product_crm_filters()
+    {
+        return [
+            'search' => isset($_GET['s']) ? sanitize_text_field(wp_unslash($_GET['s'])) : '',
+            'stock' => isset($_GET['stock']) ? sanitize_key(wp_unslash($_GET['stock'])) : '',
+            'category' => isset($_GET['product_cat']) ? absint(wp_unslash($_GET['product_cat'])) : 0,
+            'tag' => isset($_GET['product_tag']) ? absint(wp_unslash($_GET['product_tag'])) : 0,
+            'paged' => max(1, isset($_GET['paged']) ? absint(wp_unslash($_GET['paged'])) : 1),
+        ];
+    }
+
+    private function product_crm_query(array $filters)
+    {
+        $args = [
+            'post_type' => 'product',
+            'post_status' => ['publish', 'draft', 'pending', 'private'],
+            'posts_per_page' => 30,
+            'paged' => max(1, (int) $filters['paged']),
+            'fields' => 'ids',
+        ];
+
+        if ($filters['search'] !== '') {
+            $args['s'] = $filters['search'];
+        }
+
+        $tax_query = [];
+        if ($filters['category'] > 0) {
+            $tax_query[] = [
+                'taxonomy' => 'product_cat',
+                'field' => 'term_id',
+                'terms' => [$filters['category']],
+            ];
+        }
+        if ($filters['tag'] > 0) {
+            $tax_query[] = [
+                'taxonomy' => 'product_tag',
+                'field' => 'term_id',
+                'terms' => [$filters['tag']],
+            ];
+        }
+        if ($tax_query) {
+            $args['tax_query'] = $tax_query;
+        }
+
+        if ($filters['stock'] !== '' && in_array($filters['stock'], array_keys($this->product_crm_stock_statuses()), true)) {
+            $args['meta_query'] = [
+                [
+                    'key' => '_stock_status',
+                    'value' => $filters['stock'],
+                ],
+            ];
+        }
+
+        return new WP_Query($args);
+    }
+
+    private function product_crm_terms($taxonomy)
+    {
+        if (!taxonomy_exists($taxonomy)) {
+            return [];
+        }
+
+        $terms = get_terms([
+            'taxonomy' => $taxonomy,
+            'hide_empty' => false,
+            'orderby' => 'name',
+            'order' => 'ASC',
+        ]);
+
+        return is_wp_error($terms) ? [] : $terms;
+    }
+
+    private function product_crm_stock_statuses()
+    {
+        return [
+            'instock' => 'במלאי',
+            'outofstock' => 'אזל מהמלאי',
+            'onbackorder' => 'בהזמנה מוקדמת',
+        ];
+    }
+
+    private function product_crm_stock_badge($status)
+    {
+        $labels = $this->product_crm_stock_statuses();
+        $class = 'colt-crm__badge';
+        if ($status === 'instock') {
+            $class .= ' colt-crm__badge--in';
+        } elseif ($status === 'outofstock') {
+            $class .= ' colt-crm__badge--out';
+        } elseif ($status === 'onbackorder') {
+            $class .= ' colt-crm__badge--back';
+        }
+
+        return '<span class="' . esc_attr($class) . '">' . esc_html($labels[$status] ?? $status) . '</span>';
+    }
+
+    private function product_crm_stats()
+    {
+        $counts = wp_count_posts('product');
+        $total = 0;
+        foreach (['publish', 'draft', 'pending', 'private'] as $status) {
+            $total += isset($counts->{$status}) ? (int) $counts->{$status} : 0;
+        }
+
+        $stock_counts = [];
+        foreach (array_keys($this->product_crm_stock_statuses()) as $status) {
+            $stock_query = new WP_Query([
+                'post_type' => 'product',
+                'post_status' => ['publish', 'draft', 'pending', 'private'],
+                'posts_per_page' => 1,
+                'fields' => 'ids',
+                'meta_query' => [
+                    [
+                        'key' => '_stock_status',
+                        'value' => $status,
+                    ],
+                ],
+            ]);
+            $stock_counts[$status] = (int) $stock_query->found_posts;
+        }
+
+        $stock_value = 0;
+        $value_query = new WP_Query([
+            'post_type' => 'product',
+            'post_status' => ['publish', 'draft', 'pending', 'private'],
+            'posts_per_page' => 300,
+            'fields' => 'ids',
+            'no_found_rows' => true,
+        ]);
+
+        foreach ($value_query->posts as $product_id) {
+            $product = wc_get_product($product_id);
+            if (!$product) {
+                continue;
+            }
+            $qty = $product->get_stock_quantity();
+            $qty = $qty === null ? 1 : max(0, (int) $qty);
+            $stock_value += (float) $product->get_price() * $qty;
+        }
+
+        return [
+            ['value' => number_format_i18n($total), 'label' => 'סה"כ מוצרים'],
+            ['value' => number_format_i18n($stock_counts['instock'] ?? 0), 'label' => 'במלאי'],
+            ['value' => number_format_i18n($stock_counts['outofstock'] ?? 0), 'label' => 'אזל'],
+            ['value' => number_format_i18n($stock_counts['onbackorder'] ?? 0), 'label' => 'Backorder'],
+            ['value' => wp_strip_all_tags(wc_price($stock_value)), 'label' => 'ערך מלאי משוער'],
+        ];
+    }
+
+    private function product_crm_sales_products($limit, $order)
+    {
+        $query = new WP_Query([
+            'post_type' => 'product',
+            'post_status' => ['publish', 'draft', 'private'],
+            'posts_per_page' => max(1, (int) $limit),
+            'fields' => 'ids',
+            'meta_key' => 'total_sales',
+            'orderby' => 'meta_value_num',
+            'order' => $order === 'ASC' ? 'ASC' : 'DESC',
+            'no_found_rows' => true,
+        ]);
+
+        $rows = [];
+        foreach ($query->posts as $product_id) {
+            $rows[] = [
+                'id' => $product_id,
+                'title' => get_the_title($product_id),
+                'value' => (int) get_post_meta($product_id, 'total_sales', true),
+                'url' => get_edit_post_link($product_id),
+            ];
+        }
+
+        return $rows;
+    }
+
+    private function product_crm_low_stock_products($limit)
+    {
+        $query = new WP_Query([
+            'post_type' => 'product',
+            'post_status' => ['publish', 'draft', 'private'],
+            'posts_per_page' => max(1, (int) $limit),
+            'fields' => 'ids',
+            'meta_query' => [
+                'relation' => 'AND',
+                [
+                    'key' => '_stock',
+                    'value' => 5,
+                    'compare' => '<=',
+                    'type' => 'NUMERIC',
+                ],
+                [
+                    'key' => '_stock_status',
+                    'value' => 'instock',
+                ],
+            ],
+            'orderby' => 'meta_value_num',
+            'meta_key' => '_stock',
+            'order' => 'ASC',
+            'no_found_rows' => true,
+        ]);
+
+        $rows = [];
+        foreach ($query->posts as $product_id) {
+            $rows[] = [
+                'id' => $product_id,
+                'title' => get_the_title($product_id),
+                'value' => (int) get_post_meta($product_id, '_stock', true),
+                'url' => get_edit_post_link($product_id),
+            ];
+        }
+
+        return $rows;
+    }
+
+    private function product_crm_customer_summary($limit)
+    {
+        if (!function_exists('wc_get_orders')) {
+            return [];
+        }
+
+        $orders = wc_get_orders([
+            'limit' => 80,
+            'status' => ['processing', 'completed', 'on-hold'],
+            'orderby' => 'date',
+            'order' => 'DESC',
+        ]);
+
+        $customers = [];
+        foreach ($orders as $order) {
+            if (!is_object($order) || !method_exists($order, 'get_billing_email')) {
+                continue;
+            }
+
+            $email = strtolower(trim((string) $order->get_billing_email()));
+            if ($email === '') {
+                $email = 'guest-' . (string) $order->get_id();
+            }
+
+            if (!isset($customers[$email])) {
+                $name = trim((string) $order->get_billing_first_name() . ' ' . (string) $order->get_billing_last_name());
+                $customers[$email] = [
+                    'name' => $name !== '' ? $name : 'לקוח אורח',
+                    'email' => $email,
+                    'orders' => 0,
+                    'total' => 0,
+                ];
+            }
+
+            $customers[$email]['orders']++;
+            $customers[$email]['total'] += (float) $order->get_total();
+        }
+
+        usort($customers, static function ($a, $b) {
+            return $b['total'] <=> $a['total'];
+        });
+
+        return array_slice($customers, 0, max(1, (int) $limit));
+    }
+
+    private function render_product_crm_product_list(array $rows, $value_label)
+    {
+        if (!$rows) {
+            echo '<p>אין נתונים להצגה עדיין.</p>';
+            return;
+        }
+        ?>
+        <ul class="colt-crm__list">
+            <?php foreach ($rows as $row) : ?>
+                <li>
+                    <span>
+                        <a href="<?php echo esc_url($row['url']); ?>"><?php echo esc_html($row['title']); ?></a><br>
+                        <span class="colt-crm__muted">ID <?php echo esc_html((string) $row['id']); ?></span>
+                    </span>
+                    <strong><?php echo esc_html(number_format_i18n((int) $row['value']) . ' ' . $value_label); ?></strong>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+        <?php
+    }
+
+    private function product_crm_term_names($product_id, $taxonomy)
+    {
+        $terms = get_the_terms($product_id, $taxonomy);
+        if (!$terms || is_wp_error($terms)) {
+            return '—';
+        }
+
+        return implode(', ', wp_list_pluck($terms, 'name'));
+    }
+
+    private function product_crm_pagination(WP_Query $query, array $filters)
+    {
+        if ((int) $query->max_num_pages < 2) {
+            return '';
+        }
+
+        return paginate_links([
+            'base' => add_query_arg([
+                'page' => 'colt-product-crm',
+                's' => $filters['search'],
+                'stock' => $filters['stock'],
+                'product_cat' => $filters['category'],
+                'product_tag' => $filters['tag'],
+                'paged' => '%#%',
+            ], admin_url('admin.php')),
+            'format' => '',
+            'current' => max(1, (int) $filters['paged']),
+            'total' => (int) $query->max_num_pages,
+            'prev_text' => '‹',
+            'next_text' => '›',
+        ]);
+    }
+
+    private function product_crm_posted_ids($field)
+    {
+        if (!isset($_POST[$field])) {
+            return [];
+        }
+
+        $value = wp_unslash($_POST[$field]);
+        if (!is_array($value)) {
+            $value = [$value];
+        }
+
+        return array_values(array_filter(array_unique(array_map('absint', $value))));
+    }
+
+    private function product_crm_posted_tags()
+    {
+        $raw = isset($_POST['bulk_tags']) ? (string) wp_unslash($_POST['bulk_tags']) : '';
+        if ($raw === '') {
+            return [];
+        }
+
+        $tags = array_map('trim', explode(',', $raw));
+        $tags = array_map('sanitize_text_field', $tags);
+
+        return array_values(array_filter($tags));
+    }
+
+    private function product_crm_create_coupon(array $product_ids, array $category_ids)
+    {
+        if (!post_type_exists('shop_coupon')) {
+            return 0;
+        }
+
+        $code = isset($_POST['coupon_code']) ? strtoupper(sanitize_text_field(wp_unslash($_POST['coupon_code']))) : '';
+        $code = preg_replace('/[^A-Z0-9_-]/', '', $code);
+        if ($code === '') {
+            $code = 'COLT-' . gmdate('ymd-His');
+        }
+
+        $type = isset($_POST['coupon_type']) ? sanitize_key(wp_unslash($_POST['coupon_type'])) : 'percent';
+        if (!in_array($type, ['percent', 'fixed_product', 'fixed_cart'], true)) {
+            $type = 'percent';
+        }
+
+        $amount_raw = isset($_POST['coupon_amount']) ? trim((string) wp_unslash($_POST['coupon_amount'])) : '';
+        $amount = $amount_raw !== '' && is_numeric($amount_raw) ? max(0, (float) $amount_raw) : 0;
+        if ($amount <= 0) {
+            return 0;
+        }
+
+        $coupon_id = wp_insert_post([
+            'post_title' => $code,
+            'post_excerpt' => 'Created from COLT Product CRM',
+            'post_status' => 'publish',
+            'post_type' => 'shop_coupon',
+        ], true);
+
+        if (is_wp_error($coupon_id) || !$coupon_id) {
+            return 0;
+        }
+
+        update_post_meta($coupon_id, 'discount_type', $type);
+        update_post_meta($coupon_id, 'coupon_amount', wc_format_decimal($amount));
+        update_post_meta($coupon_id, 'individual_use', 'no');
+        update_post_meta($coupon_id, 'usage_limit', '');
+        update_post_meta($coupon_id, 'usage_limit_per_user', '');
+        update_post_meta($coupon_id, 'product_ids', implode(',', $product_ids));
+        update_post_meta($coupon_id, 'product_categories', $category_ids);
+        update_post_meta($coupon_id, '_colt_product_crm_created', time());
+
+        return (int) $coupon_id;
+    }
+
+    private function product_crm_create_promo_rule(array $product_ids, array $category_ids)
+    {
+        $name = isset($_POST['promo_name']) ? sanitize_text_field(wp_unslash($_POST['promo_name'])) : '';
+        if ($name === '') {
+            $name = '3+1 מאותה קטגוריה';
+        }
+
+        $rules = get_option('colt_product_crm_promotions', []);
+        if (!is_array($rules)) {
+            $rules = [];
+        }
+
+        $rules[] = [
+            'id' => 'promo_' . time() . '_' . wp_rand(1000, 9999),
+            'name' => $name,
+            'type' => 'buy_x_get_y',
+            'buy_qty' => 3,
+            'get_qty' => 1,
+            'scope' => $category_ids ? 'categories' : 'products',
+            'product_ids' => array_values(array_map('absint', $product_ids)),
+            'category_ids' => array_values(array_map('absint', $category_ids)),
+            'status' => 'active',
+            'created' => time(),
+        ];
+
+        update_option('colt_product_crm_promotions', $rules, false);
+
+        return true;
+    }
+
+    public function apply_product_crm_promo_rules($cart)
+    {
+        if (is_admin() && !wp_doing_ajax()) {
+            return;
+        }
+
+        if (!$cart || !method_exists($cart, 'get_cart') || !method_exists($cart, 'add_fee')) {
+            return;
+        }
+
+        $rules = get_option('colt_product_crm_promotions', []);
+        if (!is_array($rules) || !$rules) {
+            return;
+        }
+
+        foreach ($rules as $rule) {
+            if (($rule['status'] ?? '') !== 'active' || ($rule['type'] ?? '') !== 'buy_x_get_y') {
+                continue;
+            }
+
+            $buy_qty = max(1, (int) ($rule['buy_qty'] ?? 3));
+            $get_qty = max(1, (int) ($rule['get_qty'] ?? 1));
+            $group_size = $buy_qty + $get_qty;
+            $eligible_prices = [];
+            $product_ids = array_map('absint', $rule['product_ids'] ?? []);
+            $category_ids = array_map('absint', $rule['category_ids'] ?? []);
+
+            foreach ($cart->get_cart() as $cart_item) {
+                $product = $cart_item['data'] ?? null;
+                if (!$product || !method_exists($product, 'get_id') || !method_exists($product, 'get_price')) {
+                    continue;
+                }
+
+                $product_id = (int) $product->get_id();
+                $parent_id = method_exists($product, 'get_parent_id') ? (int) $product->get_parent_id() : 0;
+                $matches_product = $product_ids && (in_array($product_id, $product_ids, true) || ($parent_id && in_array($parent_id, $product_ids, true)));
+                $matches_category = false;
+
+                if ($category_ids) {
+                    $term_product_id = $parent_id ?: $product_id;
+                    $matches_category = has_term($category_ids, 'product_cat', $term_product_id);
+                }
+
+                if (!$matches_product && !$matches_category) {
+                    continue;
+                }
+
+                $qty = max(0, (int) ($cart_item['quantity'] ?? 0));
+                $unit_price = max(0, (float) $product->get_price());
+                for ($i = 0; $i < $qty; $i++) {
+                    $eligible_prices[] = $unit_price;
+                }
+            }
+
+            if (count($eligible_prices) < $group_size) {
+                continue;
+            }
+
+            sort($eligible_prices, SORT_NUMERIC);
+            $free_units = (int) floor(count($eligible_prices) / $group_size) * $get_qty;
+            $discount = array_sum(array_slice($eligible_prices, 0, $free_units));
+
+            if ($discount > 0) {
+                $cart->add_fee($rule['name'] ?? 'COLT 3+1', -1 * $discount, false);
+            }
+        }
+    }
+
+    private function product_crm_redirect(array $args)
+    {
+        wp_safe_redirect(add_query_arg(array_merge(['page' => 'colt-product-crm'], $args), admin_url('admin.php')));
+        exit;
+    }
+
+    private function product_crm_error_message($code)
+    {
+        $messages = [
+            'woocommerce' => 'WooCommerce לא פעיל כרגע.',
+            'no_products' => 'לא נבחרו מוצרים לעדכון.',
+            'coupon' => 'לא ניתן ליצור קופון. ודא שיש קוד תקין וסכום הנחה גדול מאפס.',
+            'promo' => 'לא ניתן לשמור את כלל המבצע.',
+        ];
+
+        return $messages[$code] ?? 'הפעולה לא הושלמה. נסה שוב.';
     }
 
     private static function service_admin_shortcodes()

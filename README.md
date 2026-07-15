@@ -36,10 +36,15 @@ Live Show page:
 
 The Live Show shortcode creates a guest-based live card convention room. Visitors enter through a no-submit arcade lobby, vendors can place a booth only in allowed side zones, and participants can see each other, NPCs, booths, booth cards, and chat requests in real time through WordPress REST polling.
 
+## Admin Tools
+
+After activation, open `COLT Experience > Product CRM` in WordPress admin to manage WooCommerce products in bulk. The CRM includes product search and filters, quick stock and price actions, category/tag bulk edits, display image metadata, coupon creation, active 3+1 promo rules, sales insights, low-stock alerts, and customer summaries.
+
 ## What It Does
 
 - Renders a premium COLT home experience.
 - Renders a real-time guest Live Show with an arcade lobby, vendor booth placement, NPCs, and chat.
+- Adds a WooCommerce Product CRM admin screen for bulk product operations, coupon creation, 3+1 promo rules, and store insights.
 - Uses the site's WordPress custom logo when available.
 - Links to existing service pages under `/services/...`.
 - Pulls latest WooCommerce products when WooCommerce is active.
