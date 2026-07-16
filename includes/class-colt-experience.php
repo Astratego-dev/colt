@@ -36,6 +36,10 @@ final class Colt_Experience
 
         add_action('rest_api_init', [$this, 'register_live_show_routes']);
         add_action('woocommerce_cart_calculate_fees', [$this, 'apply_product_crm_promo_rules']);
+        add_action('woocommerce_single_product_summary', [$this, 'render_backorder_signup_form'], 31);
+        add_filter('woocommerce_is_purchasable', [$this, 'maybe_disable_backorder_purchase'], 10, 2);
+        add_action('admin_post_colt_backorder_signup', [$this, 'handle_backorder_signup']);
+        add_action('admin_post_nopriv_colt_backorder_signup', [$this, 'handle_backorder_signup']);
 
         if (is_admin()) {
             add_action('admin_menu', [$this, 'register_admin_menu']);
@@ -43,6 +47,9 @@ final class Colt_Experience
             add_action('admin_post_colt_experience_save_content', [$this, 'handle_admin_save_content']);
             add_action('admin_post_colt_product_crm_bulk', [$this, 'handle_product_crm_bulk_action']);
             add_action('admin_post_colt_product_crm_create', [$this, 'handle_product_crm_create_product']);
+            add_action('admin_post_colt_product_crm_update', [$this, 'handle_product_crm_update_product']);
+            add_action('admin_post_colt_product_crm_upload_xlsx', [$this, 'handle_product_crm_upload_xlsx']);
+            add_action('admin_post_colt_product_crm_import_xlsx', [$this, 'handle_product_crm_import_xlsx']);
         }
     }
 
@@ -1129,13 +1136,16 @@ JS);
                 .colt-crm__modal-head { display: flex; justify-content: space-between; gap: 12px; align-items: start; margin-bottom: 14px; }
                 .colt-crm__create-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
                 .colt-crm__wide { grid-column: 1 / -1; }
+                .colt-crm__import-preview { overflow-x: auto; max-height: 260px; border: 1px solid #dcdcde; border-radius: 10px; background: #fff; }
+                .colt-crm__mapping { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+                .colt-crm__mapping label { padding: 10px; border: 1px solid #e7e8ea; border-radius: 10px; background: #f8f9fb; }
                 .colt-admin__media { display: grid; gap: 8px; }
                 .colt-admin__media-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; }
                 .colt-admin__media-preview { min-height: 64px; border: 1px dashed #c3c4c7; border-radius: 8px; background: #fff; overflow: hidden; }
                 .colt-admin__media-preview:empty { display: none; }
                 .colt-admin__media-preview img { display: block; width: 100%; max-height: 160px; object-fit: contain; background: #f6f7f7; }
                 @media (max-width: 1240px) { .colt-crm__stats { grid-template-columns: repeat(3, 1fr); } .colt-crm__bulk, .colt-crm__insights { grid-template-columns: repeat(2, 1fr); } }
-                @media (max-width: 782px) { .colt-crm__hero, .colt-crm__footer-actions, .colt-crm__modal-head { display: grid; } .colt-crm__hero-actions { justify-items: start; } .colt-crm__stats, .colt-crm__filters, .colt-crm__bulk, .colt-crm__insights, .colt-crm__create-grid { grid-template-columns: 1fr; } }
+                @media (max-width: 782px) { .colt-crm__hero, .colt-crm__footer-actions, .colt-crm__modal-head { display: grid; } .colt-crm__hero-actions { justify-items: start; } .colt-crm__stats, .colt-crm__filters, .colt-crm__bulk, .colt-crm__insights, .colt-crm__create-grid, .colt-crm__mapping { grid-template-columns: 1fr; } }
             </style>
 
             <h1>COLT Product CRM</h1>
@@ -1161,6 +1171,10 @@ JS);
             $customers = $this->product_crm_customer_summary(8, $period_days);
             $promotions = get_option('colt_product_crm_promotions', []);
             $promotions = is_array($promotions) ? array_slice(array_reverse($promotions), 0, 5) : [];
+            $import_token = isset($_GET['import_token']) ? sanitize_key(wp_unslash($_GET['import_token'])) : '';
+            $import_data = $import_token !== '' ? get_transient('colt_product_crm_import_' . $import_token) : [];
+            $import_data = is_array($import_data) ? $import_data : [];
+            $backorder_signups = $this->product_crm_backorder_signups(1000);
             ?>
 
             <div class="colt-crm__hero">
@@ -1179,6 +1193,12 @@ JS);
             <?php endif; ?>
             <?php if (isset($_GET['product_created'])) : ?>
                 <div class="notice notice-success is-dismissible"><p>המוצר החדש נוצר בהצלחה.</p></div>
+            <?php endif; ?>
+            <?php if (isset($_GET['product_updated'])) : ?>
+                <div class="notice notice-success is-dismissible"><p>המוצר עודכן בהצלחה.</p></div>
+            <?php endif; ?>
+            <?php if (isset($_GET['import_created']) || isset($_GET['import_updated'])) : ?>
+                <div class="notice notice-success is-dismissible"><p>ייבוא הסתיים: <?php echo esc_html((int) ($_GET['import_created'] ?? 0)); ?> מוצרים חדשים, <?php echo esc_html((int) ($_GET['import_updated'] ?? 0)); ?> מוצרים עודכנו, <?php echo esc_html((int) ($_GET['import_skipped'] ?? 0)); ?> שורות דולגו.</p></div>
             <?php endif; ?>
             <?php if (isset($_GET['crm_deleted'])) : ?>
                 <div class="notice notice-success is-dismissible"><p><?php echo esc_html((int) $_GET['crm_deleted']); ?> מוצרים נמחקו או הועברו לפח.</p></div>
@@ -1285,6 +1305,104 @@ JS);
                     </form>
                 </div>
             </div>
+
+            <div class="colt-crm__modal" data-colt-crm-edit-modal aria-hidden="true">
+                <div class="colt-crm__modal-card" role="dialog" aria-modal="true" aria-labelledby="colt-edit-product-title">
+                    <div class="colt-crm__modal-head">
+                        <div>
+                            <h2 id="colt-edit-product-title">עריכת מוצר</h2>
+                            <p class="colt-crm__muted">שינוי מהיר של כל הפרטים המרכזיים של המוצר בלי לצאת מה־CRM.</p>
+                        </div>
+                        <button type="button" class="button" data-colt-crm-close-edit>סגירה</button>
+                    </div>
+
+                    <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+                        <?php wp_nonce_field('colt_product_crm_update'); ?>
+                        <input type="hidden" name="action" value="colt_product_crm_update">
+                        <input type="hidden" name="product_id" value="" data-colt-edit-field="id">
+                        <div class="colt-crm__create-grid">
+                            <label class="colt-crm__wide">
+                                <span>שם מוצר</span>
+                                <input type="text" name="product_title" required data-colt-edit-field="title">
+                            </label>
+                            <label>
+                                <span>סטטוס פרסום</span>
+                                <select name="product_status" data-colt-edit-field="status">
+                                    <option value="draft">טיוטה</option>
+                                    <option value="publish">פורסם</option>
+                                    <option value="private">פרטי</option>
+                                    <option value="pending">ממתין לאישור</option>
+                                </select>
+                            </label>
+                            <label>
+                                <span>SKU / מק"ט</span>
+                                <input type="text" name="product_sku" data-colt-edit-field="sku">
+                            </label>
+                            <label>
+                                <span>סטטוס מלאי</span>
+                                <select name="product_stock_status" data-colt-edit-field="stockStatus">
+                                    <?php foreach ($this->product_crm_stock_statuses() as $status_key => $status_label) : ?>
+                                        <option value="<?php echo esc_attr($status_key); ?>"><?php echo esc_html($status_label); ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </label>
+                            <label>
+                                <span>מחיר רגיל</span>
+                                <input type="number" name="product_regular_price" min="0" step="0.01" data-colt-edit-field="regularPrice">
+                            </label>
+                            <label>
+                                <span>מחיר מבצע</span>
+                                <input type="number" name="product_sale_price" min="0" step="0.01" data-colt-edit-field="salePrice">
+                            </label>
+                            <label>
+                                <span>כמות במלאי</span>
+                                <input type="number" name="product_stock_quantity" min="0" step="1" data-colt-edit-field="stockQuantity">
+                            </label>
+                            <label>
+                                <span>קטגוריות</span>
+                                <select name="product_categories[]" multiple data-colt-edit-field="categoryIds">
+                                    <?php foreach ($categories as $term) : ?>
+                                        <option value="<?php echo esc_attr($term->term_id); ?>"><?php echo esc_html($term->name); ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </label>
+                            <label>
+                                <span>תגיות</span>
+                                <input type="text" name="product_tags" data-colt-edit-field="tags">
+                            </label>
+                            <label>
+                                <span>Set / סדרה</span>
+                                <input type="text" name="product_set" data-colt-edit-field="setName">
+                            </label>
+                            <label>
+                                <span>שפה</span>
+                                <select name="product_language" data-colt-edit-field="language">
+                                    <option value="">לא מוגדר</option>
+                                    <option value="English">English</option>
+                                    <option value="Japanese">Japanese</option>
+                                </select>
+                            </label>
+                            <label class="colt-crm__wide">
+                                <span>תמונה ראשית</span>
+                                <?php $this->admin_media_input('product_image_url', ''); ?>
+                            </label>
+                            <label class="colt-crm__wide">
+                                <span>תיאור קצר</span>
+                                <textarea name="product_short_description" data-colt-edit-field="shortDescription"></textarea>
+                            </label>
+                            <label class="colt-crm__wide">
+                                <span>תיאור מלא</span>
+                                <textarea name="product_description" data-colt-edit-field="description"></textarea>
+                            </label>
+                        </div>
+                        <p class="submit">
+                            <button type="submit" class="button button-primary button-hero">שמירת מוצר</button>
+                        </p>
+                    </form>
+                </div>
+            </div>
+
+            <?php $this->render_product_crm_import_panel($import_token, $import_data); ?>
 
             <section class="colt-crm__stats" aria-label="סקירת מוצרים">
                 <?php foreach ($stats as $stat) : ?>
@@ -1512,9 +1630,27 @@ JS);
                                             continue;
                                         }
                                         $image = get_the_post_thumbnail_url($product_id, 'woocommerce_thumbnail') ?: wc_placeholder_img_src('woocommerce_thumbnail');
+                                        $full_image = get_the_post_thumbnail_url($product_id, 'full') ?: '';
                                         $stock_status = $product->get_stock_status();
                                         $regular_price = $product->get_regular_price();
                                         $sale_price = $product->get_sale_price();
+                                        $edit_payload = [
+                                            'id' => $product_id,
+                                            'title' => get_the_title($product_id),
+                                            'status' => get_post_status($product_id),
+                                            'sku' => $product->get_sku(),
+                                            'stockStatus' => $stock_status,
+                                            'regularPrice' => $regular_price,
+                                            'salePrice' => $sale_price,
+                                            'stockQuantity' => $product->get_stock_quantity(),
+                                            'categoryIds' => $this->product_crm_term_ids($product_id, 'product_cat'),
+                                            'tags' => $this->product_crm_term_names($product_id, 'product_tag', ''),
+                                            'setName' => (string) get_post_meta($product_id, '_colt_product_set', true),
+                                            'language' => (string) get_post_meta($product_id, '_colt_product_language', true),
+                                            'imageUrl' => $full_image,
+                                            'shortDescription' => $product->get_short_description(),
+                                            'description' => $product->get_description(),
+                                        ];
                                         ?>
                                         <tr>
                                             <td><input type="checkbox" name="product_ids[]" value="<?php echo esc_attr($product_id); ?>"></td>
@@ -1523,7 +1659,8 @@ JS);
                                                     <img class="colt-crm__thumb" src="<?php echo esc_url($image); ?>" alt="">
                                                     <span>
                                                         <strong><a href="<?php echo esc_url(get_edit_post_link($product_id)); ?>"><?php echo esc_html(get_the_title($product_id)); ?></a></strong>
-                                                        <span class="colt-crm__muted">ID <?php echo esc_html((string) $product_id); ?> · <?php echo esc_html($product->get_type()); ?></span>
+                                                        <span class="colt-crm__muted">ID <?php echo esc_html((string) $product_id); ?> · <?php echo esc_html($product->get_type()); ?></span><br>
+                                                        <button type="button" class="button button-small" data-colt-crm-edit-product="<?php echo esc_attr(wp_json_encode($edit_payload)); ?>">עריכה מהירה</button>
                                                     </span>
                                                 </div>
                                             </td>
@@ -1617,6 +1754,11 @@ JS);
                     </ul>
                 </div>
             </section>
+
+            <section class="colt-crm__panel">
+                <h2>הרשמות Backorder לעדכוני מלאי</h2>
+                <?php $this->render_product_crm_backorder_signup_list($backorder_signups); ?>
+            </section>
         </div>
         <script>
         document.addEventListener('change', function (event) {
@@ -1630,7 +1772,10 @@ JS);
         document.addEventListener('click', function (event) {
             const openButton = event.target.closest('[data-colt-crm-open-create]');
             const closeButton = event.target.closest('[data-colt-crm-close-create]');
+            const editButton = event.target.closest('[data-colt-crm-edit-product]');
+            const editCloseButton = event.target.closest('[data-colt-crm-close-edit]');
             const modal = document.querySelector('[data-colt-crm-create-modal]');
+            const editModal = document.querySelector('[data-colt-crm-edit-modal]');
 
             if (openButton && modal) {
                 modal.classList.add('is-open');
@@ -1645,6 +1790,58 @@ JS);
             if (event.target === modal) {
                 modal.classList.remove('is-open');
                 modal.setAttribute('aria-hidden', 'true');
+            }
+
+            if (editButton && editModal) {
+                let payload = {};
+                try {
+                    payload = JSON.parse(editButton.getAttribute('data-colt-crm-edit-product') || '{}');
+                } catch (error) {
+                    payload = {};
+                }
+
+                editModal.querySelectorAll('[data-colt-edit-field]').forEach(function (field) {
+                    const key = field.getAttribute('data-colt-edit-field');
+                    const value = payload[key] ?? '';
+
+                    if (field.tagName === 'SELECT' && field.multiple) {
+                        const values = Array.isArray(value) ? value.map(String) : [];
+                        Array.from(field.options).forEach(function (option) {
+                            option.selected = values.includes(option.value);
+                        });
+                        return;
+                    }
+
+                    field.value = value === null ? '' : value;
+                });
+
+                const mediaInput = editModal.querySelector('.colt-admin__media input[type="text"]');
+                const mediaPreview = editModal.querySelector('.colt-admin__media-preview');
+                if (mediaInput) {
+                    mediaInput.value = payload.imageUrl || '';
+                }
+                if (mediaPreview) {
+                    mediaPreview.innerHTML = '';
+                    if (payload.imageUrl) {
+                        const previewImage = document.createElement('img');
+                        previewImage.src = payload.imageUrl;
+                        previewImage.alt = '';
+                        mediaPreview.appendChild(previewImage);
+                    }
+                }
+
+                editModal.classList.add('is-open');
+                editModal.setAttribute('aria-hidden', 'false');
+            }
+
+            if (editCloseButton && editModal) {
+                editModal.classList.remove('is-open');
+                editModal.setAttribute('aria-hidden', 'true');
+            }
+
+            if (event.target === editModal) {
+                editModal.classList.remove('is-open');
+                editModal.setAttribute('aria-hidden', 'true');
             }
         });
         document.addEventListener('submit', function (event) {
@@ -1734,6 +1931,15 @@ JS);
 
             if ($stock_status !== '') {
                 $product->set_stock_status($stock_status);
+                if ($stock_status === 'onbackorder') {
+                    if (method_exists($product, 'set_backorders')) {
+                        $product->set_backorders('no');
+                    }
+                    if ($stock_quantity === null) {
+                        $product->set_manage_stock(true);
+                        $product->set_stock_quantity(0);
+                    }
+                }
                 $changed = true;
             }
 
@@ -1795,6 +2001,13 @@ JS);
             if ($image_fit !== '') {
                 update_post_meta($product_id, '_colt_crm_image_fit', $image_fit);
                 $changed = true;
+            }
+
+            if ($stock_status === 'onbackorder') {
+                update_post_meta($product_id, '_colt_backorder_signup_enabled', '1');
+                $changed = true;
+            } elseif ($stock_status !== '') {
+                delete_post_meta($product_id, '_colt_backorder_signup_enabled');
             }
 
             if ($changed) {
@@ -1884,6 +2097,14 @@ JS);
                 $product->set_stock_quantity($stock_quantity);
             }
 
+            if ($stock_status === 'onbackorder') {
+                if (method_exists($product, 'set_backorders')) {
+                    $product->set_backorders('no');
+                }
+                $product->set_manage_stock(true);
+                $product->set_stock_quantity(0);
+            }
+
             $image_id = $this->product_crm_attachment_id_from_url($image_url);
             if ($image_id > 0) {
                 $product->set_image_id($image_id);
@@ -1920,7 +2141,713 @@ JS);
             update_post_meta($product_id, '_colt_product_language', $language);
         }
 
+        if ($stock_status === 'onbackorder') {
+            update_post_meta($product_id, '_colt_backorder_signup_enabled', '1');
+        }
+
         $this->product_crm_redirect(['product_created' => $product_id]);
+    }
+
+    public function handle_product_crm_update_product()
+    {
+        if (!$this->can_manage_product_crm()) {
+            wp_die(esc_html__('You do not have permission to update products.', 'colt-experience'));
+        }
+
+        check_admin_referer('colt_product_crm_update');
+
+        if (!$this->is_woocommerce_ready()) {
+            $this->product_crm_redirect(['crm_error' => 'woocommerce']);
+        }
+
+        $product_id = isset($_POST['product_id']) ? absint(wp_unslash($_POST['product_id'])) : 0;
+        $product = $product_id > 0 ? wc_get_product($product_id) : null;
+        if (!$product) {
+            $this->product_crm_redirect(['crm_error' => 'product_update']);
+        }
+
+        $title = isset($_POST['product_title']) ? sanitize_text_field(wp_unslash($_POST['product_title'])) : '';
+        if ($title === '') {
+            $this->product_crm_redirect(['crm_error' => 'product_title']);
+        }
+
+        $status = isset($_POST['product_status']) ? sanitize_key(wp_unslash($_POST['product_status'])) : 'draft';
+        if (!in_array($status, ['draft', 'publish', 'private', 'pending'], true)) {
+            $status = 'draft';
+        }
+
+        $stock_status = isset($_POST['product_stock_status']) ? sanitize_key(wp_unslash($_POST['product_stock_status'])) : 'instock';
+        if (!in_array($stock_status, array_keys($this->product_crm_stock_statuses()), true)) {
+            $stock_status = 'instock';
+        }
+
+        $regular_price = $this->product_crm_decimal_from_post('product_regular_price');
+        $sale_price = $this->product_crm_decimal_from_post('product_sale_price');
+        $stock_quantity_raw = isset($_POST['product_stock_quantity']) ? trim((string) wp_unslash($_POST['product_stock_quantity'])) : '';
+        $stock_quantity = $stock_quantity_raw !== '' && is_numeric($stock_quantity_raw) ? max(0, (int) $stock_quantity_raw) : null;
+        $sku = isset($_POST['product_sku']) ? sanitize_text_field(wp_unslash($_POST['product_sku'])) : '';
+        $short_description = isset($_POST['product_short_description']) ? wp_kses_post(wp_unslash($_POST['product_short_description'])) : '';
+        $description = isset($_POST['product_description']) ? wp_kses_post(wp_unslash($_POST['product_description'])) : '';
+        $image_url = isset($_POST['product_image_url']) ? esc_url_raw(wp_unslash($_POST['product_image_url'])) : '';
+        $set_name = isset($_POST['product_set']) ? sanitize_text_field(wp_unslash($_POST['product_set'])) : '';
+        $language = isset($_POST['product_language']) ? sanitize_text_field(wp_unslash($_POST['product_language'])) : '';
+        if (!in_array($language, ['', 'English', 'Japanese'], true)) {
+            $language = '';
+        }
+
+        try {
+            $product->set_name($title);
+            $product->set_status($status);
+            $product->set_stock_status($stock_status);
+            $product->set_description($description);
+            $product->set_short_description($short_description);
+
+            if ($sku !== '') {
+                $product->set_sku($sku);
+            } else {
+                $product->set_sku('');
+            }
+
+            $product->set_regular_price($regular_price !== null ? wc_format_decimal($regular_price) : '');
+            $product->set_sale_price($sale_price !== null ? wc_format_decimal($sale_price) : '');
+
+            if ($stock_quantity !== null) {
+                $product->set_manage_stock(true);
+                $product->set_stock_quantity($stock_quantity);
+            }
+
+            if ($stock_status === 'onbackorder') {
+                if (method_exists($product, 'set_backorders')) {
+                    $product->set_backorders('no');
+                }
+                $product->set_manage_stock(true);
+                $product->set_stock_quantity(0);
+            }
+
+            $image_id = $this->product_crm_attachment_id_from_url($image_url);
+            if ($image_id > 0) {
+                $product->set_image_id($image_id);
+            } elseif ($image_url === '') {
+                $product->set_image_id(0);
+            }
+
+            $product->save();
+        } catch (Exception $exception) {
+            $this->product_crm_redirect(['crm_error' => 'product_update']);
+        }
+
+        wp_set_object_terms($product_id, $this->product_crm_posted_ids('product_categories'), 'product_cat', false);
+        $tag_names = $this->product_crm_posted_tags('product_tags');
+        wp_set_object_terms($product_id, $tag_names, 'product_tag', false);
+
+        if ($image_url !== '' && empty($image_id)) {
+            update_post_meta($product_id, '_colt_crm_source_image_url', $image_url);
+        } else {
+            delete_post_meta($product_id, '_colt_crm_source_image_url');
+        }
+
+        $set_name !== '' ? update_post_meta($product_id, '_colt_product_set', $set_name) : delete_post_meta($product_id, '_colt_product_set');
+        $language !== '' ? update_post_meta($product_id, '_colt_product_language', $language) : delete_post_meta($product_id, '_colt_product_language');
+
+        if ($stock_status === 'onbackorder') {
+            update_post_meta($product_id, '_colt_backorder_signup_enabled', '1');
+        } else {
+            delete_post_meta($product_id, '_colt_backorder_signup_enabled');
+        }
+
+        $this->product_crm_redirect(['product_updated' => $product_id]);
+    }
+
+    public function handle_product_crm_upload_xlsx()
+    {
+        if (!$this->can_manage_product_crm()) {
+            wp_die(esc_html__('You do not have permission to import products.', 'colt-experience'));
+        }
+
+        check_admin_referer('colt_product_crm_upload_xlsx');
+
+        if (empty($_FILES['xlsx_file']['tmp_name']) || !is_uploaded_file($_FILES['xlsx_file']['tmp_name'])) {
+            $this->product_crm_redirect(['crm_error' => 'xlsx_upload']);
+        }
+
+        $filename = isset($_FILES['xlsx_file']['name']) ? sanitize_file_name(wp_unslash($_FILES['xlsx_file']['name'])) : '';
+        if (strtolower(pathinfo($filename, PATHINFO_EXTENSION)) !== 'xlsx') {
+            $this->product_crm_redirect(['crm_error' => 'xlsx_type']);
+        }
+
+        $parsed = $this->product_crm_parse_xlsx($_FILES['xlsx_file']['tmp_name'], 700);
+        if (is_wp_error($parsed)) {
+            $this->product_crm_redirect(['crm_error' => $parsed->get_error_code()]);
+        }
+
+        $token = strtolower(wp_generate_password(14, false, false));
+        set_transient('colt_product_crm_import_' . $token, $parsed, HOUR_IN_SECONDS);
+
+        $this->product_crm_redirect(['import_token' => $token]);
+    }
+
+    public function handle_product_crm_import_xlsx()
+    {
+        if (!$this->can_manage_product_crm()) {
+            wp_die(esc_html__('You do not have permission to import products.', 'colt-experience'));
+        }
+
+        check_admin_referer('colt_product_crm_import_xlsx');
+
+        if (!$this->is_woocommerce_ready() || !class_exists('WC_Product_Simple')) {
+            $this->product_crm_redirect(['crm_error' => 'woocommerce']);
+        }
+
+        $token = isset($_POST['import_token']) ? sanitize_key(wp_unslash($_POST['import_token'])) : '';
+        $data = $token !== '' ? get_transient('colt_product_crm_import_' . $token) : [];
+        if (!is_array($data) || empty($data['headers']) || empty($data['rows'])) {
+            $this->product_crm_redirect(['crm_error' => 'xlsx_expired']);
+        }
+
+        $identifier_column = isset($_POST['identifier_column']) ? sanitize_text_field(wp_unslash($_POST['identifier_column'])) : '';
+        $identifier_target = isset($_POST['identifier_target']) ? sanitize_key(wp_unslash($_POST['identifier_target'])) : 'name_exact';
+        if (!in_array($identifier_target, ['name_exact', 'sku', 'product_id'], true)) {
+            $identifier_target = 'name_exact';
+        }
+
+        $field_map = isset($_POST['field_map']) && is_array($_POST['field_map']) ? wp_unslash($_POST['field_map']) : [];
+        $allowed_fields = array_keys($this->product_crm_import_fields());
+        $create_missing = !empty($_POST['create_missing']);
+        $update_existing = !empty($_POST['update_existing']);
+        $new_status = isset($_POST['new_product_status']) ? sanitize_key(wp_unslash($_POST['new_product_status'])) : 'draft';
+        if (!in_array($new_status, ['draft', 'publish'], true)) {
+            $new_status = 'draft';
+        }
+
+        $created = 0;
+        $updated = 0;
+        $skipped = 0;
+
+        foreach ($data['rows'] as $row) {
+            if (!is_array($row)) {
+                continue;
+            }
+
+            $identifier = trim((string) ($row[$identifier_column] ?? ''));
+            $product_id = $identifier !== '' ? $this->product_crm_find_product_by_identifier($identifier_target, $identifier) : 0;
+            $values = [];
+
+            foreach ($field_map as $column => $field) {
+                $column = (string) $column;
+                $field = sanitize_key((string) $field);
+                if ($field === 'skip' || !in_array($field, $allowed_fields, true)) {
+                    continue;
+                }
+
+                $cell_value = isset($row[$column]) ? trim((string) $row[$column]) : '';
+                if ($cell_value === '') {
+                    continue;
+                }
+
+                $values[$field] = $cell_value;
+            }
+
+            if (empty($values['name']) && $identifier_target === 'name_exact' && $identifier !== '') {
+                $values['name'] = $identifier;
+            }
+
+            if ($product_id > 0) {
+                if (!$update_existing) {
+                    $skipped++;
+                    continue;
+                }
+
+                $result = $this->product_crm_apply_import_values($product_id, $values, $new_status);
+                if (is_wp_error($result)) {
+                    $skipped++;
+                    continue;
+                }
+                $updated++;
+                continue;
+            }
+
+            if (!$create_missing || empty($values['name'])) {
+                $skipped++;
+                continue;
+            }
+
+            $result = $this->product_crm_apply_import_values(0, $values, $new_status);
+            if (is_wp_error($result)) {
+                $skipped++;
+                continue;
+            }
+            $created++;
+        }
+
+        delete_transient('colt_product_crm_import_' . $token);
+
+        $this->product_crm_redirect([
+            'import_created' => $created,
+            'import_updated' => $updated,
+            'import_skipped' => $skipped,
+        ]);
+    }
+
+    private function render_product_crm_import_panel($import_token, array $import_data)
+    {
+        $headers = isset($import_data['headers']) && is_array($import_data['headers']) ? $import_data['headers'] : [];
+        $rows = isset($import_data['rows']) && is_array($import_data['rows']) ? $import_data['rows'] : [];
+        ?>
+        <section class="colt-crm__panel">
+            <h2>ייבוא מוצרים מקובץ XLSX</h2>
+            <p>מעלים קובץ, בוחרים שדה מזהה, ואז ממפים כל עמודה מהאקסל לשדה באתר. אם בוחרים זיהוי לפי שם, התאמה מדויקת בשם תיחשב אותו מוצר.</p>
+
+            <form method="post" enctype="multipart/form-data" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" class="colt-crm__filters">
+                <?php wp_nonce_field('colt_product_crm_upload_xlsx'); ?>
+                <input type="hidden" name="action" value="colt_product_crm_upload_xlsx">
+                <label>
+                    <span>קובץ XLSX</span>
+                    <input type="file" name="xlsx_file" accept=".xlsx" required>
+                </label>
+                <button type="submit" class="button button-primary">טעינת קובץ ומעבר למיפוי</button>
+            </form>
+
+            <?php if ($import_token !== '' && $headers && $rows) : ?>
+                <hr>
+                <h3>מיפוי שדות מהאקסל לאתר</h3>
+                <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+                    <?php wp_nonce_field('colt_product_crm_import_xlsx'); ?>
+                    <input type="hidden" name="action" value="colt_product_crm_import_xlsx">
+                    <input type="hidden" name="import_token" value="<?php echo esc_attr($import_token); ?>">
+
+                    <div class="colt-crm__filters">
+                        <label>
+                            <span>עמודת מזהה באקסל</span>
+                            <select name="identifier_column" required>
+                                <?php foreach ($headers as $header) : ?>
+                                    <option value="<?php echo esc_attr($header); ?>"><?php echo esc_html($header); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </label>
+                        <label>
+                            <span>לפי איזה שדה מזהים באתר</span>
+                            <select name="identifier_target">
+                                <option value="name_exact">שם מוצר - התאמה מדויקת</option>
+                                <option value="sku">SKU / מק"ט</option>
+                                <option value="product_id">ID מוצר</option>
+                            </select>
+                        </label>
+                        <label>
+                            <span>סטטוס למוצרים חדשים</span>
+                            <select name="new_product_status">
+                                <option value="draft">טיוטה</option>
+                                <option value="publish">פרסום מיידי</option>
+                            </select>
+                        </label>
+                        <label>
+                            <span><input type="checkbox" name="create_missing" value="1" checked> צור מוצרים חדשים אם לא נמצא מוצר קיים</span>
+                        </label>
+                        <label>
+                            <span><input type="checkbox" name="update_existing" value="1" checked> עדכן מוצרים קיימים שנמצאו</span>
+                        </label>
+                    </div>
+
+                    <div class="colt-crm__mapping">
+                        <?php foreach ($headers as $header) : ?>
+                            <label>
+                                <span><?php echo esc_html($header); ?></span>
+                                <select name="field_map[<?php echo esc_attr($header); ?>]">
+                                    <?php foreach ($this->product_crm_import_fields() as $field_key => $field_label) : ?>
+                                        <option value="<?php echo esc_attr($field_key); ?>" <?php selected($this->product_crm_guess_import_field($header), $field_key); ?>><?php echo esc_html($field_label); ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </label>
+                        <?php endforeach; ?>
+                    </div>
+
+                    <h3>תצוגה מקדימה</h3>
+                    <div class="colt-crm__import-preview">
+                        <table class="widefat striped">
+                            <thead>
+                                <tr>
+                                    <?php foreach ($headers as $header) : ?>
+                                        <th><?php echo esc_html($header); ?></th>
+                                    <?php endforeach; ?>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach (array_slice($rows, 0, 5) as $row) : ?>
+                                    <tr>
+                                        <?php foreach ($headers as $header) : ?>
+                                            <td><?php echo esc_html((string) ($row[$header] ?? '')); ?></td>
+                                        <?php endforeach; ?>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <p class="submit">
+                        <button type="submit" class="button button-primary button-hero">ייבוא / עדכון מוצרים</button>
+                    </p>
+                </form>
+            <?php elseif ($import_token !== '') : ?>
+                <p class="colt-crm__note">הקובץ הזמני כבר לא זמין. העלה אותו שוב כדי להמשיך במיפוי.</p>
+            <?php endif; ?>
+        </section>
+        <?php
+    }
+
+    private function product_crm_parse_xlsx($file_path, $max_rows = 700)
+    {
+        if (!class_exists('ZipArchive')) {
+            return new WP_Error('xlsx_zip', 'ZipArchive is not available.');
+        }
+
+        $zip = new ZipArchive();
+        if ($zip->open($file_path) !== true) {
+            return new WP_Error('xlsx_open', 'Could not open XLSX file.');
+        }
+
+        $shared_strings = [];
+        $shared_xml = $zip->getFromName('xl/sharedStrings.xml');
+        if ($shared_xml !== false) {
+            $shared = simplexml_load_string($shared_xml);
+            if ($shared) {
+                foreach ($shared->si as $item) {
+                    if (isset($item->t)) {
+                        $shared_strings[] = (string) $item->t;
+                        continue;
+                    }
+
+                    $text = '';
+                    if (isset($item->r)) {
+                        foreach ($item->r as $run) {
+                            $text .= (string) $run->t;
+                        }
+                    }
+                    $shared_strings[] = $text;
+                }
+            }
+        }
+
+        $sheet_xml = $zip->getFromName('xl/worksheets/sheet1.xml');
+        if ($sheet_xml === false) {
+            $zip->close();
+            return new WP_Error('xlsx_sheet', 'Could not find the first worksheet.');
+        }
+
+        $sheet = simplexml_load_string($sheet_xml);
+        if (!$sheet || !isset($sheet->sheetData->row)) {
+            $zip->close();
+            return new WP_Error('xlsx_sheet', 'Could not read worksheet rows.');
+        }
+
+        $raw_rows = [];
+        foreach ($sheet->sheetData->row as $row) {
+            $cells = [];
+            foreach ($row->c as $cell) {
+                $reference = (string) $cell['r'];
+                preg_match('/^[A-Z]+/', $reference, $matches);
+                $column_index = $this->product_crm_xlsx_column_index($matches[0] ?? 'A');
+                $type = (string) $cell['t'];
+                $value = '';
+
+                if ($type === 's') {
+                    $string_index = isset($cell->v) ? (int) $cell->v : -1;
+                    $value = $shared_strings[$string_index] ?? '';
+                } elseif ($type === 'inlineStr' && isset($cell->is->t)) {
+                    $value = (string) $cell->is->t;
+                } elseif (isset($cell->v)) {
+                    $value = (string) $cell->v;
+                }
+
+                $cells[$column_index] = trim($value);
+            }
+
+            if (array_filter($cells, static function ($value) {
+                return $value !== '';
+            })) {
+                ksort($cells);
+                $raw_rows[] = $cells;
+            }
+
+            if (count($raw_rows) >= $max_rows + 1) {
+                break;
+            }
+        }
+
+        $zip->close();
+
+        if (!$raw_rows) {
+            return new WP_Error('xlsx_empty', 'The worksheet is empty.');
+        }
+
+        $header_row = array_shift($raw_rows);
+        $headers = [];
+        $used_headers = [];
+        $max_column = max(array_keys($header_row));
+
+        for ($column = 0; $column <= $max_column; $column++) {
+            $header = trim((string) ($header_row[$column] ?? ''));
+            if ($header === '') {
+                $header = 'Column ' . ($column + 1);
+            }
+
+            $base_header = $header;
+            $suffix = 2;
+            while (isset($used_headers[$header])) {
+                $header = $base_header . ' #' . $suffix;
+                $suffix++;
+            }
+            $used_headers[$header] = true;
+            $headers[$column] = $header;
+        }
+
+        $rows = [];
+        foreach ($raw_rows as $raw_row) {
+            $row = [];
+            foreach ($headers as $column => $header) {
+                $row[$header] = trim((string) ($raw_row[$column] ?? ''));
+            }
+
+            if (array_filter($row, static function ($value) {
+                return $value !== '';
+            })) {
+                $rows[] = $row;
+            }
+        }
+
+        if (!$rows) {
+            return new WP_Error('xlsx_empty', 'No product rows were found.');
+        }
+
+        return [
+            'headers' => array_values($headers),
+            'rows' => $rows,
+            'uploaded' => time(),
+        ];
+    }
+
+    private function product_crm_xlsx_column_index($letters)
+    {
+        $letters = strtoupper((string) $letters);
+        $index = 0;
+        for ($i = 0, $length = strlen($letters); $i < $length; $i++) {
+            $index = ($index * 26) + (ord($letters[$i]) - 64);
+        }
+
+        return max(0, $index - 1);
+    }
+
+    private function product_crm_import_fields()
+    {
+        return [
+            'skip' => 'לא לייבא',
+            'name' => 'שם מוצר',
+            'sku' => 'SKU / מק"ט',
+            'regular_price' => 'מחיר רגיל',
+            'sale_price' => 'מחיר מבצע',
+            'stock_quantity' => 'כמות מלאי',
+            'stock_status' => 'סטטוס מלאי',
+            'short_description' => 'תיאור קצר',
+            'description' => 'תיאור מלא',
+            'categories' => 'קטגוריות',
+            'tags' => 'תגיות',
+            'image_url' => 'תמונה ראשית URL',
+            'set' => 'Set / סדרה',
+            'language' => 'שפה',
+        ];
+    }
+
+    private function product_crm_guess_import_field($header)
+    {
+        $normalized = strtolower(trim((string) $header));
+        $normalized = str_replace([' ', '-', '_'], '', $normalized);
+
+        $map = [
+            'name' => 'name',
+            'title' => 'name',
+            'שם' => 'name',
+            'שםמוצר' => 'name',
+            'sku' => 'sku',
+            'מק"ט' => 'sku',
+            'מקט' => 'sku',
+            'regularprice' => 'regular_price',
+            'price' => 'regular_price',
+            'מחיר' => 'regular_price',
+            'saleprice' => 'sale_price',
+            'מבצע' => 'sale_price',
+            'stock' => 'stock_quantity',
+            'quantity' => 'stock_quantity',
+            'מלאי' => 'stock_quantity',
+            'stockstatus' => 'stock_status',
+            'status' => 'stock_status',
+            'shortdescription' => 'short_description',
+            'תיאורקצר' => 'short_description',
+            'description' => 'description',
+            'תיאור' => 'description',
+            'categories' => 'categories',
+            'category' => 'categories',
+            'קטגוריות' => 'categories',
+            'tags' => 'tags',
+            'תגיות' => 'tags',
+            'image' => 'image_url',
+            'images' => 'image_url',
+            'imageurl' => 'image_url',
+            'תמונה' => 'image_url',
+            'set' => 'set',
+            'סט' => 'set',
+            'language' => 'language',
+            'שפה' => 'language',
+        ];
+
+        return $map[$normalized] ?? 'skip';
+    }
+
+    private function product_crm_find_product_by_identifier($target, $identifier)
+    {
+        $identifier = trim((string) $identifier);
+        if ($identifier === '') {
+            return 0;
+        }
+
+        if ($target === 'product_id') {
+            $product_id = absint($identifier);
+            return $product_id > 0 && get_post_type($product_id) === 'product' ? $product_id : 0;
+        }
+
+        if ($target === 'sku' && function_exists('wc_get_product_id_by_sku')) {
+            return absint(wc_get_product_id_by_sku($identifier));
+        }
+
+        global $wpdb;
+        $product_id = (int) $wpdb->get_var($wpdb->prepare(
+            "SELECT ID FROM {$wpdb->posts} WHERE post_type = 'product' AND post_title = %s AND post_status != 'trash' LIMIT 1",
+            $identifier
+        ));
+
+        return $product_id > 0 ? $product_id : 0;
+    }
+
+    private function product_crm_apply_import_values($product_id, array $values, $new_status)
+    {
+        $product = $product_id > 0 ? wc_get_product($product_id) : new WC_Product_Simple();
+        if (!$product) {
+            return new WP_Error('product_missing', 'Product not found.');
+        }
+
+        if ($product_id <= 0 && empty($values['name'])) {
+            return new WP_Error('product_name', 'Product name is required.');
+        }
+
+        try {
+            if (!empty($values['name'])) {
+                $product->set_name(sanitize_text_field($values['name']));
+            }
+
+            if ($product_id <= 0) {
+                $product->set_status($new_status);
+                $product->set_catalog_visibility('visible');
+            }
+
+            if (!empty($values['sku'])) {
+                $product->set_sku(sanitize_text_field($values['sku']));
+            }
+
+            if (isset($values['regular_price'])) {
+                $product->set_regular_price(wc_format_decimal($this->product_crm_decimal_value($values['regular_price'])));
+            }
+
+            if (isset($values['sale_price'])) {
+                $product->set_sale_price(wc_format_decimal($this->product_crm_decimal_value($values['sale_price'])));
+            }
+
+            if (isset($values['stock_quantity']) && is_numeric($values['stock_quantity'])) {
+                $product->set_manage_stock(true);
+                $product->set_stock_quantity(max(0, (int) $values['stock_quantity']));
+            }
+
+            if (!empty($values['stock_status'])) {
+                $stock_status = $this->product_crm_normalize_stock_status($values['stock_status']);
+                $product->set_stock_status($stock_status);
+                if ($stock_status === 'onbackorder') {
+                    if (method_exists($product, 'set_backorders')) {
+                        $product->set_backorders('no');
+                    }
+                    $product->set_manage_stock(true);
+                    $product->set_stock_quantity(0);
+                }
+            }
+
+            if (isset($values['short_description'])) {
+                $product->set_short_description(wp_kses_post($values['short_description']));
+            }
+
+            if (isset($values['description'])) {
+                $product->set_description(wp_kses_post($values['description']));
+            }
+
+            if (!empty($values['image_url'])) {
+                $image_id = $this->product_crm_attachment_id_from_url(esc_url_raw($values['image_url']));
+                if ($image_id > 0) {
+                    $product->set_image_id($image_id);
+                }
+            }
+
+            $saved_id = (int) $product->save();
+        } catch (Exception $exception) {
+            return new WP_Error('product_save', $exception->getMessage());
+        }
+
+        if ($saved_id <= 0) {
+            return new WP_Error('product_save', 'Product could not be saved.');
+        }
+
+        if (isset($values['categories'])) {
+            wp_set_object_terms($saved_id, $this->product_crm_split_terms($values['categories']), 'product_cat', false);
+        }
+
+        if (isset($values['tags'])) {
+            wp_set_object_terms($saved_id, $this->product_crm_split_terms($values['tags']), 'product_tag', false);
+        }
+
+        if (isset($values['set'])) {
+            update_post_meta($saved_id, '_colt_product_set', sanitize_text_field($values['set']));
+        }
+
+        if (isset($values['language'])) {
+            update_post_meta($saved_id, '_colt_product_language', sanitize_text_field($values['language']));
+        }
+
+        $stock_status = !empty($values['stock_status']) ? $this->product_crm_normalize_stock_status($values['stock_status']) : '';
+        if ($stock_status === 'onbackorder') {
+            update_post_meta($saved_id, '_colt_backorder_signup_enabled', '1');
+        } elseif (array_key_exists('stock_status', $values)) {
+            delete_post_meta($saved_id, '_colt_backorder_signup_enabled');
+        }
+
+        return $saved_id;
+    }
+
+    private function product_crm_split_terms($value)
+    {
+        $parts = preg_split('/[,|]+/', (string) $value);
+        $parts = array_map('trim', is_array($parts) ? $parts : []);
+        $parts = array_map('sanitize_text_field', $parts);
+
+        return array_values(array_filter($parts));
+    }
+
+    private function product_crm_normalize_stock_status($value)
+    {
+        $value = strtolower(trim((string) $value));
+        $value = str_replace([' ', '-', '_'], '', $value);
+
+        if (in_array($value, ['outofstock', 'אזל', 'אזלמהמלאי', 'לאבמלאי'], true)) {
+            return 'outofstock';
+        }
+
+        if (in_array($value, ['backorder', 'backorders', 'onbackorder', 'preorder', 'הזמנהמוקדמת'], true)) {
+            return 'onbackorder';
+        }
+
+        return 'instock';
     }
 
     private function can_manage_product_crm()
@@ -2011,7 +2938,7 @@ JS);
         return [
             'instock' => 'במלאי',
             'outofstock' => 'אזל מהמלאי',
-            'onbackorder' => 'בהזמנה מוקדמת',
+            'onbackorder' => 'Backorder / טופס עדכונים',
         ];
     }
 
@@ -2323,11 +3250,21 @@ JS);
         <?php
     }
 
-    private function product_crm_term_names($product_id, $taxonomy)
+    private function product_crm_term_ids($product_id, $taxonomy)
     {
         $terms = get_the_terms($product_id, $taxonomy);
         if (!$terms || is_wp_error($terms)) {
-            return '—';
+            return [];
+        }
+
+        return array_values(array_map('absint', wp_list_pluck($terms, 'term_id')));
+    }
+
+    private function product_crm_term_names($product_id, $taxonomy, $fallback = '—')
+    {
+        $terms = get_the_terms($product_id, $taxonomy);
+        if (!$terms || is_wp_error($terms)) {
+            return $fallback;
         }
 
         return implode(', ', wp_list_pluck($terms, 'name'));
@@ -2392,11 +3329,24 @@ JS);
     private function product_crm_decimal_from_post($field)
     {
         $raw = isset($_POST[$field]) ? trim((string) wp_unslash($_POST[$field])) : '';
-        if ($raw === '' || !is_numeric($raw)) {
+        if ($raw === '') {
             return null;
         }
 
-        return max(0, (float) $raw);
+        return $this->product_crm_decimal_value($raw);
+    }
+
+    private function product_crm_decimal_value($value)
+    {
+        $value = trim((string) $value);
+        $value = str_replace(',', '.', $value);
+        $value = preg_replace('/[^0-9.\-]/', '', $value);
+
+        if ($value === '' || !is_numeric($value)) {
+            return 0;
+        }
+
+        return max(0, (float) $value);
     }
 
     private function product_crm_attachment_id_from_url($url)
@@ -2571,6 +3521,142 @@ JS);
         }
     }
 
+    public function maybe_disable_backorder_purchase($purchasable, $product)
+    {
+        if ($this->is_product_backorder_signup_enabled($product)) {
+            return false;
+        }
+
+        return $purchasable;
+    }
+
+    public function render_backorder_signup_form()
+    {
+        global $product;
+
+        if (!$this->is_product_backorder_signup_enabled($product)) {
+            return;
+        }
+
+        $product_id = (int) $product->get_id();
+        ?>
+        <div class="colt-backorder-signup" dir="rtl" style="margin:18px 0;padding:18px;border:1px solid #d6c28a;border-radius:12px;background:#10151c;color:#fff;">
+            <h3 style="margin:0 0 8px;font-size:22px;">המוצר לא במלאי כרגע</h3>
+            <p style="margin:0 0 14px;color:#d8d3c4;">השאירו פרטים ונעדכן אתכם כשהמוצר חוזר או כשיש אפשרות הזמנה מתאימה.</p>
+            <?php if (isset($_GET['colt_backorder_signup'])) : ?>
+                <p style="padding:10px;border-radius:8px;background:#163d2f;color:#bff8db;">נרשמת בהצלחה לעדכונים על המוצר.</p>
+            <?php elseif (isset($_GET['colt_backorder_error'])) : ?>
+                <p style="padding:10px;border-radius:8px;background:#4b1d1d;color:#ffd5d5;">צריך להזין אימייל תקין כדי שנוכל לעדכן אותך.</p>
+            <?php endif; ?>
+            <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="display:grid;gap:10px;">
+                <?php wp_nonce_field('colt_backorder_signup_' . $product_id); ?>
+                <input type="hidden" name="action" value="colt_backorder_signup">
+                <input type="hidden" name="product_id" value="<?php echo esc_attr($product_id); ?>">
+                <input type="text" name="customer_name" placeholder="שם מלא" style="width:100%;min-height:42px;">
+                <input type="email" name="customer_email" placeholder="אימייל לעדכון" required style="width:100%;min-height:42px;">
+                <input type="tel" name="customer_phone" placeholder="טלפון / וואטסאפ" style="width:100%;min-height:42px;">
+                <button type="submit" class="button" style="min-height:42px;background:#d6b45d;border-color:#d6b45d;color:#10151c;font-weight:800;">עדכנו אותי כשהמוצר חוזר</button>
+            </form>
+        </div>
+        <?php
+    }
+
+    public function handle_backorder_signup()
+    {
+        $product_id = isset($_POST['product_id']) ? absint(wp_unslash($_POST['product_id'])) : 0;
+        $nonce = isset($_POST['_wpnonce']) ? sanitize_text_field(wp_unslash($_POST['_wpnonce'])) : '';
+        if ($product_id <= 0 || !wp_verify_nonce($nonce, 'colt_backorder_signup_' . $product_id)) {
+            wp_die(esc_html__('Invalid signup request.', 'colt-experience'));
+        }
+
+        $email = isset($_POST['customer_email']) ? sanitize_email(wp_unslash($_POST['customer_email'])) : '';
+        if ($email === '') {
+            wp_safe_redirect(add_query_arg('colt_backorder_error', 'email', get_permalink($product_id)));
+            exit;
+        }
+
+        $signups = get_option('colt_backorder_signups', []);
+        if (!is_array($signups)) {
+            $signups = [];
+        }
+
+        array_unshift($signups, [
+            'id' => 'signup_' . time() . '_' . wp_rand(1000, 9999),
+            'product_id' => $product_id,
+            'product_name' => get_the_title($product_id),
+            'name' => isset($_POST['customer_name']) ? sanitize_text_field(wp_unslash($_POST['customer_name'])) : '',
+            'email' => $email,
+            'phone' => isset($_POST['customer_phone']) ? sanitize_text_field(wp_unslash($_POST['customer_phone'])) : '',
+            'created' => time(),
+        ]);
+
+        update_option('colt_backorder_signups', array_slice($signups, 0, 1000), false);
+
+        wp_safe_redirect(add_query_arg('colt_backorder_signup', '1', get_permalink($product_id)));
+        exit;
+    }
+
+    private function is_product_backorder_signup_enabled($product)
+    {
+        if (!$product || !is_object($product) || !method_exists($product, 'get_id')) {
+            return false;
+        }
+
+        $product_id = (int) $product->get_id();
+        return get_post_meta($product_id, '_colt_backorder_signup_enabled', true) === '1'
+            || (method_exists($product, 'get_stock_status') && $product->get_stock_status() === 'onbackorder');
+    }
+
+    private function product_crm_backorder_signups($limit = 10)
+    {
+        $signups = get_option('colt_backorder_signups', []);
+        if (!is_array($signups)) {
+            return [];
+        }
+
+        return array_slice($signups, 0, max(1, (int) $limit));
+    }
+
+    private function render_product_crm_backorder_signup_list(array $signups)
+    {
+        if (!$signups) {
+            echo '<p>עדיין אין הרשמות לעדכוני Backorder.</p>';
+            return;
+        }
+        ?>
+        <div class="colt-crm__table-wrap">
+            <table class="widefat striped">
+                <thead>
+                    <tr>
+                        <th>מוצר</th>
+                        <th>שם</th>
+                        <th>אימייל</th>
+                        <th>טלפון</th>
+                        <th>תאריך</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($signups as $signup) : ?>
+                        <tr>
+                            <td>
+                                <?php if (!empty($signup['product_id'])) : ?>
+                                    <a href="<?php echo esc_url(get_edit_post_link((int) $signup['product_id'])); ?>"><?php echo esc_html($signup['product_name'] ?? 'מוצר'); ?></a>
+                                <?php else : ?>
+                                    <?php echo esc_html($signup['product_name'] ?? 'מוצר'); ?>
+                                <?php endif; ?>
+                            </td>
+                            <td><?php echo esc_html($signup['name'] ?? ''); ?></td>
+                            <td><a href="mailto:<?php echo esc_attr($signup['email'] ?? ''); ?>"><?php echo esc_html($signup['email'] ?? ''); ?></a></td>
+                            <td><?php echo esc_html($signup['phone'] ?? ''); ?></td>
+                            <td><?php echo esc_html(!empty($signup['created']) ? wp_date('d.m.Y H:i', (int) $signup['created']) : ''); ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+        <?php
+    }
+
     private function product_crm_redirect(array $args)
     {
         wp_safe_redirect(add_query_arg(array_merge(['page' => 'colt-product-crm'], $args), admin_url('admin.php')));
@@ -2587,6 +3673,14 @@ JS);
             'confirm_delete' => 'צריך לאשר מחיקה לפני הפעלת פעולת מחיקה.',
             'product_title' => 'חובה להזין שם מוצר.',
             'product_create' => 'לא ניתן ליצור את המוצר. בדוק SKU כפול או שדות לא תקינים.',
+            'product_update' => 'לא ניתן לעדכן את המוצר. בדוק SKU כפול או שדות לא תקינים.',
+            'xlsx_upload' => 'לא התקבל קובץ XLSX לייבוא.',
+            'xlsx_type' => 'אפשר להעלות רק קובץ XLSX.',
+            'xlsx_zip' => 'השרת לא תומך בקריאת XLSX כי ZipArchive לא זמין.',
+            'xlsx_open' => 'לא ניתן לפתוח את קובץ ה-XLSX.',
+            'xlsx_sheet' => 'לא ניתן לקרוא את הגיליון הראשון בקובץ.',
+            'xlsx_empty' => 'לא נמצאו שורות מוצרים בקובץ.',
+            'xlsx_expired' => 'תצוגת הייבוא הזמנית פגה. העלה את הקובץ שוב.',
         ];
 
         return $messages[$code] ?? 'הפעולה לא הושלמה. נסה שוב.';
