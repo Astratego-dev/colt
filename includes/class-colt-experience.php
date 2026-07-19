@@ -218,7 +218,7 @@ final class Colt_Experience
             'id' => '',
             'products' => '',
             'title' => '',
-            'show_title' => '1',
+            'show_title' => '0',
         ], $atts, 'colt_product_slider');
 
         $slider_id = sanitize_key((string) $atts['id']);
@@ -239,12 +239,8 @@ final class Colt_Experience
             return '';
         }
 
-        $title = trim((string) $atts['title']);
-        if ($title === '' && !empty($slider['name'])) {
-            $title = (string) $slider['name'];
-        }
-
         static $style_printed = false;
+        static $script_printed = false;
 
         ob_start();
         if (!$style_printed) :
@@ -253,36 +249,40 @@ final class Colt_Experience
             <style>
                 .colt-product-slider { --colt-product-slider-card: clamp(220px, 24vw, 320px); color: inherit; }
                 .colt-product-slider, .colt-product-slider * { box-sizing: border-box; }
-                .colt-product-slider__head { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+                .colt-product-slider__head { display: flex; align-items: end; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
                 .colt-product-slider__title { margin: 0; font: inherit; font-size: clamp(24px, 3vw, 44px); font-weight: 900; line-height: 1.05; }
-                .colt-product-slider__track { display: grid; grid-auto-flow: column; grid-auto-columns: var(--colt-product-slider-card); gap: 16px; overflow-x: auto; overscroll-behavior-inline: contain; scroll-snap-type: inline mandatory; padding: 2px 2px 16px; scrollbar-width: thin; }
-                .colt-product-slider__item { scroll-snap-align: start; min-width: 0; border: 1px solid rgba(214, 194, 138, .32); border-radius: 14px; background: rgba(11, 15, 23, .78); color: #fff; overflow: hidden; }
-                .colt-product-slider__media { display: block; aspect-ratio: 1 / 1; background: rgba(255,255,255,.06); overflow: hidden; }
+                .colt-product-slider__track { direction: ltr; display: grid; grid-auto-flow: column; grid-auto-columns: var(--colt-product-slider-card); gap: 12px; overflow-x: auto; overscroll-behavior-inline: contain; scroll-snap-type: inline mandatory; padding: 2px 2px 12px; scrollbar-width: thin; }
+                .colt-product-slider__item { direction: rtl; scroll-snap-align: start; min-width: 0; border: 1px solid rgba(214, 194, 138, .32); border-radius: 14px; background: rgba(11, 15, 23, .78); color: #fff; overflow: hidden; }
+                .colt-product-slider__media { position: relative; display: block; aspect-ratio: 1 / 1; background: rgba(255,255,255,.06); overflow: hidden; }
                 .colt-product-slider__image { display: block; width: 100%; height: 100%; object-fit: cover; }
-                .colt-product-slider__body { display: grid; gap: 10px; padding: 14px; }
-                .colt-product-slider__category { color: #9ff8e6; font-size: 12px; font-weight: 900; text-transform: uppercase; }
-                .colt-product-slider__name { margin: 0; font-size: 18px; line-height: 1.2; font-weight: 900; }
+                .colt-product-slider__soldout { position: absolute; inset: auto 12px 12px 12px; display: inline-flex; justify-content: center; padding: 10px 12px; border: 1px solid rgba(255,255,255,.45); border-radius: 999px; background: rgba(9, 11, 17, .78); color: #fff; font-size: 14px; font-weight: 900; letter-spacing: .08em; backdrop-filter: blur(10px); }
+                .colt-product-slider__item.is-sold-out .colt-product-slider__image { filter: saturate(.45) brightness(.68); }
+                .colt-product-slider__body { display: grid; gap: 7px; padding: 11px; }
+                .colt-product-slider__category { color: #9ff8e6; font-size: 11px; font-weight: 900; text-transform: uppercase; }
+                .colt-product-slider__name { margin: 0; font-size: 17px; line-height: 1.16; font-weight: 900; }
                 .colt-product-slider__name a, .colt-product-slider__cta { color: inherit; text-decoration: none; }
                 .colt-product-slider__price { color: #f5d37b; font-weight: 900; }
-                .colt-product-slider__meta, .colt-product-slider__attributes { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; color: rgba(255,255,255,.76); font-size: 13px; }
-                .colt-product-slider__meta li { display: grid; gap: 2px; }
+                .colt-product-slider__meta, .colt-product-slider__attributes { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; color: rgba(255,255,255,.76); font-size: 12px; }
+                .colt-product-slider__meta li { display: grid; gap: 1px; }
                 .colt-product-slider__label { color: rgba(255,255,255,.48); font-size: 11px; font-weight: 900; text-transform: uppercase; }
-                .colt-product-slider__attributes { padding-top: 8px; border-top: 1px solid rgba(255,255,255,.12); }
-                .colt-product-slider__attributes div { display: grid; grid-template-columns: minmax(86px, .55fr) 1fr; gap: 8px; }
+                .colt-product-slider__tags, .colt-product-slider__tag-list { display: flex; flex-wrap: wrap; gap: 5px; }
+                .colt-product-slider__tags summary { display: flex; flex-wrap: wrap; gap: 5px; cursor: pointer; list-style: none; }
+                .colt-product-slider__tags summary::-webkit-details-marker { display: none; }
+                .colt-product-slider__tag { display: inline-flex; align-items: center; min-height: 23px; padding: 4px 7px; border: 1px solid rgba(255,255,255,.14); border-radius: 999px; background: rgba(255,255,255,.07); line-height: 1; }
+                .colt-product-slider__tag-more { color: #9ff8e6; font-weight: 900; }
+                .colt-product-slider__tags[open] .colt-product-slider__tag-more { display: none; }
+                .colt-product-slider__tag-list { margin-top: 5px; }
+                .colt-product-slider__attributes { padding-top: 6px; border-top: 1px solid rgba(255,255,255,.12); }
+                .colt-product-slider__attributes div { display: grid; grid-template-columns: minmax(76px, .5fr) 1fr; gap: 6px; }
                 .colt-product-slider__attributes dt, .colt-product-slider__attributes dd { margin: 0; }
                 .colt-product-slider__attributes dt { color: rgba(255,255,255,.5); font-weight: 900; }
-                .colt-product-slider__cta { display: inline-flex; align-items: center; justify-content: center; min-height: 38px; padding: 9px 12px; border-radius: 999px; background: #d6b45d; color: #10151c; font-weight: 900; }
+                .colt-product-slider__cta { display: inline-flex; align-items: center; justify-content: center; min-height: 34px; padding: 7px 11px; border-radius: 999px; background: #d6b45d; color: #10151c; font-weight: 900; }
                 @media (max-width: 767px) { .colt-product-slider { --colt-product-slider-card: min(78vw, 310px); } }
             </style>
             <?php
         endif;
         ?>
         <section class="colt-product-slider" dir="rtl" data-colt-product-slider="<?php echo esc_attr($slider_id ?: 'manual'); ?>">
-            <?php if ($title !== '' && (string) $atts['show_title'] !== '0') : ?>
-                <div class="colt-product-slider__head">
-                    <h2 class="colt-product-slider__title"><?php echo esc_html($title); ?></h2>
-                </div>
-            <?php endif; ?>
             <div class="colt-product-slider__track" role="list">
                 <?php foreach ($product_ids as $product_id) : ?>
                     <?php
@@ -299,11 +299,16 @@ final class Colt_Experience
                     $set_name = (string) get_post_meta($product_id, '_colt_product_set', true);
                     $language = (string) get_post_meta($product_id, '_colt_product_language', true);
                     $stock_status = $product->get_stock_status();
-                    $stock_labels = $this->product_crm_stock_statuses();
+                    $is_sold_out = $stock_status === 'outofstock';
+                    $visible_tags = array_slice($tags, 0, 4);
+                    $hidden_tags = array_slice($tags, 4);
                     ?>
-                    <article class="colt-product-slider__item" role="listitem" data-product-id="<?php echo esc_attr($product_id); ?>">
+                    <article class="colt-product-slider__item<?php echo $is_sold_out ? ' is-sold-out' : ''; ?>" role="listitem" data-product-id="<?php echo esc_attr($product_id); ?>">
                         <a class="colt-product-slider__media" href="<?php echo esc_url(get_permalink($product_id)); ?>" aria-label="<?php echo esc_attr(get_the_title($product_id)); ?>">
                             <img class="colt-product-slider__image" src="<?php echo esc_url($image); ?>" alt="<?php echo esc_attr(get_the_title($product_id)); ?>" loading="lazy">
+                            <?php if ($is_sold_out) : ?>
+                                <span class="colt-product-slider__soldout">SOLD OUT</span>
+                            <?php endif; ?>
                         </a>
                         <div class="colt-product-slider__body">
                             <?php if ($categories) : ?>
@@ -324,8 +329,31 @@ final class Colt_Experience
                                 <?php if ($brands) : ?>
                                     <li><span class="colt-product-slider__label">מותגים</span><span><?php echo esc_html(implode(', ', $brands)); ?></span></li>
                                 <?php endif; ?>
-                                <?php if ($tags) : ?>
-                                    <li><span class="colt-product-slider__label">תגיות</span><span><?php echo esc_html(implode(', ', $tags)); ?></span></li>
+                                <?php if ($visible_tags) : ?>
+                                    <li>
+                                        <span class="colt-product-slider__label">תגיות</span>
+                                        <?php if ($hidden_tags) : ?>
+                                            <details class="colt-product-slider__tags">
+                                                <summary>
+                                                    <?php foreach ($visible_tags as $tag_name) : ?>
+                                                        <span class="colt-product-slider__tag"><?php echo esc_html($tag_name); ?></span>
+                                                    <?php endforeach; ?>
+                                                    <span class="colt-product-slider__tag colt-product-slider__tag-more">...</span>
+                                                </summary>
+                                                <span class="colt-product-slider__tag-list">
+                                                    <?php foreach ($hidden_tags as $tag_name) : ?>
+                                                        <span class="colt-product-slider__tag"><?php echo esc_html($tag_name); ?></span>
+                                                    <?php endforeach; ?>
+                                                </span>
+                                            </details>
+                                        <?php else : ?>
+                                            <span class="colt-product-slider__tag-list">
+                                                <?php foreach ($visible_tags as $tag_name) : ?>
+                                                    <span class="colt-product-slider__tag"><?php echo esc_html($tag_name); ?></span>
+                                                <?php endforeach; ?>
+                                            </span>
+                                        <?php endif; ?>
+                                    </li>
                                 <?php endif; ?>
                                 <?php if ($set_name !== '') : ?>
                                     <li><span class="colt-product-slider__label">Set</span><span><?php echo esc_html($set_name); ?></span></li>
@@ -333,7 +361,6 @@ final class Colt_Experience
                                 <?php if ($language !== '') : ?>
                                     <li><span class="colt-product-slider__label">שפה</span><span><?php echo esc_html($language); ?></span></li>
                                 <?php endif; ?>
-                                <li><span class="colt-product-slider__label">מלאי</span><span><?php echo esc_html($stock_labels[$stock_status] ?? $stock_status); ?></span></li>
                             </ul>
 
                             <?php if ($attributes) : ?>
@@ -352,6 +379,94 @@ final class Colt_Experience
                 <?php endforeach; ?>
             </div>
         </section>
+        <?php if (!$script_printed) : ?>
+            <?php $script_printed = true; ?>
+            <script>
+            (function () {
+                const duration = 2000;
+                const interval = 2000;
+                const ease = function (t) {
+                    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+                };
+
+                function animateScroll(track, target) {
+                    if (track.dataset.coltAnimating === '1') {
+                        return;
+                    }
+
+                    const start = track.scrollLeft;
+                    const distance = target - start;
+                    const startedAt = performance.now();
+                    track.dataset.coltAnimating = '1';
+
+                    function frame(now) {
+                        const progress = Math.min(1, (now - startedAt) / duration);
+                        track.scrollLeft = start + distance * ease(progress);
+
+                        if (progress < 1) {
+                            requestAnimationFrame(frame);
+                            return;
+                        }
+
+                        track.scrollLeft = target;
+                        track.dataset.coltAnimating = '0';
+                    }
+
+                    requestAnimationFrame(frame);
+                }
+
+                function setupSlider(slider) {
+                    if (slider.dataset.coltAutoplayReady === '1') {
+                        return;
+                    }
+
+                    const track = slider.querySelector('.colt-product-slider__track');
+                    const firstItem = slider.querySelector('.colt-product-slider__item');
+                    if (!track || !firstItem || track.children.length < 2) {
+                        return;
+                    }
+
+                    slider.dataset.coltAutoplayReady = '1';
+                    let paused = false;
+                    const setPaused = function (value) {
+                        paused = value;
+                    };
+
+                    slider.addEventListener('pointerenter', function () { setPaused(true); });
+                    slider.addEventListener('pointerleave', function () { setPaused(false); });
+                    slider.addEventListener('focusin', function () { setPaused(true); });
+                    slider.addEventListener('focusout', function () { setPaused(false); });
+
+                    window.setInterval(function () {
+                        if (paused || track.dataset.coltAnimating === '1') {
+                            return;
+                        }
+
+                        const itemRect = firstItem.getBoundingClientRect();
+                        const gap = parseFloat(window.getComputedStyle(track).columnGap || '0') || 0;
+                        const step = itemRect.width + gap;
+                        const maxScroll = Math.max(0, track.scrollWidth - track.clientWidth);
+                        if (maxScroll <= 2) {
+                            return;
+                        }
+
+                        const next = track.scrollLeft + step;
+                        animateScroll(track, next >= maxScroll - 2 ? 0 : Math.min(next, maxScroll));
+                    }, interval);
+                }
+
+                function init() {
+                    document.querySelectorAll('.colt-product-slider').forEach(setupSlider);
+                }
+
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', init);
+                } else {
+                    init();
+                }
+            }());
+            </script>
+        <?php endif; ?>
         <?php
         return (string) ob_get_clean();
     }
