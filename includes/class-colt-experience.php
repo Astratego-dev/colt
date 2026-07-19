@@ -247,20 +247,23 @@ final class Colt_Experience
             $style_printed = true;
             ?>
             <style>
-                .colt-product-slider { --colt-product-slider-card: clamp(220px, 24vw, 320px); color: inherit; }
-                .colt-product-slider, .colt-product-slider * { box-sizing: border-box; }
+                @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800;900&display=swap');
+                .colt-product-slider { --colt-product-slider-card: clamp(220px, 24vw, 320px); color: inherit; font-family: "Rubik", Arial, sans-serif !important; }
+                .colt-product-slider, .colt-product-slider * { box-sizing: border-box; font-family: inherit !important; }
                 .colt-product-slider__head { display: flex; align-items: end; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
                 .colt-product-slider__title { margin: 0; font: inherit; font-size: clamp(24px, 3vw, 44px); font-weight: 900; line-height: 1.05; }
-                .colt-product-slider__track { direction: ltr; display: grid; grid-auto-flow: column; grid-auto-columns: var(--colt-product-slider-card); gap: 12px; overflow-x: auto; overscroll-behavior-inline: contain; scroll-snap-type: inline mandatory; padding: 2px 2px 12px; scrollbar-width: thin; }
-                .colt-product-slider__item { direction: rtl; scroll-snap-align: start; min-width: 0; border: 1px solid rgba(214, 194, 138, .32); border-radius: 14px; background: rgba(11, 15, 23, .78); color: #fff; overflow: hidden; }
+                .colt-product-slider__track { direction: ltr; display: grid; grid-auto-flow: column; grid-auto-columns: var(--colt-product-slider-card); align-items: stretch; gap: 12px; overflow-x: auto; overscroll-behavior-inline: contain; scroll-snap-type: inline mandatory; padding: 2px 2px 12px; scrollbar-width: thin; }
+                .colt-product-slider__track.is-auto-scrolling { scroll-snap-type: none; }
+                .colt-product-slider__item { direction: rtl; display: flex; flex-direction: column; height: 100%; scroll-snap-align: start; min-width: 0; border: 1px solid rgba(214, 194, 138, .32); border-radius: 14px; background: rgba(11, 15, 23, .78); color: #fff; overflow: hidden; }
                 .colt-product-slider__media { position: relative; display: block; aspect-ratio: 1 / 1; background: rgba(255,255,255,.06); overflow: hidden; }
                 .colt-product-slider__image { display: block; width: 100%; height: 100%; object-fit: cover; }
                 .colt-product-slider__soldout { position: absolute; inset: auto 12px 12px 12px; display: inline-flex; justify-content: center; padding: 10px 12px; border: 1px solid rgba(255,255,255,.45); border-radius: 999px; background: rgba(9, 11, 17, .78); color: #fff; font-size: 14px; font-weight: 900; letter-spacing: .08em; backdrop-filter: blur(10px); }
                 .colt-product-slider__item.is-sold-out .colt-product-slider__image { filter: saturate(.45) brightness(.68); }
-                .colt-product-slider__body { display: grid; gap: 7px; padding: 11px; }
+                .colt-product-slider__body { display: flex; flex: 1; flex-direction: column; gap: 7px; padding: 11px; }
                 .colt-product-slider__category { color: #9ff8e6; font-size: 11px; font-weight: 900; text-transform: uppercase; }
                 .colt-product-slider__name { margin: 0; font-size: 17px; line-height: 1.16; font-weight: 900; }
-                .colt-product-slider__name a, .colt-product-slider__cta { color: inherit; text-decoration: none; }
+                .colt-product-slider .colt-product-slider__name a { color: #fff !important; text-decoration: none !important; border-bottom: 0 !important; box-shadow: none !important; }
+                .colt-product-slider__cta { color: inherit; text-decoration: none; }
                 .colt-product-slider__price { color: #f5d37b; font-weight: 900; }
                 .colt-product-slider__meta, .colt-product-slider__attributes { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; color: rgba(255,255,255,.76); font-size: 12px; }
                 .colt-product-slider__meta li { display: grid; gap: 1px; }
@@ -276,7 +279,7 @@ final class Colt_Experience
                 .colt-product-slider__attributes div { display: grid; grid-template-columns: minmax(76px, .5fr) 1fr; gap: 6px; }
                 .colt-product-slider__attributes dt, .colt-product-slider__attributes dd { margin: 0; }
                 .colt-product-slider__attributes dt { color: rgba(255,255,255,.5); font-weight: 900; }
-                .colt-product-slider__cta { display: inline-flex; align-items: center; justify-content: center; min-height: 34px; padding: 7px 11px; border-radius: 999px; background: #d6b45d; color: #10151c; font-weight: 900; }
+                .colt-product-slider__cta { display: inline-flex; align-items: center; justify-content: center; min-height: 34px; margin-top: auto; padding: 7px 11px; border-radius: 999px; background: #d6b45d; color: #10151c; font-weight: 900; }
                 @media (max-width: 767px) { .colt-product-slider { --colt-product-slider-card: min(78vw, 310px); } }
             </style>
             <?php
@@ -322,9 +325,6 @@ final class Colt_Experience
                             <ul class="colt-product-slider__meta">
                                 <?php if ($product->get_sku()) : ?>
                                     <li><span class="colt-product-slider__label">SKU</span><span><?php echo esc_html($product->get_sku()); ?></span></li>
-                                <?php endif; ?>
-                                <?php if ($categories) : ?>
-                                    <li><span class="colt-product-slider__label">קטגוריות</span><span><?php echo esc_html(implode(', ', $categories)); ?></span></li>
                                 <?php endif; ?>
                                 <?php if ($brands) : ?>
                                     <li><span class="colt-product-slider__label">מותגים</span><span><?php echo esc_html(implode(', ', $brands)); ?></span></li>
@@ -398,6 +398,7 @@ final class Colt_Experience
                     const distance = target - start;
                     const startedAt = performance.now();
                     track.dataset.coltAnimating = '1';
+                    track.classList.add('is-auto-scrolling');
 
                     function frame(now) {
                         const progress = Math.min(1, (now - startedAt) / duration);
@@ -410,6 +411,7 @@ final class Colt_Experience
 
                         track.scrollLeft = target;
                         track.dataset.coltAnimating = '0';
+                        track.classList.remove('is-auto-scrolling');
                     }
 
                     requestAnimationFrame(frame);
@@ -421,8 +423,7 @@ final class Colt_Experience
                     }
 
                     const track = slider.querySelector('.colt-product-slider__track');
-                    const firstItem = slider.querySelector('.colt-product-slider__item');
-                    if (!track || !firstItem || track.children.length < 2) {
+                    if (!track || track.children.length < 2) {
                         return;
                     }
 
@@ -442,16 +443,36 @@ final class Colt_Experience
                             return;
                         }
 
-                        const itemRect = firstItem.getBoundingClientRect();
-                        const gap = parseFloat(window.getComputedStyle(track).columnGap || '0') || 0;
-                        const step = itemRect.width + gap;
                         const maxScroll = Math.max(0, track.scrollWidth - track.clientWidth);
                         if (maxScroll <= 2) {
                             return;
                         }
 
-                        const next = track.scrollLeft + step;
-                        animateScroll(track, next >= maxScroll - 2 ? 0 : Math.min(next, maxScroll));
+                        const targets = Array.from(track.querySelectorAll('.colt-product-slider__item'))
+                            .map(function (item) {
+                                return Math.min(maxScroll, Math.max(0, item.offsetLeft));
+                            })
+                            .filter(function (target, index, list) {
+                                return index === 0 || Math.abs(target - list[index - 1]) > 2;
+                            });
+
+                        if (targets.length < 2) {
+                            return;
+                        }
+
+                        const current = track.scrollLeft;
+                        let currentIndex = 0;
+                        let smallestDistance = Infinity;
+                        targets.forEach(function (target, index) {
+                            const distanceFromTarget = Math.abs(current - target);
+                            if (distanceFromTarget < smallestDistance) {
+                                smallestDistance = distanceFromTarget;
+                                currentIndex = index;
+                            }
+                        });
+
+                        const nextIndex = currentIndex + 1 >= targets.length ? 0 : currentIndex + 1;
+                        animateScroll(track, targets[nextIndex]);
                     }, interval);
                 }
 
