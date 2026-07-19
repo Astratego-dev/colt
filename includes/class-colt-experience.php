@@ -27,6 +27,7 @@ final class Colt_Experience
         add_shortcode('colt_mystery_box_product', [$this, 'render_mystery_box_product']);
         add_shortcode('colt_service_experience', [$this, 'render_service_experience']);
         add_shortcode('colt_live_show', [$this, 'render_live_show']);
+        add_shortcode('colt_product_slider', [$this, 'render_product_slider']);
 
         foreach (self::service_shortcode_map() as $shortcode => $service_key) {
             add_shortcode($shortcode, function ($atts = []) use ($service_key, $shortcode) {
@@ -204,6 +205,154 @@ final class Colt_Experience
 
         ob_start();
         include COLT_EXPERIENCE_DIR . 'templates/service-experience.php';
+        return (string) ob_get_clean();
+    }
+
+    public function render_product_slider($atts = [])
+    {
+        if (!$this->is_woocommerce_ready()) {
+            return '';
+        }
+
+        $atts = shortcode_atts([
+            'id' => '',
+            'products' => '',
+            'title' => '',
+            'show_title' => '1',
+        ], $atts, 'colt_product_slider');
+
+        $slider_id = sanitize_key((string) $atts['id']);
+        $sliders = $this->product_crm_sliders();
+        $slider = $slider_id !== '' && isset($sliders[$slider_id]) && is_array($sliders[$slider_id]) ? $sliders[$slider_id] : [];
+        $product_ids = [];
+
+        if (!empty($slider['product_ids']) && is_array($slider['product_ids'])) {
+            $product_ids = array_map('absint', $slider['product_ids']);
+        }
+
+        if (!$product_ids && !empty($atts['products'])) {
+            $product_ids = array_map('absint', preg_split('/[,|\s]+/', (string) $atts['products']));
+        }
+
+        $product_ids = array_values(array_filter(array_unique($product_ids)));
+        if (!$product_ids) {
+            return '';
+        }
+
+        $title = trim((string) $atts['title']);
+        if ($title === '' && !empty($slider['name'])) {
+            $title = (string) $slider['name'];
+        }
+
+        static $style_printed = false;
+
+        ob_start();
+        if (!$style_printed) :
+            $style_printed = true;
+            ?>
+            <style>
+                .colt-product-slider { --colt-product-slider-card: clamp(220px, 24vw, 320px); color: inherit; }
+                .colt-product-slider, .colt-product-slider * { box-sizing: border-box; }
+                .colt-product-slider__head { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+                .colt-product-slider__title { margin: 0; font: inherit; font-size: clamp(24px, 3vw, 44px); font-weight: 900; line-height: 1.05; }
+                .colt-product-slider__track { display: grid; grid-auto-flow: column; grid-auto-columns: var(--colt-product-slider-card); gap: 16px; overflow-x: auto; overscroll-behavior-inline: contain; scroll-snap-type: inline mandatory; padding: 2px 2px 16px; scrollbar-width: thin; }
+                .colt-product-slider__item { scroll-snap-align: start; min-width: 0; border: 1px solid rgba(214, 194, 138, .32); border-radius: 14px; background: rgba(11, 15, 23, .78); color: #fff; overflow: hidden; }
+                .colt-product-slider__media { display: block; aspect-ratio: 1 / 1; background: rgba(255,255,255,.06); overflow: hidden; }
+                .colt-product-slider__image { display: block; width: 100%; height: 100%; object-fit: cover; }
+                .colt-product-slider__body { display: grid; gap: 10px; padding: 14px; }
+                .colt-product-slider__category { color: #9ff8e6; font-size: 12px; font-weight: 900; text-transform: uppercase; }
+                .colt-product-slider__name { margin: 0; font-size: 18px; line-height: 1.2; font-weight: 900; }
+                .colt-product-slider__name a, .colt-product-slider__cta { color: inherit; text-decoration: none; }
+                .colt-product-slider__price { color: #f5d37b; font-weight: 900; }
+                .colt-product-slider__meta, .colt-product-slider__attributes { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; color: rgba(255,255,255,.76); font-size: 13px; }
+                .colt-product-slider__meta li { display: grid; gap: 2px; }
+                .colt-product-slider__label { color: rgba(255,255,255,.48); font-size: 11px; font-weight: 900; text-transform: uppercase; }
+                .colt-product-slider__attributes { padding-top: 8px; border-top: 1px solid rgba(255,255,255,.12); }
+                .colt-product-slider__attributes div { display: grid; grid-template-columns: minmax(86px, .55fr) 1fr; gap: 8px; }
+                .colt-product-slider__attributes dt, .colt-product-slider__attributes dd { margin: 0; }
+                .colt-product-slider__attributes dt { color: rgba(255,255,255,.5); font-weight: 900; }
+                .colt-product-slider__cta { display: inline-flex; align-items: center; justify-content: center; min-height: 38px; padding: 9px 12px; border-radius: 999px; background: #d6b45d; color: #10151c; font-weight: 900; }
+                @media (max-width: 767px) { .colt-product-slider { --colt-product-slider-card: min(78vw, 310px); } }
+            </style>
+            <?php
+        endif;
+        ?>
+        <section class="colt-product-slider" dir="rtl" data-colt-product-slider="<?php echo esc_attr($slider_id ?: 'manual'); ?>">
+            <?php if ($title !== '' && (string) $atts['show_title'] !== '0') : ?>
+                <div class="colt-product-slider__head">
+                    <h2 class="colt-product-slider__title"><?php echo esc_html($title); ?></h2>
+                </div>
+            <?php endif; ?>
+            <div class="colt-product-slider__track" role="list">
+                <?php foreach ($product_ids as $product_id) : ?>
+                    <?php
+                    $product = wc_get_product($product_id);
+                    if (!$product || get_post_status($product_id) === 'trash') {
+                        continue;
+                    }
+
+                    $image = get_the_post_thumbnail_url($product_id, 'large') ?: wc_placeholder_img_src('large');
+                    $categories = $this->product_slider_term_names($product_id, 'product_cat');
+                    $tags = $this->product_slider_term_names($product_id, 'product_tag');
+                    $brands = $this->product_slider_brand_names($product_id);
+                    $attributes = $this->product_slider_attributes($product);
+                    $set_name = (string) get_post_meta($product_id, '_colt_product_set', true);
+                    $language = (string) get_post_meta($product_id, '_colt_product_language', true);
+                    $stock_status = $product->get_stock_status();
+                    $stock_labels = $this->product_crm_stock_statuses();
+                    ?>
+                    <article class="colt-product-slider__item" role="listitem" data-product-id="<?php echo esc_attr($product_id); ?>">
+                        <a class="colt-product-slider__media" href="<?php echo esc_url(get_permalink($product_id)); ?>" aria-label="<?php echo esc_attr(get_the_title($product_id)); ?>">
+                            <img class="colt-product-slider__image" src="<?php echo esc_url($image); ?>" alt="<?php echo esc_attr(get_the_title($product_id)); ?>" loading="lazy">
+                        </a>
+                        <div class="colt-product-slider__body">
+                            <?php if ($categories) : ?>
+                                <div class="colt-product-slider__category"><?php echo esc_html(implode(' · ', array_slice($categories, 0, 2))); ?></div>
+                            <?php endif; ?>
+                            <h3 class="colt-product-slider__name"><a href="<?php echo esc_url(get_permalink($product_id)); ?>"><?php echo esc_html(get_the_title($product_id)); ?></a></h3>
+                            <?php if ($product->get_price_html()) : ?>
+                                <div class="colt-product-slider__price"><?php echo wp_kses_post($product->get_price_html()); ?></div>
+                            <?php endif; ?>
+
+                            <ul class="colt-product-slider__meta">
+                                <?php if ($product->get_sku()) : ?>
+                                    <li><span class="colt-product-slider__label">SKU</span><span><?php echo esc_html($product->get_sku()); ?></span></li>
+                                <?php endif; ?>
+                                <?php if ($categories) : ?>
+                                    <li><span class="colt-product-slider__label">קטגוריות</span><span><?php echo esc_html(implode(', ', $categories)); ?></span></li>
+                                <?php endif; ?>
+                                <?php if ($brands) : ?>
+                                    <li><span class="colt-product-slider__label">מותגים</span><span><?php echo esc_html(implode(', ', $brands)); ?></span></li>
+                                <?php endif; ?>
+                                <?php if ($tags) : ?>
+                                    <li><span class="colt-product-slider__label">תגיות</span><span><?php echo esc_html(implode(', ', $tags)); ?></span></li>
+                                <?php endif; ?>
+                                <?php if ($set_name !== '') : ?>
+                                    <li><span class="colt-product-slider__label">Set</span><span><?php echo esc_html($set_name); ?></span></li>
+                                <?php endif; ?>
+                                <?php if ($language !== '') : ?>
+                                    <li><span class="colt-product-slider__label">שפה</span><span><?php echo esc_html($language); ?></span></li>
+                                <?php endif; ?>
+                                <li><span class="colt-product-slider__label">מלאי</span><span><?php echo esc_html($stock_labels[$stock_status] ?? $stock_status); ?></span></li>
+                            </ul>
+
+                            <?php if ($attributes) : ?>
+                                <dl class="colt-product-slider__attributes">
+                                    <?php foreach ($attributes as $attribute) : ?>
+                                        <div>
+                                            <dt><?php echo esc_html($attribute['label']); ?></dt>
+                                            <dd><?php echo esc_html($attribute['value']); ?></dd>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </dl>
+                            <?php endif; ?>
+                            <a class="colt-product-slider__cta" href="<?php echo esc_url(get_permalink($product_id)); ?>">למוצר</a>
+                        </div>
+                    </article>
+                <?php endforeach; ?>
+            </div>
+        </section>
+        <?php
         return (string) ob_get_clean();
     }
 
@@ -1125,6 +1274,9 @@ JS);
                 .colt-crm__list { display: grid; gap: 9px; margin: 0; }
                 .colt-crm__list li { display: flex; justify-content: space-between; gap: 10px; margin: 0; padding: 10px; border: 1px solid #e7e8ea; border-radius: 10px; background: #fff; }
                 .colt-crm__list a { text-decoration: none; font-weight: 800; }
+                .colt-crm__shortcode { display: inline-flex; direction: ltr; max-width: 100%; padding: 7px 10px; border-radius: 8px; background: #10151c; color: #f5d37b; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; white-space: nowrap; overflow-x: auto; }
+                .colt-crm__slider-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+                .colt-crm__slider-card { display: grid; gap: 8px; padding: 12px; border: 1px solid #e7e8ea; border-radius: 10px; background: #f8f9fb; }
                 .colt-crm__footer-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; margin-top: 14px; }
                 .colt-crm__note { margin: 0; padding: 10px 12px; border-radius: 10px; background: #fff8e5; color: #6f4e00; font-weight: 700; }
                 .colt-crm__pagination { margin-top: 14px; text-align: center; }
@@ -1145,7 +1297,7 @@ JS);
                 .colt-admin__media-preview:empty { display: none; }
                 .colt-admin__media-preview img { display: block; width: 100%; max-height: 160px; object-fit: contain; background: #f6f7f7; }
                 @media (max-width: 1240px) { .colt-crm__stats { grid-template-columns: repeat(3, 1fr); } .colt-crm__bulk, .colt-crm__insights { grid-template-columns: repeat(2, 1fr); } }
-                @media (max-width: 782px) { .colt-crm__hero, .colt-crm__footer-actions, .colt-crm__modal-head { display: grid; } .colt-crm__hero-actions { justify-items: start; } .colt-crm__stats, .colt-crm__filters, .colt-crm__bulk, .colt-crm__insights, .colt-crm__create-grid, .colt-crm__mapping { grid-template-columns: 1fr; } }
+                @media (max-width: 782px) { .colt-crm__hero, .colt-crm__footer-actions, .colt-crm__modal-head { display: grid; } .colt-crm__hero-actions { justify-items: start; } .colt-crm__stats, .colt-crm__filters, .colt-crm__bulk, .colt-crm__insights, .colt-crm__create-grid, .colt-crm__mapping, .colt-crm__slider-list { grid-template-columns: 1fr; } }
             </style>
 
             <h1>COLT Product CRM</h1>
@@ -1171,6 +1323,7 @@ JS);
             $customers = $this->product_crm_customer_summary(8, $period_days);
             $promotions = get_option('colt_product_crm_promotions', []);
             $promotions = is_array($promotions) ? array_slice(array_reverse($promotions), 0, 5) : [];
+            $sliders = $this->product_crm_sliders();
             $import_token = isset($_GET['import_token']) ? sanitize_key(wp_unslash($_GET['import_token'])) : '';
             $import_data = $import_token !== '' ? get_transient('colt_product_crm_import_' . $import_token) : [];
             $import_data = is_array($import_data) ? $import_data : [];
@@ -1208,6 +1361,10 @@ JS);
             <?php endif; ?>
             <?php if (isset($_GET['promo_created'])) : ?>
                 <div class="notice notice-success is-dismissible"><p>כלל המבצע נשמר ב־CRM.</p></div>
+            <?php endif; ?>
+            <?php if (isset($_GET['slider_created'])) : ?>
+                <?php $created_slider_id = sanitize_key(wp_unslash($_GET['slider_created'])); ?>
+                <div class="notice notice-success is-dismissible"><p>הסליידר נוצר. השורטקוד שלך: <code class="colt-crm__shortcode">[colt_product_slider id="<?php echo esc_html($created_slider_id); ?>"]</code></p></div>
             <?php endif; ?>
             <?php if (isset($_GET['crm_error'])) : ?>
                 <div class="notice notice-error is-dismissible"><p><?php echo esc_html($this->product_crm_error_message((string) wp_unslash($_GET['crm_error']))); ?></p></div>
@@ -1403,6 +1560,7 @@ JS);
             </div>
 
             <?php $this->render_product_crm_import_panel($import_token, $import_data); ?>
+            <?php $this->render_product_crm_slider_panel($sliders); ?>
 
             <section class="colt-crm__stats" aria-label="סקירת מוצרים">
                 <?php foreach ($stats as $stat) : ?>
@@ -1577,6 +1735,16 @@ JS);
                                 <span><input type="checkbox" name="create_promo_rule" value="1"> שמור כלל 3+1</span>
                             </label>
                             <input type="text" name="promo_name" placeholder="3+1 מאותה קטגוריה">
+                        </div>
+
+                        <div class="colt-crm__bulk-card">
+                            <h3>סליידר מוצרים</h3>
+                            <label>
+                                <span>שם הסליידר</span>
+                                <input type="text" name="slider_name" placeholder="לדוגמה: פוקימון חדשים">
+                            </label>
+                            <p class="colt-crm__note">סמן מוצרים מהרשימה ולחץ כאן כדי לקבל שורטקוד לאלמנטור. הסליידר יציג תמונה 1:1, שם, מחיר, קטגוריות, מותגים ו־attributes.</p>
+                            <button class="button button-secondary" type="submit" name="create_product_slider" value="1">צור סליידר מהמוצרים שסומנו</button>
                         </div>
 
                         <div class="colt-crm__bulk-card colt-crm__bulk-card--danger">
@@ -1883,6 +2051,12 @@ JS);
         $product_ids = $this->product_crm_posted_ids('product_ids');
         if (!$product_ids) {
             $this->product_crm_redirect(['crm_error' => 'no_products']);
+        }
+
+        if (!empty($_POST['create_product_slider'])) {
+            $slider_name = isset($_POST['slider_name']) ? sanitize_text_field(wp_unslash($_POST['slider_name'])) : '';
+            $slider_id = $this->product_crm_create_slider($product_ids, $slider_name);
+            $this->product_crm_redirect($slider_id !== '' ? ['slider_created' => $slider_id] : ['crm_error' => 'slider_create']);
         }
 
         $delete_action = isset($_POST['delete_action']) ? sanitize_key(wp_unslash($_POST['delete_action'])) : '';
@@ -3250,6 +3424,188 @@ JS);
         <?php
     }
 
+    private function render_product_crm_slider_panel(array $sliders)
+    {
+        ?>
+        <section class="colt-crm__panel">
+            <h2>סליידרים שנוצרו</h2>
+            <p class="colt-crm__muted">כל סליידר נשמר לפי המוצרים שסימנת בזמן היצירה. את השורטקוד אפשר לשים באלמנטור או בכל עמוד WordPress.</p>
+            <?php if (!$sliders) : ?>
+                <p>עדיין לא נוצרו סליידרים. סמן מוצרים מהרשימה ולחץ על “צור סליידר מהמוצרים שסומנו”.</p>
+            <?php else : ?>
+                <div class="colt-crm__slider-list">
+                    <?php foreach ($sliders as $slider_id => $slider) : ?>
+                        <?php
+                        $product_count = isset($slider['product_ids']) && is_array($slider['product_ids']) ? count($slider['product_ids']) : 0;
+                        $shortcode = '[colt_product_slider id="' . $slider_id . '"]';
+                        ?>
+                        <div class="colt-crm__slider-card">
+                            <strong><?php echo esc_html($slider['name'] ?? 'סליידר מוצרים'); ?></strong>
+                            <span class="colt-crm__muted"><?php echo esc_html(number_format_i18n($product_count)); ?> מוצרים · נוצר <?php echo esc_html(!empty($slider['created']) ? wp_date('d.m.Y H:i', (int) $slider['created']) : ''); ?></span>
+                            <code class="colt-crm__shortcode"><?php echo esc_html($shortcode); ?></code>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+        </section>
+        <?php
+    }
+
+    private function product_crm_sliders()
+    {
+        $sliders = get_option('colt_product_crm_sliders', []);
+        if (!is_array($sliders)) {
+            return [];
+        }
+
+        $normalized = [];
+        foreach ($sliders as $slider_id => $slider) {
+            if (!is_array($slider)) {
+                continue;
+            }
+
+            $slider_id = sanitize_key((string) ($slider['id'] ?? $slider_id));
+            if ($slider_id === '') {
+                continue;
+            }
+
+            $product_ids = isset($slider['product_ids']) && is_array($slider['product_ids'])
+                ? array_values(array_filter(array_unique(array_map('absint', $slider['product_ids']))))
+                : [];
+
+            if (!$product_ids) {
+                continue;
+            }
+
+            $normalized[$slider_id] = [
+                'id' => $slider_id,
+                'name' => isset($slider['name']) ? sanitize_text_field((string) $slider['name']) : 'סליידר מוצרים',
+                'product_ids' => $product_ids,
+                'created' => isset($slider['created']) ? (int) $slider['created'] : 0,
+            ];
+        }
+
+        uasort($normalized, static function ($left, $right) {
+            return ((int) ($right['created'] ?? 0)) <=> ((int) ($left['created'] ?? 0));
+        });
+
+        return $normalized;
+    }
+
+    private function product_crm_create_slider(array $product_ids, $name = '')
+    {
+        $product_ids = array_values(array_filter(array_unique(array_map('absint', $product_ids)), static function ($product_id) {
+            return $product_id > 0 && get_post_type($product_id) === 'product' && get_post_status($product_id) !== 'trash';
+        }));
+
+        if (!$product_ids) {
+            return '';
+        }
+
+        $sliders = $this->product_crm_sliders();
+        $slider_id = 'slider_' . gmdate('ymd_His') . '_' . wp_rand(100, 999);
+        $name = trim((string) $name);
+        if ($name === '') {
+            $name = 'סליידר מוצרים ' . wp_date('d.m.Y H:i');
+        }
+
+        $sliders[$slider_id] = [
+            'id' => $slider_id,
+            'name' => sanitize_text_field($name),
+            'product_ids' => $product_ids,
+            'created' => time(),
+        ];
+
+        update_option('colt_product_crm_sliders', $sliders, false);
+
+        return $slider_id;
+    }
+
+    private function product_slider_term_names($product_id, $taxonomy)
+    {
+        if (!taxonomy_exists($taxonomy)) {
+            return [];
+        }
+
+        $terms = get_the_terms($product_id, $taxonomy);
+        if (!$terms || is_wp_error($terms)) {
+            return [];
+        }
+
+        return array_values(array_filter(array_map('sanitize_text_field', wp_list_pluck($terms, 'name'))));
+    }
+
+    private function product_slider_brand_names($product_id)
+    {
+        $brand_taxonomies = [];
+        $common_taxonomies = ['product_brand', 'pwb-brand', 'yith_product_brand', 'pa_brand', 'pa_brands', 'pa_מותג'];
+
+        foreach ($common_taxonomies as $taxonomy) {
+            if (taxonomy_exists($taxonomy)) {
+                $brand_taxonomies[] = $taxonomy;
+            }
+        }
+
+        $product_taxonomies = get_object_taxonomies('product', 'objects');
+        if (is_array($product_taxonomies)) {
+            foreach ($product_taxonomies as $taxonomy => $object) {
+                if (in_array($taxonomy, ['product_cat', 'product_tag'], true)) {
+                    continue;
+                }
+
+                $label = isset($object->label) ? (string) $object->label : '';
+                $haystack = strtolower($taxonomy . ' ' . $label);
+                if (strpos($haystack, 'brand') !== false || strpos($haystack, 'מותג') !== false) {
+                    $brand_taxonomies[] = $taxonomy;
+                }
+            }
+        }
+
+        $brand_names = [];
+        foreach (array_unique($brand_taxonomies) as $taxonomy) {
+            $brand_names = array_merge($brand_names, $this->product_slider_term_names($product_id, $taxonomy));
+        }
+
+        return array_values(array_unique($brand_names));
+    }
+
+    private function product_slider_attributes($product)
+    {
+        if (!$product || !is_object($product) || !method_exists($product, 'get_attributes')) {
+            return [];
+        }
+
+        $rows = [];
+        foreach ($product->get_attributes() as $attribute) {
+            if (!is_object($attribute) || !method_exists($attribute, 'get_name')) {
+                continue;
+            }
+
+            $name = (string) $attribute->get_name();
+            $label = function_exists('wc_attribute_label') ? wc_attribute_label($name) : $name;
+            $values = [];
+
+            if (method_exists($attribute, 'is_taxonomy') && $attribute->is_taxonomy()) {
+                $terms = function_exists('wc_get_product_terms') ? wc_get_product_terms($product->get_id(), $name, ['fields' => 'names']) : [];
+                $values = is_wp_error($terms) ? [] : (array) $terms;
+            } elseif (method_exists($attribute, 'get_options')) {
+                $values = (array) $attribute->get_options();
+            }
+
+            $values = array_values(array_filter(array_map('sanitize_text_field', array_map('strval', $values))));
+            if (!$values) {
+                continue;
+            }
+
+            $rows[] = [
+                'label' => sanitize_text_field((string) $label),
+                'value' => implode(', ', $values),
+            ];
+        }
+
+        return $rows;
+    }
+
     private function product_crm_term_ids($product_id, $taxonomy)
     {
         $terms = get_the_terms($product_id, $taxonomy);
@@ -3670,6 +4026,7 @@ JS);
             'no_products' => 'לא נבחרו מוצרים לעדכון.',
             'coupon' => 'לא ניתן ליצור קופון. ודא שיש קוד תקין וסכום הנחה גדול מאפס.',
             'promo' => 'לא ניתן לשמור את כלל המבצע.',
+            'slider_create' => 'לא ניתן ליצור סליידר מהמוצרים שסומנו.',
             'confirm_delete' => 'צריך לאשר מחיקה לפני הפעלת פעולת מחיקה.',
             'product_title' => 'חובה להזין שם מוצר.',
             'product_create' => 'לא ניתן ליצור את המוצר. בדוק SKU כפול או שדות לא תקינים.',
