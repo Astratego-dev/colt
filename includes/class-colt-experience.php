@@ -1480,6 +1480,9 @@ JS);
             <?php if (isset($_GET['crm_updated'])) : ?>
                 <div class="notice notice-success is-dismissible"><p><?php echo esc_html((int) $_GET['crm_updated']); ?> מוצרים עודכנו בהצלחה.</p></div>
             <?php endif; ?>
+            <?php if (isset($_GET['images_adjusted'])) : ?>
+                <div class="notice notice-success is-dismissible"><p><?php echo esc_html((int) $_GET['images_adjusted']); ?> תמונות מוצר הותאמו ונשמרו עם שוליים לבנים.</p></div>
+            <?php endif; ?>
             <?php if (isset($_GET['product_created'])) : ?>
                 <div class="notice notice-success is-dismissible"><p>המוצר החדש נוצר בהצלחה.</p></div>
             <?php endif; ?>
@@ -1828,6 +1831,14 @@ JS);
                         <div class="colt-crm__bulk-card">
                             <h3>תמונה ותצוגה</h3>
                             <label>
+                                <span>התאמת יחס תמונת מוצר</span>
+                                <select name="image_aspect_ratio">
+                                    <option value="">ללא שינוי</option>
+                                    <option value="1-1">ריבוע 1:1 - שוליים לבנים ללא חיתוך</option>
+                                    <option value="3-4">לאורך 3:4 - שוליים לבנים ללא חיתוך</option>
+                                </select>
+                            </label>
+                            <label>
                                 <span>רוחב תצוגה</span>
                                 <input type="number" name="image_width" min="0" step="1" placeholder="px">
                             </label>
@@ -1844,7 +1855,7 @@ JS);
                                     <option value="fill">Fill</option>
                                 </select>
                             </label>
-                            <p class="colt-crm__note">נשמר כ־meta לתצוגה עתידית, בלי להרוס או לחתוך את קובץ התמונה המקורי.</p>
+                            <p class="colt-crm__note">התאמת יחס יוצרת קובץ תמונה חדש במדיה עם רקע לבן ושומרת את המקור. שדות רוחב/גובה/fit נשמרים כ־meta לתצוגה עתידית.</p>
                         </div>
 
                         <div class="colt-crm__bulk-card">
@@ -2228,8 +2239,13 @@ JS);
         if (!in_array($image_fit, ['cover', 'contain', 'fill'], true)) {
             $image_fit = '';
         }
+        $image_aspect_ratio = isset($_POST['image_aspect_ratio']) ? sanitize_key(wp_unslash($_POST['image_aspect_ratio'])) : '';
+        if (!in_array($image_aspect_ratio, ['1-1', '3-4'], true)) {
+            $image_aspect_ratio = '';
+        }
 
         $updated = 0;
+        $images_adjusted = 0;
 
         foreach ($product_ids as $product_id) {
             $product = wc_get_product($product_id);
@@ -2312,6 +2328,13 @@ JS);
                 update_post_meta($product_id, '_colt_crm_image_fit', $image_fit);
                 $changed = true;
             }
+            if ($image_aspect_ratio !== '') {
+                $adjusted_image_id = $this->product_crm_pad_featured_image($product_id, $image_aspect_ratio);
+                if (!is_wp_error($adjusted_image_id) && $adjusted_image_id > 0) {
+                    $images_adjusted++;
+                    $changed = true;
+                }
+            }
 
             if ($stock_status === 'onbackorder') {
                 update_post_meta($product_id, '_colt_backorder_signup_enabled', '1');
@@ -2326,6 +2349,12 @@ JS);
         }
 
         $redirect_args = ['crm_updated' => $updated];
+        if ($image_aspect_ratio !== '') {
+            $redirect_args['images_adjusted'] = $images_adjusted;
+            if ($images_adjusted <= 0 && $updated <= 0) {
+                $redirect_args['crm_error'] = 'image_adjust';
+            }
+        }
         $coupon_categories = $this->product_crm_posted_ids('coupon_categories');
         if (!empty($_POST['create_coupon'])) {
             $coupon_id = $this->product_crm_create_coupon($product_ids, $coupon_categories);
@@ -3856,6 +3885,170 @@ JS);
         return absint($attachment_id);
     }
 
+    private function product_crm_pad_featured_image($product_id, $aspect_ratio)
+    {
+        if (!function_exists('imagecreatetruecolor') || !function_exists('imagecopy') || !function_exists('imagejpeg')) {
+            return new WP_Error('image_gd', 'GD image functions are not available.');
+        }
+
+        $product_id = absint($product_id);
+        $source_attachment_id = get_post_thumbnail_id($product_id);
+        if (!$product_id || !$source_attachment_id) {
+            return new WP_Error('image_missing', 'Product has no featured image.');
+        }
+
+        $source_path = get_attached_file($source_attachment_id);
+        if (!$source_path && function_exists('wp_get_original_image_path')) {
+            $source_path = wp_get_original_image_path($source_attachment_id);
+        }
+
+        if (!$source_path || !file_exists($source_path) || !is_readable($source_path)) {
+            return new WP_Error('image_missing', 'Featured image file is missing.');
+        }
+
+        $image_size = getimagesize($source_path);
+        if (!$image_size || empty($image_size[0]) || empty($image_size[1])) {
+            return new WP_Error('image_read', 'Could not read image dimensions.');
+        }
+
+        $source_width = (int) $image_size[0];
+        $source_height = (int) $image_size[1];
+        $mime = (string) ($image_size['mime'] ?? get_post_mime_type($source_attachment_id));
+        $source_image = $this->product_crm_load_gd_image($source_path, $mime);
+        if (is_wp_error($source_image)) {
+            return $source_image;
+        }
+
+        if ($aspect_ratio === '1-1') {
+            $canvas_width = max($source_width, $source_height);
+            $canvas_height = $canvas_width;
+            $ratio_slug = 'square-1x1';
+        } else {
+            $target_ratio = 3 / 4;
+            if (($source_width / $source_height) > $target_ratio) {
+                $canvas_width = $source_width;
+                $canvas_height = (int) ceil($source_width / $target_ratio);
+            } else {
+                $canvas_height = $source_height;
+                $canvas_width = (int) ceil($source_height * $target_ratio);
+            }
+            $ratio_slug = 'portrait-3x4';
+        }
+
+        if ($canvas_width === $source_width && $canvas_height === $source_height) {
+            imagedestroy($source_image);
+            return 0;
+        }
+
+        $canvas = imagecreatetruecolor($canvas_width, $canvas_height);
+        if (!$canvas) {
+            imagedestroy($source_image);
+            return new WP_Error('image_canvas', 'Could not create image canvas.');
+        }
+
+        $white = imagecolorallocate($canvas, 255, 255, 255);
+        imagefill($canvas, 0, 0, $white);
+
+        $offset_x = (int) floor(($canvas_width - $source_width) / 2);
+        $offset_y = (int) floor(($canvas_height - $source_height) / 2);
+        imagecopy($canvas, $source_image, $offset_x, $offset_y, 0, 0, $source_width, $source_height);
+
+        $uploads = wp_upload_dir();
+        if (!empty($uploads['error']) || empty($uploads['path']) || empty($uploads['url'])) {
+            imagedestroy($source_image);
+            imagedestroy($canvas);
+            return new WP_Error('image_upload_dir', 'Could not access uploads directory.');
+        }
+
+        if (!wp_mkdir_p($uploads['path'])) {
+            imagedestroy($source_image);
+            imagedestroy($canvas);
+            return new WP_Error('image_upload_dir', 'Could not create uploads directory.');
+        }
+
+        $source_name = pathinfo($source_path, PATHINFO_FILENAME);
+        $filename = sanitize_file_name($source_name . '-' . $ratio_slug . '-padded.jpg');
+        $filename = wp_unique_filename($uploads['path'], $filename);
+        $new_path = trailingslashit($uploads['path']) . $filename;
+
+        $saved = imagejpeg($canvas, $new_path, 94);
+        imagedestroy($source_image);
+        imagedestroy($canvas);
+
+        if (!$saved || !file_exists($new_path)) {
+            return new WP_Error('image_save', 'Could not save padded image.');
+        }
+
+        $attachment_id = wp_insert_attachment([
+            'post_mime_type' => 'image/jpeg',
+            'post_title' => sanitize_text_field(get_the_title($product_id) . ' - ' . $ratio_slug),
+            'post_content' => '',
+            'post_status' => 'inherit',
+        ], $new_path, $product_id);
+
+        if (is_wp_error($attachment_id) || !$attachment_id) {
+            return new WP_Error('image_attachment', 'Could not create media attachment.');
+        }
+
+        if (!function_exists('wp_generate_attachment_metadata')) {
+            require_once ABSPATH . 'wp-admin/includes/image.php';
+        }
+
+        $metadata = wp_generate_attachment_metadata($attachment_id, $new_path);
+        if (!is_wp_error($metadata) && $metadata) {
+            wp_update_attachment_metadata($attachment_id, $metadata);
+        }
+
+        $alt = get_post_meta($source_attachment_id, '_wp_attachment_image_alt', true);
+        if ($alt !== '') {
+            update_post_meta($attachment_id, '_wp_attachment_image_alt', sanitize_text_field((string) $alt));
+        }
+
+        set_post_thumbnail($product_id, $attachment_id);
+
+        $product = wc_get_product($product_id);
+        if ($product && method_exists($product, 'set_image_id')) {
+            $product->set_image_id((int) $attachment_id);
+            $product->save();
+        }
+
+        update_post_meta($product_id, '_colt_crm_padded_image_source_id', (int) $source_attachment_id);
+        update_post_meta($product_id, '_colt_crm_padded_image_ratio', $aspect_ratio);
+
+        return (int) $attachment_id;
+    }
+
+    private function product_crm_load_gd_image($path, $mime)
+    {
+        $mime = strtolower((string) $mime);
+        $loader = '';
+
+        if (in_array($mime, ['image/jpeg', 'image/jpg'], true)) {
+            $loader = 'imagecreatefromjpeg';
+        } elseif ($mime === 'image/png') {
+            $loader = 'imagecreatefrompng';
+        } elseif ($mime === 'image/webp') {
+            $loader = 'imagecreatefromwebp';
+        } elseif ($mime === 'image/avif') {
+            $loader = 'imagecreatefromavif';
+        }
+
+        if ($loader === '' || !function_exists($loader)) {
+            return new WP_Error('image_format', 'Image format is not supported by GD.');
+        }
+
+        $image = @$loader($path);
+        if (!$image) {
+            return new WP_Error('image_read', 'Could not load source image.');
+        }
+
+        if (function_exists('imagepalettetotruecolor')) {
+            imagepalettetotruecolor($image);
+        }
+
+        return $image;
+    }
+
     private function product_crm_posted_tags($field = 'bulk_tags')
     {
         $raw = isset($_POST[$field]) ? (string) wp_unslash($_POST[$field]) : '';
@@ -4163,6 +4356,7 @@ JS);
             'coupon' => 'לא ניתן ליצור קופון. ודא שיש קוד תקין וסכום הנחה גדול מאפס.',
             'promo' => 'לא ניתן לשמור את כלל המבצע.',
             'slider_create' => 'לא ניתן ליצור סליידר מהמוצרים שסומנו.',
+            'image_adjust' => 'לא ניתן היה להתאים את תמונת המוצר. ודא שלמוצרים שסומנו יש תמונה ראשית וששרת האתר תומך בעריכת תמונות.',
             'confirm_delete' => 'צריך לאשר מחיקה לפני הפעלת פעולת מחיקה.',
             'product_title' => 'חובה להזין שם מוצר.',
             'product_create' => 'לא ניתן ליצור את המוצר. בדוק SKU כפול או שדות לא תקינים.',
