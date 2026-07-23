@@ -1385,7 +1385,7 @@ JS);
                 .colt-crm__stat strong { display: block; font-size: 24px; line-height: 1.1; color: #111827; }
                 .colt-crm__stat span { display: block; margin-top: 5px; color: #646970; font-weight: 700; }
                 .colt-crm__panel { margin: 16px 0; padding: 16px; border: 1px solid #dcdcde; border-radius: 14px; background: #fff; }
-                .colt-crm__filters { display: grid; grid-template-columns: minmax(180px, 1.2fr) repeat(4, minmax(135px, .75fr)) auto; gap: 10px; align-items: end; }
+                .colt-crm__filters { display: grid; grid-template-columns: minmax(180px, 1.2fr) repeat(5, minmax(120px, .7fr)) auto; gap: 10px; align-items: end; }
                 .colt-crm label { display: grid; gap: 6px; font-weight: 800; color: #1d2327; }
                 .colt-crm input[type="text"], .colt-crm input[type="number"], .colt-crm select, .colt-crm textarea { width: 100%; max-width: none; min-height: 36px; }
                 .colt-crm textarea { min-height: 90px; }
@@ -1414,6 +1414,9 @@ JS);
                 .colt-crm__slider-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
                 .colt-crm__slider-card { display: grid; gap: 8px; padding: 12px; border: 1px solid #e7e8ea; border-radius: 10px; background: #f8f9fb; }
                 .colt-crm__footer-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; margin-top: 14px; }
+                .colt-crm__list-tools { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; }
+                .colt-crm__list-tools h2 { margin: 0; }
+                .colt-crm__per-page { min-width: 126px; }
                 .colt-crm__note { margin: 0; padding: 10px 12px; border-radius: 10px; background: #fff8e5; color: #6f4e00; font-weight: 700; }
                 .colt-crm__pagination { margin-top: 14px; text-align: center; }
                 .colt-crm__pagination .page-numbers { display: inline-block; margin: 0 2px; padding: 6px 10px; border-radius: 8px; background: #fff; border: 1px solid #dcdcde; text-decoration: none; }
@@ -1751,6 +1754,14 @@ JS);
                         <?php endforeach; ?>
                     </select>
                 </label>
+                <label>
+                    <span>כמות בתצוגה</span>
+                    <select name="per_page">
+                        <?php foreach ($this->product_crm_per_page_options() as $per_page_option) : ?>
+                            <option value="<?php echo esc_attr($per_page_option); ?>" <?php selected($filters['per_page'], (int) $per_page_option); ?>><?php echo esc_html($per_page_option); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </label>
                 <button class="button button-primary">סינון</button>
             </form>
 
@@ -1914,10 +1925,20 @@ JS);
 
                 <section class="colt-crm__panel">
                     <div class="colt-crm__footer-actions">
-                        <h2>מוצרים</h2>
+                        <div class="colt-crm__list-tools">
+                            <h2>מוצרים</h2>
+                            <label class="colt-crm__per-page">
+                                <span>כמות בתצוגה</span>
+                                <select data-colt-crm-per-page>
+                                    <?php foreach ($this->product_crm_per_page_options() as $per_page_option) : ?>
+                                        <option value="<?php echo esc_attr($per_page_option); ?>" <?php selected($filters['per_page'], (int) $per_page_option); ?>><?php echo esc_html($per_page_option); ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </label>
+                        </div>
                         <button class="button button-primary button-hero" type="submit">הפעל פעולות על המוצרים שסומנו</button>
                     </div>
-                    <p class="colt-crm__muted">נמצאו <?php echo esc_html(number_format_i18n((int) $products_query->found_posts)); ?> מוצרים לפי הסינון הנוכחי.</p>
+                    <p class="colt-crm__muted">נמצאו <?php echo esc_html(number_format_i18n((int) $products_query->found_posts)); ?> מוצרים לפי הסינון הנוכחי. מוצגים עד <?php echo esc_html((string) $filters['per_page']); ?> מוצרים בעמוד.</p>
 
                     <div class="colt-crm__table-wrap">
                         <table class="widefat striped">
@@ -2077,6 +2098,16 @@ JS);
         </div>
         <script>
         document.addEventListener('change', function (event) {
+            const perPageControl = event.target.closest('[data-colt-crm-per-page]');
+            if (perPageControl) {
+                const url = new URL(window.location.href);
+                url.searchParams.set('page', 'colt-product-crm');
+                url.searchParams.set('per_page', perPageControl.value);
+                url.searchParams.delete('paged');
+                window.location.href = url.toString();
+                return;
+            }
+
             if (!event.target.matches('[data-colt-crm-check-all]')) {
                 return;
             }
@@ -3207,6 +3238,7 @@ JS);
             'category' => isset($_GET['product_cat']) ? absint(wp_unslash($_GET['product_cat'])) : 0,
             'tag' => isset($_GET['product_tag']) ? absint(wp_unslash($_GET['product_tag'])) : 0,
             'period' => $this->product_crm_normalize_period(isset($_GET['period']) ? absint(wp_unslash($_GET['period'])) : 30),
+            'per_page' => $this->product_crm_normalize_per_page(isset($_GET['per_page']) ? absint(wp_unslash($_GET['per_page'])) : 50),
             'paged' => max(1, isset($_GET['paged']) ? absint(wp_unslash($_GET['paged'])) : 1),
         ];
     }
@@ -3216,7 +3248,7 @@ JS);
         $args = [
             'post_type' => 'product',
             'post_status' => ['publish', 'draft', 'pending', 'private'],
-            'posts_per_page' => 30,
+            'posts_per_page' => $this->product_crm_normalize_per_page((int) ($filters['per_page'] ?? 50)),
             'paged' => max(1, (int) $filters['paged']),
             'fields' => 'ids',
         ];
@@ -3311,6 +3343,17 @@ JS);
     {
         $days = (int) $days;
         return array_key_exists($days, $this->product_crm_period_options()) ? $days : 30;
+    }
+
+    private function product_crm_per_page_options()
+    {
+        return [10, 50, 100];
+    }
+
+    private function product_crm_normalize_per_page($per_page)
+    {
+        $per_page = absint($per_page);
+        return in_array($per_page, $this->product_crm_per_page_options(), true) ? $per_page : 50;
     }
 
     private function product_crm_period_label($days)
@@ -3805,6 +3848,7 @@ JS);
                 'product_cat' => $filters['category'],
                 'product_tag' => $filters['tag'],
                 'period' => $filters['period'],
+                'per_page' => $filters['per_page'],
                 'paged' => '%#%',
             ], admin_url('admin.php')),
             'format' => '',
