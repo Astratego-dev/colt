@@ -51,6 +51,7 @@ final class Colt_Experience
             add_action('admin_post_colt_product_crm_update', [$this, 'handle_product_crm_update_product']);
             add_action('admin_post_colt_product_crm_upload_xlsx', [$this, 'handle_product_crm_upload_xlsx']);
             add_action('admin_post_colt_product_crm_import_xlsx', [$this, 'handle_product_crm_import_xlsx']);
+            add_action('admin_post_colt_product_media_create', [$this, 'handle_product_media_create_product']);
         }
     }
 
@@ -1155,11 +1156,20 @@ final class Colt_Experience
             'colt-product-crm',
             [$this, 'render_product_crm_page']
         );
+
+        add_submenu_page(
+            'colt-experience',
+            'COLT Product Media',
+            'Product Media',
+            'manage_options',
+            'colt-product-media',
+            [$this, 'render_product_media_page']
+        );
     }
 
     public function enqueue_admin_assets($hook_suffix)
     {
-        if (!in_array($hook_suffix, ['toplevel_page_colt-experience', 'colt-experience_page_colt-product-crm'], true)) {
+        if (!in_array($hook_suffix, ['toplevel_page_colt-experience', 'colt-experience_page_colt-product-crm', 'colt-experience_page_colt-product-media'], true)) {
             return;
         }
 
@@ -1168,7 +1178,7 @@ final class Colt_Experience
         wp_enqueue_script('colt-experience-admin');
         wp_add_inline_script('colt-experience-admin', <<<'JS'
 jQuery(function ($) {
-    $('.colt-admin, .colt-crm').on('click', '.colt-admin__media-button', function (event) {
+    $('.colt-admin, .colt-crm, .colt-media').on('click', '.colt-admin__media-button', function (event) {
         event.preventDefault();
 
         const $button = $(this);
@@ -1360,6 +1370,249 @@ JS);
             </div>
         </div>
         <?php
+    }
+
+    public function render_product_media_page()
+    {
+        if (!$this->can_manage_product_crm()) {
+            return;
+        }
+
+        $media_search = isset($_GET['media_s']) ? sanitize_text_field(wp_unslash($_GET['media_s'])) : '';
+        $media_paged = max(1, isset($_GET['media_paged']) ? absint(wp_unslash($_GET['media_paged'])) : 1);
+        $selected_attachment_id = isset($_GET['selected_attachment']) ? absint(wp_unslash($_GET['selected_attachment'])) : 0;
+        $categories = $this->product_crm_terms('product_cat');
+        $media_query = new WP_Query([
+            'post_type' => 'attachment',
+            'post_status' => 'inherit',
+            'post_mime_type' => 'image',
+            'posts_per_page' => 48,
+            'paged' => $media_paged,
+            's' => $media_search,
+            'orderby' => 'date',
+            'order' => 'DESC',
+        ]);
+        $selected_url = $selected_attachment_id > 0 ? wp_get_attachment_image_url($selected_attachment_id, 'large') : '';
+        $selected_title = $selected_attachment_id > 0 ? get_the_title($selected_attachment_id) : '';
+        ?>
+        <div class="wrap colt-media" dir="rtl">
+            <style>
+                .colt-media { max-width: 1480px; color: #10151c; }
+                .colt-media h1 { font-size: 30px; font-weight: 900; margin-bottom: 6px; }
+                .colt-media h2 { margin: 0 0 12px; font-size: 19px; font-weight: 900; }
+                .colt-media p { font-size: 14px; }
+                .colt-media__hero { display: flex; justify-content: space-between; gap: 18px; align-items: center; margin: 18px 0; padding: 20px; border: 1px solid #dcdcde; border-radius: 14px; background: linear-gradient(135deg, #0d1119, #172230 58%, #21150a); color: #fff; box-shadow: 0 20px 60px rgba(16, 21, 28, .14); }
+                .colt-media__hero p { max-width: 780px; margin: 4px 0 0; color: rgba(255,255,255,.72); }
+                .colt-media__panel { margin: 16px 0; padding: 16px; border: 1px solid #dcdcde; border-radius: 14px; background: #fff; }
+                .colt-media__tools { display: grid; grid-template-columns: minmax(240px, 1fr) auto auto; gap: 10px; align-items: end; }
+                .colt-media label { display: grid; gap: 6px; font-weight: 800; color: #1d2327; }
+                .colt-media input[type="text"], .colt-media input[type="number"], .colt-media select { width: 100%; max-width: none; min-height: 36px; }
+                .colt-media select[multiple] { min-height: 132px; }
+                .colt-media__layout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 16px; align-items: start; }
+                .colt-media__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 12px; }
+                .colt-media__item { display: grid; gap: 8px; width: 100%; padding: 8px; border: 2px solid transparent; border-radius: 12px; background: #f6f7f7; color: #1d2327; text-align: right; cursor: pointer; }
+                .colt-media__item:hover, .colt-media__item.is-selected { border-color: #d9ad4f; background: #fffaf0; }
+                .colt-media__thumb { display: block; width: 100%; aspect-ratio: 1 / 1; border-radius: 9px; object-fit: contain; background: #fff; border: 1px solid #e7e8ea; }
+                .colt-media__item strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+                .colt-media__muted { color: #646970; font-size: 12px; }
+                .colt-media__form { position: sticky; top: 42px; display: grid; gap: 12px; }
+                .colt-media__preview { min-height: 210px; display: grid; place-items: center; border: 1px dashed #c3c4c7; border-radius: 12px; background: #f6f7f7; overflow: hidden; }
+                .colt-media__preview img { display: block; width: 100%; max-height: 310px; object-fit: contain; background: #fff; }
+                .colt-media__preview span { color: #646970; font-weight: 800; }
+                .colt-media__note { margin: 0; padding: 10px 12px; border-radius: 10px; background: #fff8e5; color: #6f4e00; font-weight: 700; }
+                .colt-media__pagination { margin-top: 14px; text-align: center; }
+                .colt-media__pagination .page-numbers { display: inline-block; margin: 0 2px; padding: 6px 10px; border-radius: 8px; background: #fff; border: 1px solid #dcdcde; text-decoration: none; }
+                .colt-media__pagination .current { background: #111827; color: #fff; border-color: #111827; }
+                @media (max-width: 1100px) { .colt-media__layout { grid-template-columns: 1fr; } .colt-media__form { position: static; } }
+                @media (max-width: 782px) { .colt-media__hero, .colt-media__tools { display: grid; grid-template-columns: 1fr; } }
+            </style>
+
+            <h1>COLT Product Media</h1>
+            <p>העלאה מהירה למדיה ויצירת מוצר WooCommerce מתמונה אחת, בלי להיכנס למסך מוצר מלא.</p>
+
+            <?php if (isset($_GET['media_product_created'])) : ?>
+                <?php $created_product_id = absint(wp_unslash($_GET['media_product_created'])); ?>
+                <div class="notice notice-success is-dismissible"><p>המוצר נוצר בהצלחה. <a href="<?php echo esc_url(get_edit_post_link($created_product_id)); ?>">פתיחת המוצר לעריכה</a></p></div>
+            <?php endif; ?>
+            <?php if (isset($_GET['media_error'])) : ?>
+                <div class="notice notice-error is-dismissible"><p><?php echo esc_html($this->product_media_error_message((string) wp_unslash($_GET['media_error']))); ?></p></div>
+            <?php endif; ?>
+            <?php if (!$this->is_woocommerce_ready()) : ?>
+                <div class="notice notice-warning"><p>WooCommerce לא פעיל כרגע, ולכן יצירת מוצר מהמדיה לא זמינה.</p></div>
+            <?php endif; ?>
+
+            <div class="colt-media__hero">
+                <div>
+                    <h2>מדיה למוצרים</h2>
+                    <p>העלה את כל תמונות המוצרים למדיה, לחץ על תמונה, מלא שם, מחיר, קטגוריה, תגיות ומלאי, ושמור. ברירת המחדל למלאי היא יחידה אחת במלאי.</p>
+                </div>
+                <button type="button" class="button button-primary button-hero" data-colt-media-open-uploader>העלאת תמונות למדיה</button>
+            </div>
+
+            <form class="colt-media__panel colt-media__tools" method="get" action="<?php echo esc_url(admin_url('admin.php')); ?>">
+                <input type="hidden" name="page" value="colt-product-media">
+                <label>
+                    <span>חיפוש במדיה</span>
+                    <input type="text" name="media_s" value="<?php echo esc_attr($media_search); ?>" placeholder="שם קובץ או כותרת תמונה">
+                </label>
+                <button class="button button-primary">סינון</button>
+                <a class="button" href="<?php echo esc_url(add_query_arg(['page' => 'colt-product-media'], admin_url('admin.php'))); ?>">ניקוי</a>
+            </form>
+
+            <div class="colt-media__layout">
+                <section class="colt-media__panel">
+                    <h2>תמונות במדיה</h2>
+                    <div class="colt-media__grid">
+                        <?php if ($media_query->posts) : ?>
+                            <?php foreach ($media_query->posts as $attachment) : ?>
+                                <?php
+                                $attachment_id = (int) $attachment->ID;
+                                $thumb_url = wp_get_attachment_image_url($attachment_id, 'medium') ?: wp_get_attachment_url($attachment_id);
+                                $large_url = wp_get_attachment_image_url($attachment_id, 'large') ?: $thumb_url;
+                                $title = get_the_title($attachment_id);
+                                $file_path = get_attached_file($attachment_id);
+                                $file_name = $file_path ? basename($file_path) : '';
+                                $selected_class = $attachment_id === $selected_attachment_id ? ' is-selected' : '';
+                                ?>
+                                <button
+                                    type="button"
+                                    class="colt-media__item<?php echo esc_attr($selected_class); ?>"
+                                    data-colt-media-pick
+                                    data-id="<?php echo esc_attr($attachment_id); ?>"
+                                    data-title="<?php echo esc_attr($title); ?>"
+                                    data-url="<?php echo esc_url($large_url); ?>"
+                                >
+                                    <img class="colt-media__thumb" src="<?php echo esc_url($thumb_url); ?>" alt="">
+                                    <span>
+                                        <strong><?php echo esc_html($title ?: $file_name); ?></strong>
+                                        <span class="colt-media__muted">ID <?php echo esc_html((string) $attachment_id); ?></span>
+                                    </span>
+                                </button>
+                            <?php endforeach; ?>
+                        <?php else : ?>
+                            <p>לא נמצאו תמונות במדיה לפי הסינון הנוכחי.</p>
+                        <?php endif; ?>
+                    </div>
+
+                    <?php $pagination = $this->product_media_pagination($media_query, $media_search, $media_paged); ?>
+                    <?php if ($pagination) : ?>
+                        <div class="colt-media__pagination"><?php echo wp_kses_post($pagination); ?></div>
+                    <?php endif; ?>
+                </section>
+
+                <aside class="colt-media__panel">
+                    <h2>יצירת מוצר מהתמונה</h2>
+                    <form class="colt-media__form" method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" data-colt-media-form>
+                        <?php wp_nonce_field('colt_product_media_create'); ?>
+                        <input type="hidden" name="action" value="colt_product_media_create">
+                        <input type="hidden" name="product_image_id" value="<?php echo esc_attr($selected_attachment_id); ?>" data-colt-media-image-id>
+
+                        <div class="colt-media__preview" data-colt-media-preview>
+                            <?php if ($selected_url) : ?>
+                                <img src="<?php echo esc_url($selected_url); ?>" alt="">
+                            <?php else : ?>
+                                <span>בחר תמונה מהגריד</span>
+                            <?php endif; ?>
+                        </div>
+
+                        <label>
+                            <span>שם מוצר</span>
+                            <input type="text" name="product_title" value="<?php echo esc_attr($selected_title); ?>" required data-colt-media-title>
+                        </label>
+                        <label>
+                            <span>מחיר</span>
+                            <input type="number" name="product_regular_price" min="0" step="0.01" placeholder="0.00" required>
+                        </label>
+                        <label>
+                            <span>קטגוריה</span>
+                            <select name="product_categories[]" multiple>
+                                <?php foreach ($categories as $term) : ?>
+                                    <option value="<?php echo esc_attr($term->term_id); ?>"><?php echo esc_html($term->name); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </label>
+                        <label>
+                            <span>תגיות</span>
+                            <input type="text" name="product_tags" placeholder="פוקימון, סינגל, יפנית">
+                        </label>
+                        <label>
+                            <span>מלאי</span>
+                            <input type="number" name="product_stock_quantity" min="0" step="1" value="1">
+                        </label>
+                        <label>
+                            <span>סטטוס פרסום</span>
+                            <select name="product_status">
+                                <option value="draft">טיוטה</option>
+                                <option value="publish">פרסום מיידי</option>
+                            </select>
+                        </label>
+                        <p class="colt-media__note">התמונה שנבחרה תוגדר כתמונה הראשית של המוצר. ברירת המחדל היא מוצר פשוט עם ניהול מלאי פעיל וכמות 1.</p>
+                        <button type="submit" class="button button-primary button-hero">שמירת מוצר</button>
+                    </form>
+                </aside>
+            </div>
+        </div>
+        <script>
+        document.addEventListener('click', function (event) {
+            const uploadButton = event.target.closest('[data-colt-media-open-uploader]');
+            if (uploadButton) {
+                event.preventDefault();
+                if (!window.wp || !wp.media) {
+                    return;
+                }
+
+                const frame = wp.media({
+                    title: 'העלאת תמונות מוצרים',
+                    button: { text: 'סיום' },
+                    library: { type: 'image' },
+                    multiple: true
+                });
+
+                frame.on('close', function () {
+                    window.location.reload();
+                });
+
+                frame.open();
+                return;
+            }
+
+            const item = event.target.closest('[data-colt-media-pick]');
+            if (!item) {
+                return;
+            }
+
+            document.querySelectorAll('.colt-media__item.is-selected').forEach(function (button) {
+                button.classList.remove('is-selected');
+            });
+            item.classList.add('is-selected');
+
+            const form = document.querySelector('[data-colt-media-form]');
+            const imageId = form ? form.querySelector('[data-colt-media-image-id]') : null;
+            const titleField = form ? form.querySelector('[data-colt-media-title]') : null;
+            const preview = document.querySelector('[data-colt-media-preview]');
+            const url = item.getAttribute('data-url') || '';
+            const title = item.getAttribute('data-title') || '';
+
+            if (imageId) {
+                imageId.value = item.getAttribute('data-id') || '';
+            }
+            if (titleField) {
+                titleField.value = title;
+                titleField.focus();
+            }
+            if (preview) {
+                preview.innerHTML = '';
+                if (url) {
+                    const image = document.createElement('img');
+                    image.src = url;
+                    image.alt = '';
+                    preview.appendChild(image);
+                }
+            }
+        });
+        </script>
+        <?php
+        wp_reset_postdata();
     }
 
     public function render_product_crm_page()
@@ -2516,6 +2769,79 @@ JS);
         }
 
         $this->product_crm_redirect(['product_created' => $product_id]);
+    }
+
+    public function handle_product_media_create_product()
+    {
+        if (!$this->can_manage_product_crm()) {
+            wp_die(esc_html__('You do not have permission to create products.', 'colt-experience'));
+        }
+
+        check_admin_referer('colt_product_media_create');
+
+        if (!$this->is_woocommerce_ready() || !class_exists('WC_Product_Simple')) {
+            $this->product_media_redirect(['media_error' => 'woocommerce']);
+        }
+
+        $attachment_id = isset($_POST['product_image_id']) ? absint(wp_unslash($_POST['product_image_id'])) : 0;
+        if ($attachment_id <= 0 || !wp_attachment_is_image($attachment_id)) {
+            $this->product_media_redirect(['media_error' => 'image']);
+        }
+
+        $title = isset($_POST['product_title']) ? sanitize_text_field(wp_unslash($_POST['product_title'])) : '';
+        if ($title === '') {
+            $this->product_media_redirect(['media_error' => 'title', 'selected_attachment' => $attachment_id]);
+        }
+
+        $regular_price = $this->product_crm_decimal_from_post('product_regular_price');
+        if ($regular_price === null) {
+            $this->product_media_redirect(['media_error' => 'price', 'selected_attachment' => $attachment_id]);
+        }
+
+        $status = isset($_POST['product_status']) ? sanitize_key(wp_unslash($_POST['product_status'])) : 'draft';
+        if (!in_array($status, ['draft', 'publish'], true)) {
+            $status = 'draft';
+        }
+
+        $stock_quantity_raw = isset($_POST['product_stock_quantity']) ? trim((string) wp_unslash($_POST['product_stock_quantity'])) : '';
+        $stock_quantity = $stock_quantity_raw !== '' && is_numeric($stock_quantity_raw) ? max(0, (int) $stock_quantity_raw) : 1;
+
+        try {
+            $product = new WC_Product_Simple();
+            $product->set_name($title);
+            $product->set_status($status);
+            $product->set_catalog_visibility('visible');
+            $product->set_regular_price(wc_format_decimal($regular_price));
+            $product->set_manage_stock(true);
+            $product->set_stock_quantity($stock_quantity);
+            $product->set_stock_status($stock_quantity > 0 ? 'instock' : 'outofstock');
+            $product->set_image_id($attachment_id);
+
+            $product_id = (int) $product->save();
+        } catch (Exception $exception) {
+            $this->product_media_redirect(['media_error' => 'create', 'selected_attachment' => $attachment_id]);
+        }
+
+        if ($product_id <= 0) {
+            $this->product_media_redirect(['media_error' => 'create', 'selected_attachment' => $attachment_id]);
+        }
+
+        $category_ids = $this->product_crm_posted_ids('product_categories');
+        if ($category_ids) {
+            wp_set_object_terms($product_id, $category_ids, 'product_cat', false);
+        }
+
+        $tag_names = $this->product_crm_posted_tags('product_tags');
+        if ($tag_names) {
+            wp_set_object_terms($product_id, $tag_names, 'product_tag', true);
+        }
+
+        update_post_meta($product_id, '_colt_product_media_source_attachment_id', $attachment_id);
+
+        $this->product_media_redirect([
+            'media_product_created' => $product_id,
+            'selected_attachment' => $attachment_id,
+        ]);
     }
 
     public function handle_product_crm_update_product()
@@ -4384,6 +4710,45 @@ JS);
             </table>
         </div>
         <?php
+    }
+
+    private function product_media_pagination(WP_Query $query, $search, $current)
+    {
+        if ((int) $query->max_num_pages < 2) {
+            return '';
+        }
+
+        return paginate_links([
+            'base' => add_query_arg([
+                'page' => 'colt-product-media',
+                'media_s' => (string) $search,
+                'media_paged' => '%#%',
+            ], admin_url('admin.php')),
+            'format' => '',
+            'current' => max(1, (int) $current),
+            'total' => (int) $query->max_num_pages,
+            'prev_text' => '‹',
+            'next_text' => '›',
+        ]);
+    }
+
+    private function product_media_redirect(array $args)
+    {
+        wp_safe_redirect(add_query_arg(array_merge(['page' => 'colt-product-media'], $args), admin_url('admin.php')));
+        exit;
+    }
+
+    private function product_media_error_message($code)
+    {
+        $messages = [
+            'woocommerce' => 'WooCommerce לא פעיל כרגע.',
+            'image' => 'צריך לבחור תמונה תקינה מספריית המדיה.',
+            'title' => 'חובה להזין שם מוצר.',
+            'price' => 'חובה להזין מחיר מוצר.',
+            'create' => 'לא ניתן ליצור את המוצר. בדוק את הנתונים ונסה שוב.',
+        ];
+
+        return $messages[$code] ?? 'לא ניתן להשלים את הפעולה.';
     }
 
     private function product_crm_redirect(array $args)
