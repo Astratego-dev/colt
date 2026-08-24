@@ -1524,6 +1524,10 @@ JS);
                             <input type="number" name="product_regular_price" min="0" step="0.01" placeholder="0.00" required>
                         </label>
                         <label>
+                            <span>מק״ט / SKU</span>
+                            <input type="text" name="product_sku" placeholder="אופציונלי">
+                        </label>
+                        <label>
                             <span>קטגוריה</span>
                             <select name="product_categories[]" multiple>
                                 <?php foreach ($categories as $term) : ?>
@@ -2805,6 +2809,7 @@ JS);
 
         $stock_quantity_raw = isset($_POST['product_stock_quantity']) ? trim((string) wp_unslash($_POST['product_stock_quantity'])) : '';
         $stock_quantity = $stock_quantity_raw !== '' && is_numeric($stock_quantity_raw) ? max(0, (int) $stock_quantity_raw) : 1;
+        $sku = isset($_POST['product_sku']) ? sanitize_text_field(wp_unslash($_POST['product_sku'])) : '';
 
         try {
             $product = new WC_Product_Simple();
@@ -2816,6 +2821,10 @@ JS);
             $product->set_stock_quantity($stock_quantity);
             $product->set_stock_status($stock_quantity > 0 ? 'instock' : 'outofstock');
             $product->set_image_id($attachment_id);
+
+            if ($sku !== '') {
+                $product->set_sku($sku);
+            }
 
             $product_id = (int) $product->save();
         } catch (Exception $exception) {
