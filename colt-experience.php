@@ -3,7 +3,7 @@
  * Plugin Name: COLT Experience
  * Plugin URI: https://github.com/Astratego-dev/colt
  * Description: Premium shortcode-driven experience pages for the COLT collectibles site.
- * Version: 2.7.1
+ * Version: 2.8.0
  * Author: COLT
  * Text Domain: colt-experience
  * GitHub Plugin URI: https://github.com/Astratego-dev/colt
@@ -14,13 +14,15 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('COLT_EXPERIENCE_VERSION', '2.7.1');
+define('COLT_EXPERIENCE_VERSION', '2.8.0');
 define('COLT_EXPERIENCE_FILE', __FILE__);
 define('COLT_EXPERIENCE_DIR', plugin_dir_path(__FILE__));
 define('COLT_EXPERIENCE_URL', plugin_dir_url(__FILE__));
 
 require_once COLT_EXPERIENCE_DIR . 'includes/class-colt-experience.php';
+require_once COLT_EXPERIENCE_DIR . 'includes/class-colt-ebay-manager.php';
 
 add_action('plugins_loaded', static function () {
     Colt_Experience::instance();
+    Colt_Ebay_Manager::instance();
 });
